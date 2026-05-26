@@ -1,0 +1,148 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { Step1Data } from './wizard-state';
+import type { Holiday } from '@/types';
+
+const DEFAULT_HOLIDAYS = (_year: number): Holiday[] => [
+  { id: crypto.randomUUID(), label: 'Herbstferien', start: '', end: '' },
+  { id: crypto.randomUUID(), label: 'Weihnachtsferien', start: '', end: '' },
+  { id: crypto.randomUUID(), label: 'Osterferien', start: '', end: '' },
+  { id: crypto.randomUUID(), label: 'Pfingstferien', start: '', end: '' },
+  { id: crypto.randomUUID(), label: 'Sommerferien', start: '', end: '' }
+];
+
+interface Props {
+  initial: Step1Data;
+  onCancel(): void;
+  onNext(data: Step1Data): void;
+}
+
+export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
+  const [data, setData] = useState<Step1Data>(initial);
+  const [error, setError] = useState<string | null>(null);
+
+  const update = <K extends keyof Step1Data>(key: K, value: Step1Data[K]) => {
+    setData((d) => ({ ...d, [key]: value }));
+  };
+
+  const updateHoliday = (id: string, patch: Partial<Holiday>) => {
+    setData((d) => ({
+      ...d,
+      holidays: d.holidays.map((h) => (h.id === id ? { ...h, ...patch } : h))
+    }));
+  };
+
+  const addHoliday = () => {
+    setData((d) => ({
+      ...d,
+      holidays: [...d.holidays, { id: crypto.randomUUID(), label: 'Ferien', start: '', end: '' }]
+    }));
+  };
+
+  const removeHoliday = (id: string) => {
+    setData((d) => ({ ...d, holidays: d.holidays.filter((h) => h.id !== id) }));
+  };
+
+  const handleNext = () => {
+    if (!data.label.trim()) return setError('Schuljahr-Label erforderlich');
+    if (!data.name.trim()) return setError('Plan-Name erforderlich');
+    if (!data.firstSchoolDay || !data.firstTeachingDay || !data.lastSchoolDay)
+      return setError('Alle Datums-Felder ausfüllen');
+    if (data.firstTeachingDay < data.firstSchoolDay)
+      return setError('Erster Unterrichtstag muss ≥ Erster Schultag sein');
+    if (data.lastSchoolDay <= data.firstSchoolDay)
+      return setError('Letzter Schultag muss > Erster Schultag sein');
+    for (const h of data.holidays) {
+      if ((h.start && !h.end) || (!h.start && h.end))
+        return setError(`Ferien "${h.label}": beide Daten oder keines`);
+      if (h.start && h.end && h.start > h.end)
+        return setError(`Ferien "${h.label}": Ende muss ≥ Start sein`);
+    }
+    setError(null);
+    onNext({
+      ...data,
+      holidays: data.holidays.filter((h) => h.start && h.end)
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="label">Schuljahr</Label>
+          <Input id="label" value={data.label} onChange={(e) => update('label', e.target.value)} placeholder="2026/27" />
+        </div>
+        <div>
+          <Label htmlFor="name">Plan-Name</Label>
+          <Input id="name" value={data.name} onChange={(e) => update('name', e.target.value)} />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+          Eckdaten
+        </h3>
+        <div className="grid grid-cols-[1fr_auto] gap-3 items-center">
+          <Label>Erster Schultag (SW 00)</Label>
+          <Input
+            type="date"
+            value={data.firstSchoolDay}
+            onChange={(e) => update('firstSchoolDay', e.target.value)}
+          />
+          <Label>Erster Unterrichtstag (SW 01)</Label>
+          <Input
+            type="date"
+            value={data.firstTeachingDay}
+            onChange={(e) => update('firstTeachingDay', e.target.value)}
+          />
+          <Label>Letzter Schultag</Label>
+          <Input
+            type="date"
+            value={data.lastSchoolDay}
+            onChange={(e) => update('lastSchoolDay', e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+          Ferien
+        </h3>
+        {data.holidays.map((h) => (
+          <div key={h.id} className="grid grid-cols-[160px_1fr_1fr_auto] gap-2 items-center">
+            <Input
+              value={h.label}
+              onChange={(e) => updateHoliday(h.id, { label: e.target.value })}
+              placeholder="Label"
+            />
+            <Input type="date" value={h.start} onChange={(e) => updateHoliday(h.id, { start: e.target.value })} />
+            <Input type="date" value={h.end} onChange={(e) => updateHoliday(h.id, { end: e.target.value })} />
+            <Button variant="ghost" size="icon" onClick={() => removeHoliday(h.id)} title="Entfernen">
+              ✕
+            </Button>
+          </div>
+        ))}
+        <Button variant="outline" size="sm" onClick={addHoliday}>
+          + Ferien-Block
+        </Button>
+      </div>
+
+      {error && (
+        <div role="alert" className="p-3 rounded bg-red-50 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="flex justify-between pt-4 border-t">
+        <Button variant="ghost" onClick={onCancel}>
+          Abbrechen
+        </Button>
+        <Button onClick={handleNext}>Weiter →</Button>
+      </div>
+    </div>
+  );
+}
+
+export { DEFAULT_HOLIDAYS };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome/Welcome';
+import { Wizard } from '@/components/wizard/Wizard';
 import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
 import type { PlannerDocument, UUID } from '@/types';
@@ -57,7 +58,17 @@ export default function App() {
           onImportJson={importDoc}
         />
       )}
-      {route === 'wizard' && <div data-testid="wizard-placeholder">Wizard (Task 9)</div>}
+      {route === 'wizard' && (
+        <Wizard
+          onCancel={() => setRoute('welcome')}
+          onComplete={async (doc) => {
+            await storage.saveDoc(doc);
+            await storage.setActiveDoc(doc.schoolyear.id);
+            setDoc(doc);
+            setRoute('editor');
+          }}
+        />
+      )}
       {route === 'editor' && <div data-testid="editor-placeholder">Editor (Task 12)</div>}
     </>
   );

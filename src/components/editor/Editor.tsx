@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EditorHeader } from './EditorHeader';
 import { EditorToolbar } from './EditorToolbar';
 import { QuarterCalendar } from './QuarterCalendar';
+import { EventModal } from '@/components/event-modal/EventModal';
 
 interface Props {
   onSwitchPlan(): void;
@@ -18,6 +19,7 @@ export function Editor({ onSwitchPlan }: Props) {
       <div className="flex-1 p-6">
         <QuarterCalendar />
       </div>
+      <EventModal />
     </div>
   );
 }

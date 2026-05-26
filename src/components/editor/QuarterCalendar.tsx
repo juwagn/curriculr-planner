@@ -9,6 +9,7 @@ import { pastelize } from '@/lib/colors';
 import { toast } from 'sonner';
 import { parseISO, format } from 'date-fns';
 import { DayCellContent } from './DayCellContent';
+import { NotePopover } from './NotePopover';
 
 export function QuarterCalendar() {
   const doc = usePlannerStore((s) => s.doc);
@@ -99,8 +100,11 @@ export function QuarterCalendar() {
           />
         )}
       />
-      {/* NotePopover wired in Task 18 */}
-      {notePopoverSw !== null && <span className="hidden" data-sw={notePopoverSw} />}
+      <NotePopover
+        schoolweek={notePopoverSw}
+        week={notePopoverSw !== null ? weeks.find((w) => w.index === notePopoverSw) ?? null : null}
+        onClose={() => setNotePopoverSw(null)}
+      />
       <style>{`
         .gtp-holiday-cell {
           background-image: repeating-linear-gradient(

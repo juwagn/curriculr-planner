@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Step1Schoolyear, DEFAULT_HOLIDAYS } from './Step1Schoolyear';
 import { Step2Categories } from './Step2Categories';
+import { Step3Review } from './Step3Review';
 import { createEmptyDoc } from '@/stores/planner';
 import type { Step1Data, Step2Data } from './wizard-state';
 import type { PlannerDocument } from '@/types';
@@ -16,7 +17,7 @@ const currentSchoolyearLabel = () => {
   return `${y}/${(y + 1).toString().slice(-2)}`;
 };
 
-export function Wizard({ onCancel, onComplete: _onComplete }: Props) {
+export function Wizard({ onCancel, onComplete }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [step1, setStep1] = useState<Step1Data>({
     label: currentSchoolyearLabel(),
@@ -75,7 +76,26 @@ export function Wizard({ onCancel, onComplete: _onComplete }: Props) {
             }}
           />
         )}
-        {step === 3 && <div>Step 3 (Task 11)</div>}
+        {step === 3 && step2 && (() => {
+          const previewDoc = createEmptyDoc(
+            step1.name,
+            step1.label,
+            step1.firstSchoolDay,
+            step1.firstTeachingDay,
+            step1.lastSchoolDay
+          );
+          previewDoc.schoolyear.holidays = step1.holidays;
+          previewDoc.schoolyear.quarterBoundaries = [...step2.quarterBoundaries];
+          previewDoc.categories = step2.categories;
+          previewDoc.availableGroups = step2.availableGroups;
+          return (
+            <Step3Review
+              doc={previewDoc}
+              onBack={() => setStep(2)}
+              onCreate={() => onComplete(previewDoc)}
+            />
+          );
+        })()}
       </DialogContent>
     </Dialog>
   );

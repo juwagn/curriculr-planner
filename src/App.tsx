@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome/Welcome';
 import { Wizard } from '@/components/wizard/Wizard';
+import { Editor } from '@/components/editor/Editor';
 import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
 import type { PlannerDocument, UUID } from '@/types';
@@ -69,7 +70,7 @@ export default function App() {
           }}
         />
       )}
-      {route === 'editor' && <div data-testid="editor-placeholder">Editor (Task 12)</div>}
+      {route === 'editor' && <Editor onSwitchPlan={() => setRoute('welcome')} />}
     </>
   );
 }

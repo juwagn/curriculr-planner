@@ -26,14 +26,24 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
   const annotation = annotations.find((a) => a.schoolweek === sw.index);
   const hasNote = !!annotation && annotation.text.trim().length > 0;
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
+    onNoteClick(sw.index);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+  };
+
   return (
     <span className="flex items-center gap-1.5 text-sm">
       <span>{dayNum}</span>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onNoteClick(sw.index);
-        }}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
         className={`inline-flex items-center justify-center w-5 h-5 rounded text-xs cursor-pointer ${
           hasNote
             ? 'bg-[var(--color-accent-warning)] text-black'

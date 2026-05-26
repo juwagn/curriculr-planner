@@ -84,22 +84,25 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
         <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
           Eckdaten
         </h3>
-        <div className="grid grid-cols-[1fr_auto] gap-3 items-center">
+        <div className="grid grid-cols-[260px_200px] gap-3 items-center">
           <Label>Erster Schultag (SW 00)</Label>
           <Input
             type="date"
+            className="min-w-[180px]"
             value={data.firstSchoolDay}
             onChange={(e) => update('firstSchoolDay', e.target.value)}
           />
           <Label>Erster Unterrichtstag (SW 01)</Label>
           <Input
             type="date"
+            className="min-w-[180px]"
             value={data.firstTeachingDay}
             onChange={(e) => update('firstTeachingDay', e.target.value)}
           />
           <Label>Letzter Schultag</Label>
           <Input
             type="date"
+            className="min-w-[180px]"
             value={data.lastSchoolDay}
             onChange={(e) => update('lastSchoolDay', e.target.value)}
           />
@@ -111,14 +114,14 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
           Ferien
         </h3>
         {data.holidays.map((h) => (
-          <div key={h.id} className="grid grid-cols-[160px_1fr_1fr_auto] gap-2 items-center">
+          <div key={h.id} className="grid grid-cols-[160px_180px_180px_auto] gap-2 items-center">
             <Input
               value={h.label}
               onChange={(e) => updateHoliday(h.id, { label: e.target.value })}
               placeholder="Label"
             />
-            <Input type="date" value={h.start} onChange={(e) => updateHoliday(h.id, { start: e.target.value })} />
-            <Input type="date" value={h.end} onChange={(e) => updateHoliday(h.id, { end: e.target.value })} />
+            <Input type="date" className="min-w-[170px]" value={h.start} onChange={(e) => updateHoliday(h.id, { start: e.target.value })} />
+            <Input type="date" className="min-w-[170px]" value={h.end} onChange={(e) => updateHoliday(h.id, { end: e.target.value })} />
             <Button variant="ghost" size="icon" onClick={() => removeHoliday(h.id)} title="Entfernen">
               ✕
             </Button>

@@ -1,13 +1,14 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import multiMonthPlugin from '@fullcalendar/multimonth';
 import interactionPlugin from '@fullcalendar/interaction';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { isHoliday, isWeekend, computeSchoolweeks } from '@/lib/schoolweeks';
 import { pastelize } from '@/lib/colors';
 import { toast } from 'sonner';
-import { parseISO, format } from 'date-fns';
+import { parseISO, format, differenceInCalendarMonths } from 'date-fns';
 import { DayCellContent } from './DayCellContent';
 import { NotePopover } from './NotePopover';
 
@@ -39,21 +40,24 @@ export function QuarterCalendar() {
     });
   }, [doc]);
 
-  const quarterStart = useMemo(() => {
-    if (!doc) return new Date();
+  const quarterRange = useMemo(() => {
+    if (!doc) return { startIso: '', monthCount: 3 };
     const sy = doc.schoolyear;
     const starts = [sy.firstSchoolDay, sy.quarterBoundaries[0], sy.quarterBoundaries[1], sy.quarterBoundaries[2]];
-    const iso = starts[currentQuarter - 1];
-    return iso ? parseISO(iso) : new Date();
-  }, [doc, currentQuarter]);
+    const ends = [sy.quarterBoundaries[0], sy.quarterBoundaries[1], sy.quarterBoundaries[2], sy.lastSchoolDay];
+    const s = starts[currentQuarter - 1];
+    const e = ends[currentQuarter - 1];
+    if (!s || !e) return { startIso: '', monthCount: 3 };
+    const monthCount = Math.max(1, differenceInCalendarMonths(parseISO(e), parseISO(s)) + 1);
+    return { startIso: s, monthCount };
+  }, [doc?.schoolyear, currentQuarter]);
 
-  const weeks = useMemo(() => (doc ? computeSchoolweeks(doc.schoolyear) : []), [doc]);
+  const weeks = useMemo(() => (doc ? computeSchoolweeks(doc.schoolyear) : []), [doc?.schoolyear]);
 
   useEffect(() => {
-    if (calRef.current) {
-      calRef.current.getApi().gotoDate(quarterStart);
-    }
-  }, [quarterStart]);
+    if (!calRef.current || !quarterRange.startIso) return;
+    calRef.current.getApi().gotoDate(parseISO(quarterRange.startIso));
+  }, [quarterRange.startIso, quarterRange.monthCount]);
 
   if (!doc) return null;
 
@@ -61,9 +65,9 @@ export function QuarterCalendar() {
     <div className="bg-white">
       <FullCalendar
         ref={calRef}
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        initialDate={quarterStart}
+        plugins={[dayGridPlugin, multiMonthPlugin, interactionPlugin]}
+        initialView="quarterView"
+        initialDate={quarterRange.startIso ? parseISO(quarterRange.startIso) : new Date()}
         firstDay={1}
         locale="de"
         headerToolbar={{ left: 'prev,next', center: 'title', right: 'today' }}
@@ -71,6 +75,15 @@ export function QuarterCalendar() {
         dayMaxEvents={3}
         editable
         events={fcEvents}
+        views={{
+          quarterView: {
+            type: 'multiMonth',
+            duration: { months: quarterRange.monthCount },
+            multiMonthMaxColumns: 1,
+            multiMonthMinWidth: 600,
+            buttonText: 'Quartal'
+          }
+        }}
         eventClick={(info) => openEdit(info.event.id)}
         dateClick={(info) => openCreate(format(info.date, 'yyyy-MM-dd'))}
         eventDrop={(info) => {
@@ -86,7 +99,7 @@ export function QuarterCalendar() {
         }}
         dayCellClassNames={(arg) => {
           const iso = format(arg.date, 'yyyy-MM-dd');
-          const cls = [];
+          const cls: string[] = [];
           if (isWeekend(iso)) cls.push('bg-slate-50');
           if (isHoliday(iso, doc.schoolyear.holidays)) cls.push('gtp-holiday-cell');
           return cls;
@@ -115,7 +128,22 @@ export function QuarterCalendar() {
             transparent 12px
           );
         }
-        .fc-daygrid-day { min-height: 96px; }
+        .fc-multimonth-month { padding: 0 0 24px 0 !important; }
+        .fc-multimonth-title {
+          font-size: 1rem !important;
+          color: var(--color-primary-900) !important;
+          padding: 12px 0 8px 0 !important;
+        }
+        .fc-multimonth-daygrid-table { width: 100% !important; }
+        .fc-multimonth-daygrid-table td,
+        .fc-multimonth-daygrid-table th {
+          font-size: 0.875rem;
+        }
+        .fc-daygrid-day,
+        .fc-multimonth-daygrid-table td {
+          min-height: 80px;
+          height: 80px;
+        }
         .fc .fc-toolbar-title { font-size: 1rem; color: var(--color-primary-900); }
         .fc-button-primary {
           background: var(--color-primary-100) !important;

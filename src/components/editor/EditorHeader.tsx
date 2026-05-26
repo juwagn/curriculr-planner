@@ -12,6 +12,8 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
   const savingState = usePlannerStore((s) => s.savingState);
   const openSettings = useUiStore((s) => s.openSettings);
+  const viewMode = useUiStore((s) => s.viewMode);
+  const setViewMode = useUiStore((s) => s.setViewMode);
 
   if (!doc) return null;
 
@@ -32,12 +34,26 @@ export function EditorHeader({ onSwitchPlan }: Props) {
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="px-3 py-1 rounded-full bg-white/10">{stateLabel}</span>
           <div className="flex items-center bg-white/10 rounded-full overflow-hidden">
-            <span className="px-3 py-1 bg-[var(--color-accent-warning)] text-black font-semibold rounded-full">
-              Quartal
-            </span>
-            <span className="px-3 py-1 opacity-50 cursor-not-allowed" title="Phase 2">
-              Schuljahr
-            </span>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-1 font-semibold transition ${
+                viewMode === 'table'
+                  ? 'bg-[var(--color-accent-warning)] text-black'
+                  : 'hover:bg-white/10'
+              }`}
+            >
+              Tabelle
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`px-3 py-1 font-semibold transition ${
+                viewMode === 'calendar'
+                  ? 'bg-[var(--color-accent-warning)] text-black'
+                  : 'hover:bg-white/10'
+              }`}
+            >
+              Kalender
+            </button>
           </div>
           <Button variant="ghost" size="icon" onClick={openSettings} className="text-white hover:bg-white/10">
             <SettingsIcon className="w-4 h-4" />

@@ -65,3 +65,57 @@ export function getQuarterForDate(
   if (iso <= q3End) return 3;
   return 4;
 }
+
+export interface QuarterRange {
+  startDate: ISODate;
+  endDate: ISODate;
+}
+
+export function getQuarterRange(quarter: 1 | 2 | 3 | 4, sy: Schoolyear): QuarterRange {
+  const starts: ISODate[] = [
+    sy.firstSchoolDay,
+    sy.quarterBoundaries[0],
+    sy.quarterBoundaries[1],
+    sy.quarterBoundaries[2]
+  ];
+  const ends: ISODate[] = [
+    sy.quarterBoundaries[0],
+    sy.quarterBoundaries[1],
+    sy.quarterBoundaries[2],
+    sy.lastSchoolDay
+  ];
+  return { startDate: starts[quarter - 1] ?? sy.firstSchoolDay, endDate: ends[quarter - 1] ?? sy.lastSchoolDay };
+}
+
+export type WeekRow =
+  | { kind: 'schoolweek'; index: number; startDate: ISODate; endDate: ISODate }
+  | { kind: 'holiday'; label: string; startDate: ISODate; endDate: ISODate };
+
+export function computeWeekRows(sy: Schoolyear): WeekRow[] {
+  const start = startOfWeek(parseISO(sy.firstSchoolDay), { weekStartsOn: 1 });
+  const last = parseISO(sy.lastSchoolDay);
+  const rows: WeekRow[] = [];
+  let index = 0;
+  let cursor = start;
+  while (cursor <= last) {
+    const monday = cursor;
+    const friday = addDays(cursor, 4);
+    let holidayLabel: string | null = null;
+    let holidayDays = 0;
+    for (let i = 0; i < 5; i++) {
+      const h = isHoliday(fmt(addDays(cursor, i)), sy.holidays);
+      if (h) {
+        holidayDays++;
+        if (!holidayLabel) holidayLabel = h.label;
+      }
+    }
+    if (holidayDays >= 3) {
+      rows.push({ kind: 'holiday', label: holidayLabel ?? 'Ferien', startDate: fmt(monday), endDate: fmt(friday) });
+    } else {
+      rows.push({ kind: 'schoolweek', index, startDate: fmt(monday), endDate: fmt(friday) });
+      index++;
+    }
+    cursor = addDays(cursor, 7);
+  }
+  return rows;
+}

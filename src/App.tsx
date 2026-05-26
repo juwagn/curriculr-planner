@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { Welcome } from '@/components/welcome/Welcome';
 import { Wizard } from '@/components/wizard/Wizard';
 import { Editor } from '@/components/editor/Editor';
+import { PlanSwitcherDialog } from '@/components/welcome/PlanSwitcherDialog';
 import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
 import type { PlannerDocument, UUID } from '@/types';
@@ -11,6 +12,7 @@ type Route = 'loading' | 'welcome' | 'wizard' | 'editor';
 
 export default function App() {
   const [route, setRoute] = useState<Route>('loading');
+  const [planSwitcherOpen, setPlanSwitcherOpen] = useState(false);
   const setDoc = usePlannerStore((s) => s.setDoc);
 
   useEffect(() => {
@@ -70,7 +72,16 @@ export default function App() {
           }}
         />
       )}
-      {route === 'editor' && <Editor onSwitchPlan={() => setRoute('welcome')} />}
+      {route === 'editor' && (
+        <>
+          <Editor onSwitchPlan={() => setPlanSwitcherOpen(true)} />
+          <PlanSwitcherDialog
+            open={planSwitcherOpen}
+            onClose={() => setPlanSwitcherOpen(false)}
+            onCreateNew={() => setRoute('wizard')}
+          />
+        </>
+      )}
     </>
   );
 }

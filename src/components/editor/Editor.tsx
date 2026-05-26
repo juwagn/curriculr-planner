@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { EditorHeader } from './EditorHeader';
 import { EditorToolbar } from './EditorToolbar';
+import { QuarterCalendar } from './QuarterCalendar';
 
 interface Props {
   onSwitchPlan(): void;
@@ -15,9 +16,7 @@ export function Editor({ onSwitchPlan }: Props) {
       <EditorHeader onOpenExport={() => setExportOpen(true)} onSwitchPlan={onSwitchPlan} />
       <EditorToolbar />
       <div className="flex-1 p-6">
-        <div className="bg-white rounded-lg p-6 text-center text-[var(--color-text-muted)]">
-          Kalender folgt in Task 14
-        </div>
+        <QuarterCalendar />
       </div>
     </div>
   );

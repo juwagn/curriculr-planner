@@ -3,6 +3,7 @@ import { EditorHeader } from './EditorHeader';
 import { EditorToolbar } from './EditorToolbar';
 import { QuarterCalendar } from './QuarterCalendar';
 import { EventModal } from '@/components/event-modal/EventModal';
+import { SettingsModal } from '@/components/settings/SettingsModal';
 
 interface Props {
   onSwitchPlan(): void;
@@ -20,6 +21,7 @@ export function Editor({ onSwitchPlan }: Props) {
         <QuarterCalendar />
       </div>
       <EventModal />
+      <SettingsModal />
     </div>
   );
 }

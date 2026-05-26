@@ -1,15 +1,29 @@
+import { useEffect, useState } from 'react';
+import { Toaster } from '@/components/ui/sonner';
+import { storage } from '@/lib/storage';
+import type { UUID } from '@/types';
+
 export default function App() {
+  const [route, setRoute] = useState<'loading' | 'welcome' | 'editor'>('loading');
+  const [activeDocId, setActiveDocId] = useState<UUID | null>(null);
+
+  useEffect(() => {
+    storage.getActiveDoc().then((id) => {
+      setActiveDocId(id);
+      setRoute(id ? 'editor' : 'welcome');
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="text-center">
-        <img src="/curriculr-logo-dark.svg" alt="Curriculr" className="h-12 mx-auto mb-4" onError={(e) => { e.currentTarget.src = '/curriculr-logo.svg'; }} />
-        <h1 className="text-2xl font-bold text-[var(--color-primary-900)]">
-          Planner — Setup OK
-        </h1>
-        <p className="text-[var(--color-text-muted)] mt-2">
-          Tailwind + Brand-Tokens funktionieren.
-        </p>
-      </div>
-    </div>
+    <>
+      <Toaster richColors position="bottom-right" />
+      {route === 'loading' && (
+        <div className="min-h-screen flex items-center justify-center text-[var(--color-text-muted)]">
+          Lädt…
+        </div>
+      )}
+      {route === 'welcome' && <div data-testid="welcome-placeholder">Welcome (placeholder)</div>}
+      {route === 'editor' && <div data-testid="editor-placeholder">Editor for {activeDocId}</div>}
+    </>
   );
 }

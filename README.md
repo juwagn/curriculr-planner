@@ -34,6 +34,19 @@ v1.0 covers wizard, quarter editor, drag-drop, ICS export, LocalStorage. Roadmap
 - Zustand (state) + react-hook-form + Zod (validation)
 - Vitest + Testing-Library
 
+## Releases
+
+### v1.0.0 — 2026-05-26 (MVP)
+- Setup wizard (3 steps: schoolyear/categories/groups)
+- Quarter editor with FullCalendar (drag-drop between days)
+- Event create/edit modal with category auto-matching via keywords
+- Weekend + holiday warning toasts on drop
+- Note per schoolweek (popover trigger via 📝 icon + slide-in sidebar)
+- Settings modal (5 tabs: schoolyear, categories, groups, export, about)
+- Export: ICS, JSON-backup, Excel (Konverter-compatible format)
+- Multi-plan management via plan-switcher dialog
+- LocalStorage with auto-save (300ms debounced) + restore-from-backup
+
 ## License
 
 MIT

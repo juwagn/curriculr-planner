@@ -2,13 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
+import { ExportDropdown } from '@/components/export/ExportDropdown';
 
 interface Props {
-  onOpenExport(): void;
   onSwitchPlan(): void;
 }
 
-export function EditorHeader({ onOpenExport, onSwitchPlan }: Props) {
+export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
   const savingState = usePlannerStore((s) => s.savingState);
   const openSettings = useUiStore((s) => s.openSettings);
@@ -42,9 +42,7 @@ export function EditorHeader({ onOpenExport, onSwitchPlan }: Props) {
           <Button variant="ghost" size="icon" onClick={openSettings} className="text-white hover:bg-white/10">
             <SettingsIcon className="w-4 h-4" />
           </Button>
-          <Button onClick={onOpenExport} className="bg-[var(--color-accent-success)] hover:bg-emerald-700">
-            Export ↓
-          </Button>
+          <ExportDropdown />
         </div>
       </div>
     </header>

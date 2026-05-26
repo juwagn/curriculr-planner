@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Step1Schoolyear, DEFAULT_HOLIDAYS } from './Step1Schoolyear';
-import type { Step1Data } from './wizard-state';
+import { Step2Categories } from './Step2Categories';
+import { createEmptyDoc } from '@/stores/planner';
+import type { Step1Data, Step2Data } from './wizard-state';
 import type { PlannerDocument } from '@/types';
 
 interface Props {
@@ -23,6 +25,14 @@ export function Wizard({ onCancel, onComplete: _onComplete }: Props) {
     firstTeachingDay: '',
     lastSchoolDay: '',
     holidays: DEFAULT_HOLIDAYS(new Date().getFullYear())
+  });
+  const [step2, setStep2] = useState<Step2Data>(() => {
+    const skeleton = createEmptyDoc('', '', '', '', '');
+    return {
+      quarterBoundaries: ['', '', ''],
+      categories: skeleton.categories,
+      availableGroups: skeleton.availableGroups
+    };
   });
 
   return (
@@ -55,7 +65,16 @@ export function Wizard({ onCancel, onComplete: _onComplete }: Props) {
             }}
           />
         )}
-        {step === 2 && <div>Step 2 (Task 10)</div>}
+        {step === 2 && (
+          <Step2Categories
+            initial={step2}
+            onBack={() => setStep(1)}
+            onNext={(data) => {
+              setStep2(data);
+              setStep(3);
+            }}
+          />
+        )}
         {step === 3 && <div>Step 3 (Task 11)</div>}
       </DialogContent>
     </Dialog>

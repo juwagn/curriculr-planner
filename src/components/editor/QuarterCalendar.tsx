@@ -5,7 +5,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth';
 import interactionPlugin from '@fullcalendar/interaction';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
-import { isHoliday, isWeekend, computeSchoolweeks } from '@/lib/schoolweeks';
+import { isHoliday, isWeekend, computeSchoolweeks, findSchoolweek } from '@/lib/schoolweeks';
 import { pastelize } from '@/lib/colors';
 import { toast } from 'sonner';
 import { parseISO, format, differenceInCalendarMonths } from 'date-fns';
@@ -70,6 +70,12 @@ export function QuarterCalendar() {
         initialDate={quarterRange.startIso ? parseISO(quarterRange.startIso) : new Date()}
         firstDay={1}
         locale="de"
+        weekends={false}
+        weekNumbers={true}
+        weekNumberContent={(arg) => {
+          const sw = findSchoolweek(format(arg.date, 'yyyy-MM-dd'), weeks);
+          return sw ? `SW ${sw.index.toString().padStart(2, '0')}` : '';
+        }}
         headerToolbar={{ left: 'prev,next', center: 'title', right: 'today' }}
         height="auto"
         dayMaxEvents={3}
@@ -100,7 +106,6 @@ export function QuarterCalendar() {
         dayCellClassNames={(arg) => {
           const iso = format(arg.date, 'yyyy-MM-dd');
           const cls: string[] = [];
-          if (isWeekend(iso)) cls.push('bg-slate-50');
           if (isHoliday(iso, doc.schoolyear.holidays)) cls.push('gtp-holiday-cell');
           return cls;
         }}
@@ -145,6 +150,16 @@ export function QuarterCalendar() {
           height: 80px;
         }
         .fc .fc-toolbar-title { font-size: 1rem; color: var(--color-primary-900); }
+        .fc-week-number {
+          background: var(--color-primary-100) !important;
+          color: var(--color-primary-900) !important;
+          font-weight: 700 !important;
+          font-size: 0.75rem !important;
+          text-align: center !important;
+          vertical-align: middle !important;
+          width: 60px !important;
+          min-width: 60px !important;
+        }
         .fc-button-primary {
           background: var(--color-primary-100) !important;
           border-color: var(--color-primary-100) !important;

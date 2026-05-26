@@ -1,0 +1,63 @@
+export type ISODate = string;
+export type ISOTime = string;
+export type UUID = string;
+
+export interface Holiday {
+  id: UUID;
+  label: string;
+  start: ISODate;
+  end: ISODate;
+}
+
+export interface Schoolyear {
+  id: UUID;
+  label: string;
+  firstSchoolDay: ISODate;
+  firstTeachingDay: ISODate;
+  lastSchoolDay: ISODate;
+  holidays: Holiday[];
+  quarterBoundaries: ISODate[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Category {
+  id: UUID;
+  label: string;
+  color: string;
+  slug: string;
+  keywords: string[];
+}
+
+export interface PlanEvent {
+  id: UUID;
+  title: string;
+  start: ISODate;
+  end: ISODate;
+  startTime?: ISOTime;
+  endTime?: ISOTime;
+  allDay: boolean;
+  categoryId: UUID;
+  notes?: string;
+  location?: string;
+  groups: string[];
+}
+
+export interface WeekAnnotation {
+  schoolweek: number;
+  text: string;
+  updatedAt: string;
+}
+
+export interface PlannerDocument {
+  version: 1;
+  schoolyear: Schoolyear;
+  categories: Category[];
+  events: PlanEvent[];
+  annotations: WeekAnnotation[];
+  availableGroups: string[];
+  meta: {
+    name: string;
+    lastSaved: string;
+  };
+}

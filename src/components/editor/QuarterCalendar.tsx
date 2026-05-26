@@ -4,10 +4,11 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
-import { isHoliday, isWeekend } from '@/lib/schoolweeks';
+import { isHoliday, isWeekend, computeSchoolweeks } from '@/lib/schoolweeks';
 import { pastelize } from '@/lib/colors';
 import { toast } from 'sonner';
 import { parseISO, format } from 'date-fns';
+import { DayCellContent } from './DayCellContent';
 
 export function QuarterCalendar() {
   const doc = usePlannerStore((s) => s.doc);
@@ -16,8 +17,7 @@ export function QuarterCalendar() {
   const openEdit = useUiStore((s) => s.openEditEvent);
   const openCreate = useUiStore((s) => s.openCreateEvent);
   const calRef = useRef<FullCalendar | null>(null);
-  const [notePopoverSw, _setNotePopoverSw] = useState<number | null>(null);
-  void notePopoverSw; void _setNotePopoverSw;
+  const [notePopoverSw, setNotePopoverSw] = useState<number | null>(null);
 
   const fcEvents = useMemo(() => {
     if (!doc) return [];
@@ -45,6 +45,8 @@ export function QuarterCalendar() {
     const iso = starts[currentQuarter - 1];
     return iso ? parseISO(iso) : new Date();
   }, [doc, currentQuarter]);
+
+  const weeks = useMemo(() => (doc ? computeSchoolweeks(doc.schoolyear) : []), [doc]);
 
   useEffect(() => {
     if (calRef.current) {
@@ -88,7 +90,17 @@ export function QuarterCalendar() {
           if (isHoliday(iso, doc.schoolyear.holidays)) cls.push('gtp-holiday-cell');
           return cls;
         }}
+        dayCellContent={(arg) => (
+          <DayCellContent
+            date={arg.date}
+            weeks={weeks}
+            annotations={doc.annotations}
+            onNoteClick={setNotePopoverSw}
+          />
+        )}
       />
+      {/* NotePopover wired in Task 18 */}
+      {notePopoverSw !== null && <span className="hidden" data-sw={notePopoverSw} />}
       <style>{`
         .gtp-holiday-cell {
           background-image: repeating-linear-gradient(

@@ -23,32 +23,44 @@ export function SchoolyearTab() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label>Schuljahr</Label>
-          <Input value={sy.label} onChange={(e) => setSy({ ...sy, label: e.target.value })} />
-        </div>
+    <div className="space-y-5">
+      <div>
+        <Label className="mb-1.5">Schuljahr</Label>
+        <Input
+          className="max-w-xs"
+          value={sy.label}
+          onChange={(e) => setSy({ ...sy, label: e.target.value })}
+        />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+
+      <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <Label>Erster Schultag</Label>
+          <Label className="mb-1.5">Erster Schultag</Label>
           <Input type="date" value={sy.firstSchoolDay} onChange={(e) => setSy({ ...sy, firstSchoolDay: e.target.value })} />
         </div>
         <div>
-          <Label>Erster Unterrichtstag</Label>
+          <Label className="mb-1.5">Erster Unterrichtstag</Label>
           <Input type="date" value={sy.firstTeachingDay} onChange={(e) => setSy({ ...sy, firstTeachingDay: e.target.value })} />
         </div>
         <div>
-          <Label>Letzter Schultag</Label>
+          <Label className="mb-1.5">Letzter Schultag</Label>
           <Input type="date" value={sy.lastSchoolDay} onChange={(e) => setSy({ ...sy, lastSchoolDay: e.target.value })} />
         </div>
       </div>
+
       <div>
-        <Label>Ferien</Label>
-        <div className="space-y-2 mt-2">
+        <Label className="mb-2">Ferien</Label>
+        <div className="space-y-2">
+          <div className="hidden sm:grid grid-cols-[1fr_minmax(140px,1fr)_minmax(140px,1fr)] gap-2 text-xs text-[var(--color-text-muted)] px-1">
+            <span>Bezeichnung</span>
+            <span>Von</span>
+            <span>Bis</span>
+          </div>
           {sy.holidays.map((h) => (
-            <div key={h.id} className="grid grid-cols-[160px_1fr_1fr] gap-2">
+            <div
+              key={h.id}
+              className="grid gap-2 grid-cols-1 sm:grid-cols-[1fr_minmax(140px,1fr)_minmax(140px,1fr)]"
+            >
               <Input value={h.label} onChange={(e) => updateHol(h.id, { label: e.target.value })} />
               <Input type="date" value={h.start} onChange={(e) => updateHol(h.id, { start: e.target.value })} />
               <Input type="date" value={h.end} onChange={(e) => updateHol(h.id, { end: e.target.value })} />
@@ -56,6 +68,7 @@ export function SchoolyearTab() {
           ))}
         </div>
       </div>
+
       <Button onClick={save}>Speichern + Schulwochen neu berechnen</Button>
     </div>
   );

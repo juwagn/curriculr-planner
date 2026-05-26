@@ -1,0 +1,80 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { usePlannerStore, createEmptyDoc } from './planner';
+
+describe('usePlannerStore', () => {
+  beforeEach(() => {
+    usePlannerStore.setState({ doc: null, savingState: 'idle' });
+    localStorage.clear();
+  });
+
+  it('starts with no doc', () => {
+    expect(usePlannerStore.getState().doc).toBeNull();
+  });
+
+  it('sets a doc', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    expect(usePlannerStore.getState().doc?.meta.name).toBe('Test');
+  });
+
+  it('adds an event', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().addEvent({
+      id: 'e1',
+      title: 'Wandertag',
+      start: '2026-09-15',
+      end: '2026-09-15',
+      allDay: true,
+      categoryId: doc.categories[0].id,
+      groups: []
+    });
+    expect(usePlannerStore.getState().doc?.events).toHaveLength(1);
+  });
+
+  it('updates an event', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    doc.events.push({
+      id: 'e1',
+      title: 'Wandertag',
+      start: '2026-09-15',
+      end: '2026-09-15',
+      allDay: true,
+      categoryId: doc.categories[0].id,
+      groups: []
+    });
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().updateEvent('e1', { title: 'Sportfest' });
+    expect(usePlannerStore.getState().doc?.events[0].title).toBe('Sportfest');
+  });
+
+  it('deletes an event', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    doc.events.push({
+      id: 'e1',
+      title: 'X',
+      start: '2026-09-15',
+      end: '2026-09-15',
+      allDay: true,
+      categoryId: doc.categories[0].id,
+      groups: []
+    });
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().deleteEvent('e1');
+    expect(usePlannerStore.getState().doc?.events).toHaveLength(0);
+  });
+
+  it('sets annotation for schoolweek', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().setAnnotation(2, 'FK-Woche');
+    const ann = usePlannerStore.getState().doc?.annotations.find((a) => a.schoolweek === 2);
+    expect(ann?.text).toBe('FK-Woche');
+  });
+
+  it('createEmptyDoc produces 7 default categories', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    expect(doc.categories.length).toBe(7);
+    expect(doc.categories.map((c) => c.slug)).toContain('sondertag');
+  });
+});

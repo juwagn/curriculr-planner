@@ -14,7 +14,7 @@ interface Props {
 export function Editor({ onSwitchPlan }: Props) {
   const viewMode = useUiStore((s) => s.viewMode);
   return (
-    <div className="h-screen flex flex-col bg-[var(--color-bg-body)] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[var(--color-paper-bg)] overflow-hidden">
       <EditorHeader onSwitchPlan={onSwitchPlan} />
       <EditorToolbar />
       <div className="flex-1 min-h-0 p-6 overflow-auto">

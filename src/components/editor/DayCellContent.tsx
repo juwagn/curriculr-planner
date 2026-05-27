@@ -15,12 +15,12 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
   const dayNum = parseISO(iso).getDate();
 
   if (!isMonday) {
-    return <span className="text-sm">{dayNum}</span>;
+    return <span className="text-[13px] tabular-nums">{dayNum}</span>;
   }
 
   const sw = findSchoolweek(iso, weeks);
   if (!sw) {
-    return <span className="text-sm">{dayNum}</span>;
+    return <span className="text-[13px] tabular-nums">{dayNum}</span>;
   }
 
   const annotation = annotations.find((a) => a.schoolweek === sw.index);
@@ -39,16 +39,17 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
   };
 
   return (
-    <span className="flex items-center gap-1.5 text-sm">
-      <span>{dayNum}</span>
+    <span className="flex items-center gap-1.5 text-[13px]">
+      <span className="tabular-nums">{dayNum}</span>
       <button
         onClick={handleClick}
         onMouseDown={handleMouseDown}
-        className={`inline-flex items-center justify-center w-5 h-5 rounded text-xs cursor-pointer ${
+        className={`inline-flex items-center justify-center w-5 h-5 rounded-[var(--radius-block)] text-[11px] cursor-pointer transition-colors ${
           hasNote
-            ? 'bg-[var(--color-accent-warning)] text-black'
-            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+            ? 'bg-[var(--color-gelb-500)] text-[var(--color-ink-900)]'
+            : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-500)] hover:bg-[var(--color-paper-bg)]/60'
         }`}
+        style={{ transitionDuration: 'var(--dur-state)' }}
         title={hasNote ? `SW ${sw.index}: ${annotation!.text.slice(0, 50)}` : `Anmerkung zu SW ${sw.index} hinzufügen`}
       >
         📝

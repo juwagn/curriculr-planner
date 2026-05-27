@@ -45,13 +45,15 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
           {docs.map((d) => (
             <div
               key={d.id}
-              className={`flex items-center justify-between p-3 rounded-lg border ${
-                d.id === currentDoc?.schoolyear.id ? 'bg-[var(--color-primary-100)] border-[var(--color-primary-500)]' : ''
+              className={`flex items-center justify-between p-3 rounded-[var(--radius-default)] border ${
+                d.id === currentDoc?.schoolyear.id
+                  ? 'bg-[var(--color-marine-100)] border-[var(--color-marine-500)]'
+                  : 'border-[var(--color-ink-200)]'
               }`}
             >
               <div>
-                <div className="font-semibold">{d.name}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">
+                <div className="text-[13px] font-semibold text-[var(--color-ink-900)]">{d.name}</div>
+                <div className="text-[12px] text-[var(--color-ink-500)] tabular-nums">
                   {d.eventCount} Termine · {new Date(d.lastSaved).toLocaleString('de-DE')}
                 </div>
               </div>
@@ -59,12 +61,12 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
                 {d.id !== currentDoc?.schoolyear.id && (
                   <Button size="sm" onClick={() => switchTo(d.id)}>Öffnen</Button>
                 )}
-                <Button size="sm" variant="ghost" onClick={() => removeDoc(d.id, d.name)}>✕</Button>
+                <Button size="sm" variant="ghost" onClick={() => removeDoc(d.id, d.name)} aria-label={`${d.name} löschen`}>✕</Button>
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-4 pt-4 border-t border-[var(--color-ink-200)]">
           <Button variant="outline" onClick={() => { onClose(); onCreateNew(); }}>
             + Neuen Plan erstellen
           </Button>

@@ -43,7 +43,7 @@ export function ExportDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="bg-[var(--color-accent-success)] hover:bg-emerald-700 text-white">
+        <Button>
           Export ↓
         </Button>
       </DropdownMenuTrigger>

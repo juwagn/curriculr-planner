@@ -35,7 +35,7 @@ export function NotePopover({ schoolweek, week, onClose }: Props) {
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md">
         <DialogTitle>Anmerkung SW {schoolweek.toString().padStart(2, '0')}</DialogTitle>
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <p className="text-[13px] text-[var(--color-ink-500)] tabular-nums">
           {week.startDate} – {week.endDate}
         </p>
         <Textarea

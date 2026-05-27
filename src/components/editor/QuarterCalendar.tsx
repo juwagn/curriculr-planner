@@ -62,7 +62,7 @@ export function QuarterCalendar() {
   if (!doc) return null;
 
   return (
-    <div className="bg-white">
+    <div className="bg-[var(--color-paper-card)]">
       <FullCalendar
         ref={calRef}
         plugins={[dayGridPlugin, multiMonthPlugin, interactionPlugin]}
@@ -127,43 +127,45 @@ export function QuarterCalendar() {
         .gtp-holiday-cell {
           background-image: repeating-linear-gradient(
             45deg,
-            rgba(0,0,0,0.04),
-            rgba(0,0,0,0.04) 6px,
-            transparent 6px,
-            transparent 12px
+            var(--color-ferien-a) 0 8px,
+            var(--color-ferien-b) 8px 16px
           );
         }
         .fc-multimonth-month { padding: 0 0 24px 0 !important; }
         .fc-multimonth-title {
-          font-size: 1rem !important;
-          color: var(--color-primary-900) !important;
+          font-size: 15px !important;
+          font-weight: 600 !important;
+          color: var(--color-marine-800) !important;
           padding: 12px 0 8px 0 !important;
         }
         .fc-multimonth-daygrid-table { width: 100% !important; }
         .fc-multimonth-daygrid-table td,
         .fc-multimonth-daygrid-table th {
-          font-size: 0.875rem;
+          font-size: 13px;
+          border-color: var(--color-ink-200) !important;
         }
         .fc-daygrid-day,
         .fc-multimonth-daygrid-table td {
           min-height: 80px;
           height: 80px;
         }
-        .fc .fc-toolbar-title { font-size: 1rem; color: var(--color-primary-900); }
+        .fc .fc-toolbar-title { font-size: 15px; font-weight: 600; color: var(--color-marine-800); }
         .fc-week-number {
-          background: var(--color-primary-100) !important;
-          color: var(--color-primary-900) !important;
+          background: var(--color-marine-100) !important;
+          color: var(--color-marine-800) !important;
           font-weight: 700 !important;
-          font-size: 0.75rem !important;
+          font-size: 12px !important;
+          font-variant-numeric: tabular-nums !important;
           text-align: center !important;
           vertical-align: middle !important;
           width: 60px !important;
           min-width: 60px !important;
         }
         .fc-button-primary {
-          background: var(--color-primary-100) !important;
-          border-color: var(--color-primary-100) !important;
-          color: var(--color-primary-900) !important;
+          background: var(--color-marine-100) !important;
+          border-color: var(--color-marine-100) !important;
+          color: var(--color-marine-800) !important;
+          transition: background var(--dur-state) var(--ease-state) !important;
         }
         .fc-button-primary:hover { background: #c7e2ff !important; }
       `}</style>

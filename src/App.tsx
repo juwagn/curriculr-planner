@@ -50,7 +50,7 @@ export default function App() {
     <>
       <Toaster richColors position="bottom-right" />
       {route === 'loading' && (
-        <div className="min-h-screen flex items-center justify-center text-[var(--color-text-muted)]">
+        <div className="min-h-screen flex items-center justify-center text-[13px] text-[var(--color-ink-500)]">
           Lädt…
         </div>
       )}

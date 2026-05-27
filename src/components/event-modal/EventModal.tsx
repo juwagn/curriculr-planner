@@ -135,7 +135,7 @@ export function EventModal() {
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <label className="flex items-center gap-2 text-[13px] text-[var(--color-ink-900)] cursor-pointer">
             <Checkbox checked={form.allDay} onCheckedChange={(v) => update('allDay', v === true)} />
             Ganztägig
           </label>
@@ -170,7 +170,7 @@ export function EventModal() {
               <SelectContent>
                 {doc.categories.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    <span className="inline-block w-3 h-3 rounded mr-2" style={{ background: c.color }} />
+                    <span className="inline-block w-3 h-3 rounded-[var(--radius-block)] mr-2" style={{ background: c.color }} />
                     {c.label}
                   </SelectItem>
                 ))}

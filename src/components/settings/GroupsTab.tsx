@@ -21,9 +21,19 @@ export function GroupsTab() {
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
         {groups.map((g) => (
-          <span key={g} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-primary-100)] text-[var(--color-primary-700)] text-sm">
+          <span
+            key={g}
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-[var(--radius-pill)] bg-[var(--color-marine-100)] text-[var(--color-marine-700)] text-[13px]"
+          >
             {g}
-            <button onClick={() => setGroups(groups.filter((x) => x !== g))} className="hover:text-red-600">✕</button>
+            <button
+              onClick={() => setGroups(groups.filter((x) => x !== g))}
+              className="hover:text-[var(--color-status-red)] transition-colors"
+              style={{ transitionDuration: 'var(--dur-state)' }}
+              aria-label={`${g} entfernen`}
+            >
+              ✕
+            </button>
           </span>
         ))}
       </div>

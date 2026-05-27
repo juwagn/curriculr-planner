@@ -30,11 +30,12 @@ export function GroupChipsInput({ available, value, onChange }: Props) {
             type="button"
             key={g}
             onClick={() => toggle(g)}
-            className={`px-3 py-1 rounded-full text-sm transition ${
+            className={`px-3 py-1 rounded-[var(--radius-pill)] text-[13px] transition-colors ${
               value.includes(g)
-                ? 'bg-[var(--color-primary-700)] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-[var(--color-marine-700)] text-[var(--color-paper-card)]'
+                : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-900)] hover:bg-[var(--color-paper-bg)]/60'
             }`}
+            style={{ transitionDuration: 'var(--dur-state)' }}
           >
             {g}
           </button>
@@ -46,7 +47,7 @@ export function GroupChipsInput({ available, value, onChange }: Props) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustom())}
           placeholder="Eigene Gruppe (Enter)"
-          className="text-sm"
+          className="text-[13px]"
         />
       </div>
     </div>

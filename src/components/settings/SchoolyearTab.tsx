@@ -51,7 +51,7 @@ export function SchoolyearTab() {
       <div>
         <Label className="mb-2">Ferien</Label>
         <div className="space-y-2">
-          <div className="hidden sm:grid grid-cols-[1fr_minmax(140px,1fr)_minmax(140px,1fr)] gap-2 text-xs text-[var(--color-text-muted)] px-1">
+          <div className="hidden sm:grid grid-cols-[1fr_minmax(140px,1fr)_minmax(140px,1fr)] gap-2 text-[12px] text-[var(--color-ink-500)] uppercase tracking-[0.05em] px-1">
             <span>Bezeichnung</span>
             <span>Von</span>
             <span>Bis</span>

@@ -21,12 +21,12 @@ export function CategoriesTab() {
 
   return (
     <div className="space-y-3">
-      <table className="w-full text-sm">
+      <table className="w-full text-[13px]">
         <thead>
-          <tr className="text-xs text-[var(--color-text-muted)]">
-            <th className="text-left py-2">Label</th>
-            <th className="w-12">Farbe</th>
-            <th className="text-left">Stichwörter</th>
+          <tr className="text-[12px] text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+            <th className="text-left py-2 font-semibold">Label</th>
+            <th className="w-12 font-semibold">Farbe</th>
+            <th className="text-left font-semibold">Stichwörter</th>
           </tr>
         </thead>
         <tbody>
@@ -36,7 +36,12 @@ export function CategoriesTab() {
                 <Input value={c.label} onChange={(e) => update(c.id, { label: e.target.value })} />
               </td>
               <td className="py-1 pr-2">
-                <input type="color" value={c.color} onChange={(e) => update(c.id, { color: e.target.value })} className="w-10 h-9 rounded border" />
+                <input
+                  type="color"
+                  value={c.color}
+                  onChange={(e) => update(c.id, { color: e.target.value })}
+                  className="w-10 h-8 rounded-[var(--radius-input)] border border-[var(--color-ink-200)] cursor-pointer"
+                />
               </td>
               <td className="py-1 pr-2">
                 <Input

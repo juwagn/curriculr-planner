@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-26T00:00:00Z",
+  "title": "Design System: Curriculr Planner",
+  "extensions": {
+    "colorMeta": {
+      "konrektoren-marine": {
+        "role": "primary",
+        "displayName": "Konrektoren-Marine",
+        "canonical": "oklch(27% 0.06 245)",
+        "tonalRamp": ["#001F35", "#00345C", "#00467D", "#0058A0", "#3773AC", "#6996C1", "#9BB9D5", "#E6F4FF"]
+      },
+      "doppelpunkt-gelb": {
+        "role": "secondary",
+        "displayName": "Doppelpunkt-Gelb",
+        "canonical": "oklch(85% 0.13 85)",
+        "tonalRamp": ["#5C4006", "#886110", "#B8851F", "#E5AC36", "#FFC857", "#FFD888", "#FFE9A8", "#FFF8E1"]
+      },
+      "meldung-gruen": {
+        "role": "tertiary",
+        "displayName": "Meldung-Grün",
+        "canonical": "oklch(60% 0.14 158)",
+        "tonalRamp": ["#053524", "#0A5D40", "#0E9F6E", "#34C18C", "#6FD4AB", "#A4E2C7", "#CFEFDE", "#EAFAF1"]
+      },
+      "meldung-rot": {
+        "role": "tertiary",
+        "displayName": "Meldung-Rot",
+        "canonical": "oklch(58% 0.21 25)",
+        "tonalRamp": ["#3A0606", "#7A1313", "#E02424", "#EF4D4D", "#F47272", "#F9A3A3", "#FCCBCB", "#FDE2E2"]
+      },
+      "papier-bg": {
+        "role": "neutral",
+        "displayName": "Papier-BG",
+        "canonical": "oklch(96% 0.005 240)",
+        "tonalRamp": ["#0E1218", "#1F2937", "#374151", "#4B5563", "#6B7280", "#9CA3AF", "#D1D5DB", "#F3F5F9"]
+      },
+      "papier-card": {
+        "role": "neutral",
+        "displayName": "Papier-Card",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": ["#1F2937", "#374151", "#4B5563", "#6B7280", "#9CA3AF", "#D1D5DB", "#E5E7EB", "#FFFFFF"]
+      },
+      "tinten-grau-900": {
+        "role": "neutral",
+        "displayName": "Tinten-Grau-900",
+        "canonical": "oklch(20% 0.02 250)",
+        "tonalRamp": ["#0E1218", "#111827", "#1F2937", "#374151", "#4B5563", "#6B7280", "#9CA3AF", "#E2E8F0"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Plan-Titel im Header, Welcome-Screen Page-Title." },
+      "headline": { "displayName": "Headline", "purpose": "Plan-Name im Header, Modal-Titel, aktive Tabs." },
+      "title": { "displayName": "Title", "purpose": "Form-Labels, sekundäre Modal-Titel, Sidebar-Heading." },
+      "body": { "displayName": "Body", "purpose": "Standard-Lese-Text, EventBlock-Inhalt, Annotation-Text." },
+      "label": { "displayName": "Label", "purpose": "Tabellen-Header-Spalten, Eyebrow-Labels in Modals. Uppercase mit 0.05em Letter-Spacing." },
+      "tabular": { "displayName": "Tabular", "purpose": "Datum-Ranges, Uhrzeiten, SW-Nummern. Mit font-feature-settings 'tnum' 1." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 1px 2px rgb(0 0 0 / 0.05)", "purpose": "Dezent unter Cards und Tabellen-Container. Markiert Block, nicht Schwebung." },
+      { "name": "modal", "value": "0 18px 40px rgba(15, 23, 42, 0.15)", "purpose": "Modal-Dialoge über Backdrop-Blur. Klar gehoben." },
+      { "name": "button", "value": "0 2px 8px rgba(0, 70, 125, 0.25)", "purpose": "Primary-Button Default-State. Marine-getönte Lift." },
+      { "name": "focus", "value": "0 0 0 3px rgba(0, 70, 125, 0.25)", "purpose": "Sichtbarer Tastatur-Focus-Ring. 3px Marine bei 25% Opazität." }
+    ],
+    "motion": [
+      { "name": "ease-state", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default-Easing für Hover-, Focus-, Active-Transitions." },
+      { "name": "duration-state", "value": "150ms", "purpose": "Hover-Lift, Background-Tint, Border-Color-Wechsel." },
+      { "name": "duration-modal", "value": "100ms", "purpose": "Dialog-Open/Close, schnell wie shadcn-Defaults." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "desktop-target", "value": "1366px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Marine-Hintergrund mit Papier-Card Text. Default-State der wichtigsten Aktion einer Surface.",
+      "html": "<button class=\"ds-btn-primary\">Termin speichern</button>",
+      "css": ".ds-btn-primary { background: #00345C; color: #FFFFFF; font: 600 13px/1 'Inter', system-ui, sans-serif; padding: 6px 14px; min-height: 32px; border: none; border-radius: 10px; box-shadow: 0 2px 8px rgba(0, 70, 125, 0.25); cursor: pointer; transition: background 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 100ms; } .ds-btn-primary:hover { background: #00467D; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 2px 8px rgba(0, 70, 125, 0.25), 0 0 0 3px rgba(0, 70, 125, 0.5); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Sekundäre Aktion, transparenter Hintergrund mit weichem Hover-Tint.",
+      "html": "<button class=\"ds-btn-ghost\">Abbrechen</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #111827; font: 500 13px/1 'Inter', system-ui, sans-serif; padding: 6px 14px; min-height: 32px; border: none; border-radius: 10px; cursor: pointer; transition: background 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-ghost:hover { background: rgba(15, 23, 42, 0.05); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 70, 125, 0.5); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form-Eingabe mit klarer Border, Marine-Focus-Ring. Label muss mit margin-bottom 6px abgesetzt sein.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Titel</span><input class=\"ds-input\" type=\"text\" placeholder=\"z.B. Zeugniskonferenz Jg 10\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; } .ds-label { font: 600 13px/1 'Inter', system-ui, sans-serif; color: #111827; margin-bottom: 6px; } .ds-input { background: #FFFFFF; color: #111827; font: 400 13px/1 'Inter', system-ui, sans-serif; padding: 4px 10px; height: 32px; border: 1px solid #E2E8F0; border-radius: 8px; outline: none; transition: border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: #9CA3AF; } .ds-input:focus-visible { border-color: #00345C; box-shadow: 0 0 0 3px rgba(0, 70, 125, 0.5); } .ds-input:disabled { background: rgba(226, 232, 240, 0.5); opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Card Container",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Standard-Card für Welcome-Screen-Listen, Settings-Sektionen. Sehr dezenter Schatten, sichtbare Border.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\">Jahresplan 2026/27</h3><p class=\"ds-card-meta\">142 Termine, zuletzt 25.05.2026 14:32</p></article>",
+      "css": ".ds-card { background: #FFFFFF; color: #111827; padding: 16px; border: 1px solid #E2E8F0; border-radius: 14px; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); } .ds-card-title { font: 600 15px/1.3 'Inter', system-ui, sans-serif; color: #00345C; margin: 0 0 4px 0; } .ds-card-meta { font: 400 13px/1.5 'Inter', system-ui, sans-serif; color: #4B5563; margin: 0; font-feature-settings: 'tnum' 1; }"
+    },
+    {
+      "name": "Week-Table Header Cell",
+      "kind": "custom",
+      "refersTo": "week-table-header",
+      "description": "Signature-Komponente: Tabellen-Header-Zelle. Marine-Hintergrund, Label-Typographie, Uppercase mit Letter-Spacing.",
+      "html": "<table class=\"ds-wt\"><thead><tr><th class=\"ds-wt-num\">#</th><th class=\"ds-wt-week\">Schulwoche</th><th class=\"ds-wt-day\">Mo</th><th class=\"ds-wt-day\">Di</th><th class=\"ds-wt-day\">Mi</th><th class=\"ds-wt-anno\">Anmerkungen</th></tr></thead></table>",
+      "css": ".ds-wt { width: 100%; border-collapse: collapse; table-layout: fixed; background: #FFFFFF; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); border: 1px solid #E2E8F0; } .ds-wt th { background: #00345C; color: #FFFFFF; font: 600 12px/1 'Inter', system-ui, sans-serif; letter-spacing: 0.05em; padding: 10px 8px; text-align: left; border-right: 1px solid rgba(255, 255, 255, 0.15); } .ds-wt-num { text-transform: uppercase; text-align: center !important; width: 50px; } .ds-wt-week { text-transform: uppercase; width: 120px; } .ds-wt-day { font-size: 12.5px !important; text-transform: none; letter-spacing: normal !important; } .ds-wt-anno { text-transform: uppercase; width: 180px; }"
+    },
+    {
+      "name": "Event Block",
+      "kind": "custom",
+      "refersTo": "event-block",
+      "description": "Termin-Block in einer Tag-Zelle. Pastel-Hintergrund der Kategorie-Farbe plus 3px-Left-Akzent. Draggable.",
+      "html": "<button class=\"ds-evt\" draggable=\"true\"><span class=\"ds-evt-time\">09.00</span> Zeugniskonferenz Jg 10</button>",
+      "css": ".ds-evt { display: block; width: 100%; text-align: left; background: #E6F4FF; color: #111827; border: none; border-left: 3px solid #0058A0; border-radius: 3px; padding: 4px 8px; font: 400 12px/1.35 'Inter', system-ui, sans-serif; cursor: grab; transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 150ms; word-break: break-word; } .ds-evt:hover { box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); transform: translateY(-0.5px); } .ds-evt:active { cursor: grabbing; } .ds-evt:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0, 70, 125, 0.5); } .ds-evt-time { font-weight: 700; font-feature-settings: 'tnum' 1; margin-right: 4px; }"
+    },
+    {
+      "name": "Annotation Cell (filled)",
+      "kind": "custom",
+      "refersTo": "annotation-cell-filled",
+      "description": "Anmerkungs-Zelle der Schulwochen-Tabelle mit Inhalt. Gelblich getönt für sofortige Erkennung.",
+      "html": "<td class=\"ds-anno\">Letzter Termin:<br>Klassensprecherwahl</td>",
+      "css": ".ds-anno { display: block; background: #FFF8E1; color: #111827; font: 400 12px/1.4 'Inter', system-ui, sans-serif; padding: 6px 8px; cursor: pointer; min-width: 180px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Das Konrektor-Notizbuch",
+    "overview": "Curriculr Planner sieht aus wie das gut geführte Notizbuch einer erfahrenen Schulleitung: klar liniert, sorgfältig beschriftet, ohne Spielerei. Die Tabelle ist die Hauptbühne (Schulwoche × Mo–Fr, Anmerkungen rechts), genau wie sie es in Word und auf Papier seit Jahren ist. Aber das Notizbuch ist digital aufgewertet: Schulwochen werden automatisch nummeriert, Kategorien tragen konsistente Farben, Ferien sind als Schraffur sofort lesbar, und nichts geht unbemerkt verloren. Die visuelle Sprache lebt von einer einzigen Konfrontation: das tiefe Konrektoren-Marine der Tabellen-Header und Buttons gegen das warme Doppelpunkt-Gelb für Anmerkungen und Highlights. Schichtung statt Schatten: Tiefe entsteht durch Hintergrund-Töne und Tabellen-Linien, nicht durch dekorative Drop-Shadows.",
+    "keyCharacteristics": [
+      "Tabellen-Layout als Primär-Surface, nicht Kalender-Grid",
+      "Inter durchgehend, tabular-nums für Datum/Schulwochen-Nummern",
+      "Zwei-Farben-System: Marine + Gelb, alles andere ist Tinten-Grau",
+      "Flach mit definierten Linien, keine kosmetischen Schatten",
+      "Deutsch, formell-höflich, ohne Marketing-Lyrik",
+      "Lesbarkeit für 22\"-Monitore und Lesebrillen vor maximaler Dichte"
+    ],
+    "rules": [
+      { "name": "Die Zwei-Stimmen-Regel", "body": "Konrektoren-Marine und Doppelpunkt-Gelb sind die einzigen zwei gesättigten Farben, die das Chrome trägt. Kategorie-Farben bleiben in den Termin-Blöcken eingesperrt; sie wandern nie ins UI-Chrome.", "section": "colors" },
+      { "name": "Die Gelb-Sparsamkeitsregel", "body": "Doppelpunkt-Gelb deckt nie mehr als 8% des sichtbaren Bildschirms. Es markiert das Bemerkenswerte: Anmerkungen mit Inhalt, Highlight-Termine, der aktive View-Toggle.", "section": "colors" },
+      { "name": "Die Tabular-Nums-Regel", "body": "Jede Ziffer, die in einer Spalte über mehreren Zeilen erscheint, läuft mit 'tnum' 1. SW-Nummern, Datum-Ranges, Uhrzeiten.", "section": "typography" },
+      { "name": "Die Inter-Only-Regel", "body": "Keine zweite Schrift. Hierarchie entsteht über Gewicht (400, 600, 700) und Größe (12 → 13 → 15 → 20), nie über Schrift-Konfrontation.", "section": "typography" },
+      { "name": "Die State-Schatten-Regel", "body": "Schatten ist immer State, nie Identität. Wer dekorativen Schatten zur Card-Hierarchie nutzt, bricht die Regel.", "section": "elevation" },
+      { "name": "Die Tabellen-Atmen-Regel", "body": "Tabellen-Zeilen sind nie kleiner als 80px Höhe. Im Auto-Density-Modus wachsen sie auf bis zu 220px, um den Viewport zu füllen.", "section": "components" },
+      { "name": "Die Modal-letzter-Ausweg-Regel", "body": "Modals nur dann, wenn die Aktion außerhalb des aktuellen Surface-Kontexts stattfinden muss. Niemals für Bestätigungen, Tooltips, Hilfetexte, einfache Auswahlen.", "section": "components" }
+    ],
+    "dos": [
+      "Do Konrektoren-Marine (#00345C) als Primary-Chrome-Farbe nutzen",
+      "Do Doppelpunkt-Gelb (#FFC857) sparsam einsetzen, max 8% des sichtbaren Bildschirms",
+      "Do Inter durchgehend mit font-feature-settings 'tnum' 1 für jede tabellarisch ausgerichtete Ziffer",
+      "Do Form-Label mit margin-bottom 6px vom Input absetzen",
+      "Do Schulwochen-Zeilen mindestens 80px hoch halten, im Auto-Density bis 220px aufwachsen lassen",
+      "Do Schatten als State-Antwort einsetzen, nie als Card-Identität",
+      "Do Tabellen-Trennlinien sichtbar belassen (1px tinten-grau-200)",
+      "Do Deutsche, formell-höfliche Verben verwenden: 'Termin speichern', 'Plan erstellen'"
+    ],
+    "donts": [
+      "Don't wie Google Calendar oder Outlook aussehen",
+      "Don't wie IServ oder Logineo aussehen",
+      "Don't wie Word oder Excel aussehen",
+      "Don't Marketing-Adjektive verwenden: smart, intuitive, powerful, awesome",
+      "Don't Emojis im UI-Chrome als Schmuck (📝 für Notiz-Icon erlaubt)",
+      "Don't eine dritte gesättigte Farbe ins Chrome einführen",
+      "Don't Card-Hierarchie über Schatten lösen",
+      "Don't Modal als erstes Werkzeug",
+      "Don't Multi-Schriftfamilien einführen",
+      "Don't Color-Only-Information",
+      "Don't 3px+ Side-Stripe-Border außerhalb von EventBlock (dort bewusste Ausnahme aus Word-Halbjahresplan-Konvention)",
+      "Don't Em-Dashes"
+    ]
+  }
+}

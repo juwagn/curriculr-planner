@@ -44,13 +44,15 @@ export function EventBlock({ event, category, onClick }: Props) {
       }}
       {...listeners}
       {...attributes}
-      className="w-full text-left rounded-[3px] px-2 py-1 leading-snug transition-all hover:shadow-sm hover:-translate-y-[0.5px] cursor-grab active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-900)]/30"
+      className="w-full text-left rounded-[var(--radius-block)] px-2 py-1 leading-snug transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-[0.5px] cursor-grab active:cursor-grabbing focus:outline-none focus-visible:ring-3 focus-visible:ring-[var(--color-marine-800)]/50"
       style={{
         backgroundColor: bg === '#FFFFFF' ? baseBg : bg,
         borderLeft: `3px solid ${category.color}`,
         opacity: isDragging ? 0.4 : 1,
-        fontSize: '12px',
-        wordBreak: 'break-word'
+        fontSize: '13px',
+        wordBreak: 'break-word',
+        transitionDuration: 'var(--dur-state)',
+        transitionTimingFunction: 'var(--ease-state)'
       }}
       title={event.title}
     >

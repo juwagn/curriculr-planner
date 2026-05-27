@@ -35,21 +35,23 @@ export function EditorToolbar() {
   };
 
   return (
-    <div className="bg-white border-b px-6 py-2 flex items-center gap-2">
+    <div className="bg-[var(--color-paper-card)] border-b border-[var(--color-ink-200)] px-6 py-2 flex items-center gap-2">
       {[1, 2, 3, 4].map((q) => (
         <button
           key={q}
           onClick={() => setQuarter(q as 1 | 2 | 3 | 4)}
-          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${
-            currentQuarter === q
-              ? 'bg-[var(--color-primary-900)] text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+          className="px-4 py-1.5 rounded-[var(--radius-pill)] text-sm font-semibold transition-colors"
+          style={{
+            background: currentQuarter === q ? 'var(--color-marine-800)' : 'var(--color-paper-bg)',
+            color: currentQuarter === q ? 'var(--color-paper-card)' : 'var(--color-ink-500)',
+            transitionDuration: 'var(--dur-state)',
+            transitionTimingFunction: 'var(--ease-state)'
+          }}
         >
           Q{q}
         </button>
       ))}
-      <span className="ml-3 text-sm text-[var(--color-text-muted)]">{fmtRange(currentQuarter - 1)}</span>
+      <span className="ml-3 text-sm text-[var(--color-ink-500)] tabular-nums">{fmtRange(currentQuarter - 1)}</span>
       <div className="ml-auto flex items-center gap-2">
         <Button variant="outline" size="sm" onClick={toggleNotes}>
           📝 Notizen

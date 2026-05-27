@@ -69,7 +69,7 @@ export function SchoolyearTab() {
         </div>
       </div>
 
-      <Button onClick={save}>Speichern + Schulwochen neu berechnen</Button>
+      <Button size="lg" onClick={save} className="px-5">Speichern + Schulwochen neu berechnen</Button>
     </div>
   );
 }

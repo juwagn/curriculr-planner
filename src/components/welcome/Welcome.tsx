@@ -31,7 +31,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
-      <Card className="max-w-2xl w-full p-10 shadow-[var(--shadow-card)]">
+      <Card className="max-w-2xl w-full p-10 shadow-[var(--shadow-modal)]">
         <div className="text-center mb-8">
           <img src="/curriculr-logo-dark.svg" alt="Curriculr" className="h-12 mx-auto mb-3" onError={(e) => { e.currentTarget.src = '/curriculr-logo.svg'; }} />
           <h1 className="text-2xl font-bold text-[var(--color-primary-900)]">Planner</h1>

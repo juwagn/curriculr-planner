@@ -9,6 +9,43 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  /* Marine (Konrektoren-Marine) — Primary */
+  --color-marine-900: #001F35;
+  --color-marine-800: #00345C;
+  --color-marine-700: #00467D;
+  --color-marine-500: #0058A0;
+  --color-marine-100: #E6F4FF;
+
+  /* Gelb (Doppelpunkt-Gelb) — Akzent */
+  --color-gelb-500: #FFC857;
+  --color-gelb-200: #FFE9A8;
+  --color-gelb-100: #FFF8E1;
+
+  /* Status */
+  --color-status-green: #0E9F6E;
+  --color-status-red: #E02424;
+
+  /* Papier (Hintergründe) */
+  --color-paper-bg: #F3F5F9;
+  --color-paper-card: #FFFFFF;
+
+  /* Tinten-Grau (Text + Linien) */
+  --color-ink-900: #111827;
+  --color-ink-500: #4B5563;
+  --color-ink-200: #E2E8F0;
+
+  /* Ferien-Schraffur */
+  --color-ferien-a: #E2E8F0;
+  --color-ferien-b: #EDF2F8;
+
+  /* Kategorie-Farben (Termin-Blöcke) */
+  --color-cat-konferenz: #0058A0;
+  --color-cat-elternabend: #0E9F6E;
+  --color-cat-pruefung: #E02424;
+  --color-cat-sonder: #7C3AED;
+  --color-cat-schliesstag: #6B7280;
+
+  /* Legacy-Aliase (alte Namen → neue Werte; identische Hex) */
   --color-primary-900: #00345C;
   --color-primary-700: #00467D;
   --color-primary-500: #0058A0;
@@ -23,13 +60,23 @@
   --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
 
-  --radius-card: 14px;
-  --radius-btn: 9999px;
+  --radius-block: 3px;
   --radius-input: 8px;
+  --radius-default: 10px;
+  --radius-card: 14px;
+  --radius-pill: 9999px;
+  --radius-btn: 9999px;
 
-  --shadow-card: 0 18px 40px rgba(15, 23, 42, 0.15);
+  /* Schatten — State-Antwort, nicht Identität */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-modal: 0 18px 40px rgba(15, 23, 42, 0.15);
   --shadow-btn: 0 2px 8px rgba(0, 70, 125, 0.25);
   --shadow-focus: 0 0 0 3px rgba(0, 70, 125, 0.25);
+
+  /* Motion */
+  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-state: 150ms;
+  --dur-modal: 100ms;
 }
 
 html, body {
@@ -84,24 +131,24 @@ html, body {
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --background: #FFFFFF;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #00345C;
+  --primary-foreground: #FFFFFF;
   --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --secondary-foreground: #111827;
+  --muted: #F3F5F9;
+  --muted-foreground: #4B5563;
   --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --accent-foreground: #111827;
+  --destructive: #E02424;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #00345C;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);

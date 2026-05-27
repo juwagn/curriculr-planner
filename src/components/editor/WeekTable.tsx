@@ -47,10 +47,10 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, rowHeight }: DayCell
     <td
       ref={setNodeRef}
       onClick={() => openCreate(iso)}
-      className={`group align-top border-r border-b border-slate-200 px-1.5 py-1.5 cursor-pointer relative ${
-        isOver ? 'bg-[var(--color-primary-100)]/60' : 'hover:bg-slate-50/60'
+      className={`group align-top border-r border-b border-[var(--color-ink-200)] px-1.5 py-1.5 cursor-pointer relative transition-colors ${
+        isOver ? 'bg-[var(--color-marine-100)]/60' : 'hover:bg-[var(--color-paper-bg)]/60'
       }`}
-      style={{ minHeight: rowHeight, height: rowHeight }}
+      style={{ minHeight: rowHeight, height: rowHeight, transitionDuration: 'var(--dur-state)', transitionTimingFunction: 'var(--ease-state)' }}
     >
       <div className="flex flex-col gap-1">
         {events.map((ev) => {
@@ -67,7 +67,7 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, rowHeight }: DayCell
         })}
       </div>
       {events.length === 0 && (
-        <span className="absolute bottom-1 left-2 text-[11px] text-slate-400 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+        <span className="absolute bottom-1 left-2 text-[11px] text-[var(--color-ink-500)] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
           + Termin
         </span>
       )}
@@ -89,15 +89,15 @@ function AnnotationCell({ text, onClick, rowHeight }: AnnotationCellProps) {
         e.stopPropagation();
         onClick();
       }}
-      className={`group align-top border-b border-slate-200 px-2 py-1.5 cursor-pointer text-[12px] leading-[1.4] text-slate-800 ${
-        hasNote ? 'bg-[#FFF8E1]' : 'bg-white hover:bg-slate-50/60'
+      className={`group align-top border-b border-[var(--color-ink-200)] px-2 py-1.5 cursor-pointer text-[13px] leading-[1.5] text-[var(--color-ink-900)] transition-colors ${
+        hasNote ? 'bg-[var(--color-gelb-100)]' : 'bg-[var(--color-paper-card)] hover:bg-[var(--color-paper-bg)]/60'
       }`}
-      style={{ width: 180, minHeight: rowHeight, height: rowHeight }}
+      style={{ width: 180, minHeight: rowHeight, height: rowHeight, transitionDuration: 'var(--dur-state)', transitionTimingFunction: 'var(--ease-state)' }}
     >
       {hasNote ? (
         <div className="whitespace-pre-line">{text}</div>
       ) : (
-        <span className="text-[11px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[11px] text-[var(--color-ink-500)] opacity-0 group-hover:opacity-100 transition-opacity">
           📝 Notiz hinzufügen
         </span>
       )}
@@ -191,7 +191,8 @@ export function WeekTable() {
     <DndContext onDragEnd={handleDragEnd}>
       <div
         ref={containerRef}
-        className="h-full bg-white rounded-lg shadow-sm border border-slate-200 overflow-auto"
+        className="h-full bg-[var(--color-paper-card)] rounded-[var(--radius-default)] border border-[var(--color-ink-200)] overflow-auto"
+        style={{ boxShadow: 'var(--shadow-card)' }}
       >
         <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
           <colgroup>
@@ -205,22 +206,22 @@ export function WeekTable() {
             <col style={{ width: 180 }} />
           </colgroup>
           <thead className="sticky top-0 z-10">
-            <tr className="bg-[var(--color-primary-900)] text-white text-[12.5px]">
-              <th className="py-2.5 text-center text-[12px] font-semibold uppercase tracking-wider border-r border-white/15">
+            <tr className="bg-[var(--color-marine-800)] text-[var(--color-paper-card)]" style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.05em' }}>
+              <th className="py-2.5 text-center uppercase border-r border-white/15">
                 #
               </th>
-              <th className="py-2.5 pl-2 text-left text-[12px] font-semibold uppercase tracking-wider border-r border-white/15">
+              <th className="py-2.5 pl-2 text-left uppercase border-r border-white/15">
                 Schulwoche
               </th>
               {DAY_LABELS.map((d) => (
                 <th
                   key={d}
-                  className="py-2.5 pl-2 text-left font-semibold border-r border-white/15"
+                  className="py-2.5 pl-2 text-left uppercase border-r border-white/15"
                 >
                   {d}
                 </th>
               ))}
-              <th className="py-2.5 pl-2 text-left text-[12px] font-semibold uppercase tracking-wider">
+              <th className="py-2.5 pl-2 text-left uppercase">
                 Anmerkungen
               </th>
             </tr>
@@ -230,34 +231,34 @@ export function WeekTable() {
               if (row.kind === 'holiday') {
                 return (
                   <tr key={`h-${i}-${row.startDate}`} style={{ height: HOLIDAY_ROW_HEIGHT }}>
-                    <td className="bg-slate-50 border-r border-b border-slate-200" />
+                    <td className="bg-[var(--color-paper-bg)] border-r border-b border-[var(--color-ink-200)]" />
                     <td
-                      className="bg-slate-50 border-r border-b border-slate-200 px-2 text-[12.5px] tabular-nums whitespace-nowrap text-slate-600"
+                      className="bg-[var(--color-paper-bg)] border-r border-b border-[var(--color-ink-200)] px-2 text-[12.5px] tabular-nums whitespace-nowrap text-[var(--color-ink-500)]"
                       style={{ width: 120 }}
                     >
                       {fmtDot(row.startDate)}–{fmtDot(row.endDate)}
                     </td>
                     <td
                       colSpan={5}
-                      className="border-b border-slate-200 text-center italic font-semibold text-[14px] tracking-wide text-slate-700"
+                      className="border-b border-[var(--color-ink-200)] text-center italic font-semibold text-[13px] tracking-wide text-[var(--color-ink-900)]"
                       style={{
                         backgroundImage:
-                          'repeating-linear-gradient(45deg, #E2E8F0 0 8px, #EDF2F8 8px 16px)'
+                          'repeating-linear-gradient(45deg, var(--color-ferien-a) 0 8px, var(--color-ferien-b) 8px 16px)'
                       }}
                     >
                       {row.label}
                     </td>
-                    <td className="bg-slate-50 border-b border-slate-200" style={{ width: 180 }} />
+                    <td className="bg-[var(--color-paper-bg)] border-b border-[var(--color-ink-200)]" style={{ width: 180 }} />
                   </tr>
                 );
               }
               const annotation = doc.annotations.find((a) => a.schoolweek === row.index);
               return (
-                <tr key={`sw-${row.index}`} className="hover:bg-slate-50/30" style={{ height: rowHeight }}>
-                  <td className="bg-slate-50/60 border-r border-b border-slate-200 text-center align-middle text-[15px] font-bold tabular-nums text-slate-700">
+                <tr key={`sw-${row.index}`} className="hover:bg-[var(--color-paper-bg)]/40 transition-colors" style={{ height: rowHeight, transitionDuration: 'var(--dur-state)' }}>
+                  <td className="bg-[var(--color-paper-bg)]/60 border-r border-b border-[var(--color-ink-200)] text-center align-middle text-[15px] font-bold tabular-nums text-[var(--color-ink-900)]">
                     {row.index.toString().padStart(2, '0')}
                   </td>
-                  <td className="bg-slate-50/60 border-r border-b border-slate-200 px-2 align-middle text-[12.5px] tabular-nums whitespace-nowrap text-slate-700">
+                  <td className="bg-[var(--color-paper-bg)]/60 border-r border-b border-[var(--color-ink-200)] px-2 align-middle text-[12.5px] tabular-nums whitespace-nowrap text-[var(--color-ink-500)]">
                     {fmtDot(row.startDate)}–{fmtDot(row.endDate)}
                   </td>
                   {DAY_LABELS.map((_d, dayIdx) => {

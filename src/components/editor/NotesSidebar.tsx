@@ -18,10 +18,17 @@ export function NotesSidebar() {
 
   return (
     <>
-      <aside className="fixed top-0 right-0 h-full w-80 bg-white border-l shadow-lg z-40 flex flex-col">
-        <div className="px-4 py-3 border-b flex items-center justify-between">
-          <h3 className="font-semibold text-[var(--color-primary-900)]">Anmerkungen</h3>
-          <button onClick={toggle} className="p-1 hover:bg-gray-100 rounded">
+      <aside
+        className="fixed top-0 right-0 h-full w-80 bg-[var(--color-paper-card)] border-l border-[var(--color-ink-200)] z-40 flex flex-col"
+        style={{ boxShadow: 'var(--shadow-modal)' }}
+      >
+        <div className="px-4 py-3 border-b border-[var(--color-ink-200)] flex items-center justify-between">
+          <h3 className="font-semibold text-[15px] text-[var(--color-marine-800)]">Anmerkungen</h3>
+          <button
+            onClick={toggle}
+            className="p-1 hover:bg-[var(--color-paper-bg)] rounded-[var(--radius-default)] transition-colors"
+            style={{ transitionDuration: 'var(--dur-state)' }}
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -33,16 +40,17 @@ export function NotesSidebar() {
               <button
                 key={w.index}
                 onClick={() => setEditSw(w.index)}
-                className={`w-full text-left p-3 rounded-lg border transition ${
+                className={`w-full text-left p-3 rounded-[var(--radius-default)] border transition-colors ${
                   has
-                    ? 'bg-amber-50 border-amber-200 hover:bg-amber-100'
-                    : 'bg-gray-50 border-gray-100 hover:bg-gray-100'
+                    ? 'bg-[var(--color-gelb-100)] border-[var(--color-gelb-200)] hover:bg-[var(--color-gelb-200)]/60'
+                    : 'bg-[var(--color-paper-bg)] border-[var(--color-ink-200)] hover:bg-[var(--color-paper-bg)]/60'
                 }`}
+                style={{ transitionDuration: 'var(--dur-state)' }}
               >
-                <div className="text-xs font-semibold text-[var(--color-primary-900)]">
+                <div className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-marine-800)] tabular-nums">
                   SW {w.index.toString().padStart(2, '0')} · {w.startDate.slice(5)} – {w.endDate.slice(5)}
                 </div>
-                <div className={`text-sm mt-1 ${has ? '' : 'italic text-gray-400'}`}>
+                <div className={`text-[13px] mt-1 ${has ? 'text-[var(--color-ink-900)]' : 'italic text-[var(--color-ink-500)]'}`}>
                   {has ? ann!.text : 'Keine Anmerkung'}
                 </div>
               </button>

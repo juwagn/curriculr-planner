@@ -68,7 +68,7 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
           Quartal-Grenzen
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -88,15 +88,15 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
           Kategorien
         </h3>
-        <table className="w-full text-sm">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-xs text-[var(--color-text-muted)]">
-              <th className="text-left py-2">Label</th>
-              <th className="w-12">Farbe</th>
-              <th className="text-left">Stichwörter (kommasepariert)</th>
+            <tr className="text-[12px] text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+              <th className="text-left py-2 font-semibold">Label</th>
+              <th className="w-12 font-semibold">Farbe</th>
+              <th className="text-left font-semibold">Stichwörter (kommasepariert)</th>
               <th className="w-8"></th>
             </tr>
           </thead>
@@ -115,7 +115,7 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
                     type="color"
                     value={c.color}
                     onChange={(e) => updateCat(c.id, { color: e.target.value })}
-                    className="w-10 h-9 rounded border cursor-pointer"
+                    className="w-10 h-8 rounded-[var(--radius-input)] border border-[var(--color-ink-200)] cursor-pointer"
                   />
                 </td>
                 <td className="py-1 pr-2">
@@ -147,17 +147,22 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
           Gruppen
         </h3>
         <div className="flex flex-wrap gap-2">
           {data.availableGroups.map((g) => (
             <span
               key={g}
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-primary-100)] text-[var(--color-primary-700)] text-sm"
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-[var(--radius-pill)] bg-[var(--color-marine-100)] text-[var(--color-marine-700)] text-[13px]"
             >
               {g}
-              <button onClick={() => removeGroup(g)} className="hover:text-red-600" aria-label={`${g} entfernen`}>
+              <button
+                onClick={() => removeGroup(g)}
+                className="hover:text-[var(--color-status-red)] transition-colors"
+                style={{ transitionDuration: 'var(--dur-state)' }}
+                aria-label={`${g} entfernen`}
+              >
                 &#x2715;
               </button>
             </span>
@@ -175,12 +180,16 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="p-3 rounded bg-red-50 text-red-700 text-sm">
+        <div
+          role="alert"
+          className="p-3 rounded-[var(--radius-default)] text-[13px]"
+          style={{ background: '#FEE2E2', color: 'var(--color-status-red)' }}
+        >
           {error}
         </div>
       )}
 
-      <div className="flex justify-between pt-4 border-t">
+      <div className="flex justify-between pt-4 border-t border-[var(--color-ink-200)]">
         <Button variant="ghost" onClick={onBack}>&#x2190; Zurück</Button>
         <Button onClick={handleNext}>Weiter &#x2192;</Button>
       </div>

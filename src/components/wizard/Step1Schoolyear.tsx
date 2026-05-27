@@ -81,7 +81,7 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
           Eckdaten
         </h3>
         <div className="grid grid-cols-[260px_200px] gap-3 items-center">
@@ -110,7 +110,7 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
           Ferien
         </h3>
         {data.holidays.map((h) => (
@@ -133,12 +133,19 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
       </div>
 
       {error && (
-        <div role="alert" className="p-3 rounded bg-red-50 text-red-700 text-sm">
+        <div
+          role="alert"
+          className="p-3 rounded-[var(--radius-default)] text-[13px]"
+          style={{
+            background: '#FEE2E2',
+            color: 'var(--color-status-red)'
+          }}
+        >
           {error}
         </div>
       )}
 
-      <div className="flex justify-between pt-4 border-t">
+      <div className="flex justify-between pt-4 border-t border-[var(--color-ink-200)]">
         <Button variant="ghost" onClick={onCancel}>
           Abbrechen
         </Button>

@@ -31,29 +31,29 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8">
-      <Card className="max-w-2xl w-full p-10 shadow-[var(--shadow-modal)]">
+      <Card className="max-w-2xl w-full p-10 shadow-[var(--shadow-modal)] border-[var(--color-ink-200)]">
         <div className="text-center mb-8">
           <img src="/curriculr-logo-dark.svg" alt="Curriculr" className="h-12 mx-auto mb-3" onError={(e) => { e.currentTarget.src = '/curriculr-logo.svg'; }} />
-          <h1 className="text-2xl font-bold text-[var(--color-primary-900)]">Planner</h1>
-          <p className="text-[var(--color-text-muted)] mt-2">
+          <h1 className="text-[20px] font-bold leading-[1.2] tracking-[-0.01em] text-[var(--color-marine-800)]">Planner</h1>
+          <p className="text-[13px] text-[var(--color-ink-500)] mt-2">
             Jahresterminplan für die Schulleitung
           </p>
         </div>
 
         {docs.length > 0 && (
           <div className="mb-8">
-            <div className="text-sm font-semibold text-[var(--color-text-muted)] mb-3 uppercase tracking-wide">
+            <div className="text-[12px] font-semibold text-[var(--color-ink-500)] mb-3 uppercase tracking-[0.05em]">
               Gespeicherte Pläne
             </div>
             <ul className="space-y-2">
               {docs.map((d) => (
                 <li
                   key={d.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-white"
+                  className="flex items-center justify-between p-4 rounded-[var(--radius-default)] border border-[var(--color-ink-200)] bg-[var(--color-paper-card)]"
                 >
                   <div>
-                    <div className="font-semibold">{d.name}</div>
-                    <div className="text-xs text-[var(--color-text-muted)] mt-1">
+                    <div className="text-[13px] font-semibold text-[var(--color-ink-900)]">{d.name}</div>
+                    <div className="text-[12px] text-[var(--color-ink-500)] mt-1 tabular-nums">
                       {d.eventCount} Termine · Zuletzt {new Date(d.lastSaved).toLocaleString('de-DE')}
                     </div>
                   </div>
@@ -82,7 +82,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
               e.target.value = '';
             }}
           />
-          <div className="text-xs text-[var(--color-text-muted)] mt-4 text-center">
+          <div className="text-[12px] text-[var(--color-ink-500)] mt-4 text-center">
             Phase 2: Excel-Import + ICS-Vorjahresplan
           </div>
         </div>

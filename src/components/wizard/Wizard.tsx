@@ -44,16 +44,19 @@ export function Wizard({ onCancel, onComplete }: Props) {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step >= s ? 'bg-[var(--color-primary-700)] text-white' : 'bg-gray-200 text-gray-500'
+                className={`w-7 h-7 rounded-[var(--radius-pill)] flex items-center justify-center text-[12px] font-bold transition-colors ${
+                  step >= s
+                    ? 'bg-[var(--color-marine-800)] text-[var(--color-paper-card)]'
+                    : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-500)]'
                 }`}
+                style={{ transitionDuration: 'var(--dur-state)' }}
               >
                 {s}
               </div>
-              {s < 3 && <div className="w-8 h-px bg-gray-300" />}
+              {s < 3 && <div className="w-8 h-px bg-[var(--color-ink-200)]" />}
             </div>
           ))}
-          <div className="ml-3 text-sm text-[var(--color-text-muted)]">Schritt {step} von 3</div>
+          <div className="ml-3 text-[13px] text-[var(--color-ink-500)] tabular-nums">Schritt {step} von 3</div>
         </div>
 
         {step === 1 && (

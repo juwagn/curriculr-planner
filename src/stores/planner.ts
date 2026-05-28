@@ -27,7 +27,7 @@ export function createEmptyDoc(
 ): PlannerDocument {
   const now = new Date().toISOString();
   return {
-    version: 1,
+    version: 2,
     schoolyear: {
       id: uid(),
       label,
@@ -43,6 +43,7 @@ export function createEmptyDoc(
     events: [],
     annotations: [],
     availableGroups: [...DEFAULT_GROUPS],
+    ignoredConflicts: [],
     meta: { name, lastSaved: now }
   };
 }

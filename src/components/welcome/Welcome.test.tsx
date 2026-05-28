@@ -28,7 +28,7 @@ describe('Welcome', () => {
     localStorage.setItem(
       'curriculr-planner:doc:doc1',
       JSON.stringify({
-        version: 1,
+        version: 2,
         schoolyear: {
           id: 'doc1',
           label: '2026/27',
@@ -44,6 +44,7 @@ describe('Welcome', () => {
         events: [],
         annotations: [],
         availableGroups: [],
+        ignoredConflicts: [],
         meta: { name: 'Jahresplan 2026/27', lastSaved: '2026-05-26T10:00:00Z' }
       })
     );

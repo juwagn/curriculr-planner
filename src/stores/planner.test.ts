@@ -77,4 +77,14 @@ describe('usePlannerStore', () => {
     expect(doc.categories.length).toBe(7);
     expect(doc.categories.map((c) => c.slug)).toContain('sondertag');
   });
+
+  it('ignores and un-ignores a conflict key', () => {
+    const store = usePlannerStore.getState();
+    const doc = createEmptyDoc('T', '25/26', '2025-08-11', '2025-08-11', '2026-06-26');
+    store.setDoc(doc);
+    usePlannerStore.getState().ignoreConflict('weekend|e1|2025-09-06');
+    expect(usePlannerStore.getState().doc?.ignoredConflicts).toContain('weekend|e1|2025-09-06');
+    usePlannerStore.getState().unignoreConflict('weekend|e1|2025-09-06');
+    expect(usePlannerStore.getState().doc?.ignoredConflicts).not.toContain('weekend|e1|2025-09-06');
+  });
 });

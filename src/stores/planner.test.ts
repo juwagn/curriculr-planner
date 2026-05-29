@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { usePlannerStore, createEmptyDoc } from './planner';
+import { useHistoryStore } from './history';
 import type { EventTemplate } from '@/types';
 
 describe('usePlannerStore', () => {
@@ -126,5 +127,47 @@ describe('templates', () => {
     usePlannerStore.getState().addTemplate({ id: 't1', name: 'X', categoryId: doc.categories[0].id, allDay: true, defaultGroups: [] });
     usePlannerStore.getState().deleteTemplate('t1');
     expect(usePlannerStore.getState().doc?.templates).toHaveLength(0);
+  });
+});
+
+describe('undo/redo integration', () => {
+  beforeEach(() => {
+    usePlannerStore.setState({ doc: null });
+    useHistoryStore.getState().reset();
+    localStorage.clear();
+  });
+
+  function withEvent() {
+    const doc = createEmptyDoc('T', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().addEvent({ id: 'e1', title: 'X', start: '2026-09-15', end: '2026-09-15', allDay: true, categoryId: doc.categories[0].id, groups: [] });
+    return doc;
+  }
+
+  it('addEvent pushes an undo snapshot; undo() removes the event', () => {
+    withEvent();
+    expect(useHistoryStore.getState().canUndo()).toBe(true);
+    usePlannerStore.getState().undo();
+    expect(usePlannerStore.getState().doc?.events).toHaveLength(0);
+  });
+
+  it('redo re-applies the event', () => {
+    withEvent();
+    usePlannerStore.getState().undo();
+    usePlannerStore.getState().redo();
+    expect(usePlannerStore.getState().doc?.events).toHaveLength(1);
+  });
+
+  it('setDoc resets history (load/switch starts clean)', () => {
+    withEvent();
+    usePlannerStore.getState().setDoc(createEmptyDoc('U', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16'));
+    expect(useHistoryStore.getState().canUndo()).toBe(false);
+  });
+
+  it('addTemplate does NOT push history (Settings-level)', () => {
+    const doc = createEmptyDoc('T', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().addTemplate({ id: 't1', name: 'X', categoryId: doc.categories[0].id, allDay: true, defaultGroups: [] });
+    expect(useHistoryStore.getState().canUndo()).toBe(false);
   });
 });

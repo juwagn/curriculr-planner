@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/storage';
+import { useHistoryStore } from './history';
 import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID } from '@/types';
 
 const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
@@ -77,9 +78,13 @@ interface PlannerState {
   addTemplate(t: EventTemplate): void;
   updateTemplate(id: UUID, patch: Partial<EventTemplate>): void;
   deleteTemplate(id: UUID): void;
+
+  undo(): void;
+  redo(): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let lastAnnoWeek: number | null = null;
 
 function debouncedSave(get: () => PlannerState) {
   if (saveTimer) clearTimeout(saveTimer);
@@ -88,12 +93,19 @@ function debouncedSave(get: () => PlannerState) {
   }, 300);
 }
 
+function snapshot(get: () => PlannerState) {
+  const doc = get().doc;
+  if (doc) useHistoryStore.getState().push(doc);
+}
+
 export const usePlannerStore = create<PlannerState>((set, get) => ({
   doc: null,
   savingState: 'idle',
 
   setDoc(doc) {
     set({ doc });
+    useHistoryStore.getState().reset();
+    lastAnnoWeek = null;
   },
 
   async loadDoc(id) {
@@ -118,6 +130,8 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   addEvent(e) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({ doc: { ...doc, events: [...doc.events, e] } });
     debouncedSave(get);
   },
@@ -125,6 +139,8 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   updateEvent(id, patch) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({
       doc: {
         ...doc,
@@ -137,6 +153,8 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   deleteEvent(id) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({ doc: { ...doc, events: doc.events.filter((e) => e.id !== id) } });
     debouncedSave(get);
   },
@@ -144,6 +162,10 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   setAnnotation(schoolweek, text) {
     const doc = get().doc;
     if (!doc) return;
+    if (schoolweek !== lastAnnoWeek) {
+      snapshot(get);
+      lastAnnoWeek = schoolweek;
+    }
     const updatedAt = new Date().toISOString();
     const existing = doc.annotations.find((a) => a.schoolweek === schoolweek);
     const annotations = existing
@@ -156,6 +178,8 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   deleteAnnotation(schoolweek) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({
       doc: { ...doc, annotations: doc.annotations.filter((a) => a.schoolweek !== schoolweek) }
     });
@@ -228,5 +252,27 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     if (!doc) return;
     set({ doc: { ...doc, templates: doc.templates.filter((t) => t.id !== id) } });
     debouncedSave(get);
+  },
+
+  undo() {
+    const doc = get().doc;
+    if (!doc) return;
+    const prev = useHistoryStore.getState().undo(doc);
+    if (prev) {
+      set({ doc: prev });
+      lastAnnoWeek = null;
+      debouncedSave(get);
+    }
+  },
+
+  redo() {
+    const doc = get().doc;
+    if (!doc) return;
+    const next = useHistoryStore.getState().redo(doc);
+    if (next) {
+      set({ doc: next });
+      lastAnnoWeek = null;
+      debouncedSave(get);
+    }
   }
 }));

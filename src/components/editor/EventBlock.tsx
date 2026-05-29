@@ -7,6 +7,7 @@ interface Props {
   category: Category;
   onClick(e: React.MouseEvent): void;
   conflictSeverity?: 'error' | 'warning';
+  segmentPosition?: 'start' | 'middle' | 'end' | 'single';
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -22,11 +23,17 @@ function fmtTime(t?: string): string {
   return t.replace(':', '.');
 }
 
-export function EventBlock({ event, category, onClick, conflictSeverity }: Props) {
+export function EventBlock({ event, category, onClick, conflictSeverity, segmentPosition }: Props) {
+  const pos = segmentPosition ?? 'single';
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `event:${event.id}`,
     data: { type: 'event', eventId: event.id }
   });
+
+  const roundLeft = pos === 'start' || pos === 'single';
+  const roundRight = pos === 'end' || pos === 'single';
+  const showLeftBorder = pos === 'start' || pos === 'single';
+  const showContent = pos === 'start' || pos === 'single';
 
   const baseBg = hexToRgba(category.color, 0.1);
   const bg = pastelize(category.color);
@@ -48,7 +55,11 @@ export function EventBlock({ event, category, onClick, conflictSeverity }: Props
       className="w-full text-left rounded-[var(--radius-block)] px-2 py-1 leading-snug transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-[0.5px] cursor-grab active:cursor-grabbing focus:outline-none focus-visible:ring-3 focus-visible:ring-[var(--color-marine-800)]/50"
       style={{
         backgroundColor: bg === '#FFFFFF' ? baseBg : bg,
-        borderLeft: `3px solid ${category.color}`,
+        borderLeft: showLeftBorder ? `3px solid ${category.color}` : 'none',
+        borderTopLeftRadius: roundLeft ? undefined : 0,
+        borderBottomLeftRadius: roundLeft ? undefined : 0,
+        borderTopRightRadius: roundRight ? undefined : 0,
+        borderBottomRightRadius: roundRight ? undefined : 0,
         opacity: isDragging ? 0.4 : 1,
         fontSize: '13px',
         wordBreak: 'break-word',
@@ -57,19 +68,25 @@ export function EventBlock({ event, category, onClick, conflictSeverity }: Props
       }}
       title={event.title}
     >
-      {conflictSeverity && (
-        <span
-          aria-label={conflictSeverity === 'error' ? 'Konflikt' : 'Warnung'}
-          className="mr-1 align-middle"
-          style={{ color: conflictSeverity === 'error' ? '#E02424' : '#B45309' }}
-        >
-          ⚠
-        </span>
+      {showContent ? (
+        <>
+          {conflictSeverity && (
+            <span
+              aria-label={conflictSeverity === 'error' ? 'Konflikt' : 'Warnung'}
+              className="mr-1 align-middle"
+              style={{ color: conflictSeverity === 'error' ? '#E02424' : '#B45309' }}
+            >
+              ⚠
+            </span>
+          )}
+          {timeLabel && (
+            <span className="font-bold tabular-nums mr-1">{timeLabel}</span>
+          )}
+          <span>{event.title}</span>
+        </>
+      ) : (
+        <span className="opacity-0">·</span>
       )}
-      {timeLabel && (
-        <span className="font-bold tabular-nums mr-1">{timeLabel}</span>
-      )}
-      <span>{event.title}</span>
     </button>
   );
 }

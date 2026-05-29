@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ViewMode = 'table' | 'calendar';
+export type ViewMode = 'table' | 'calendar' | 'year';
 export type Density = 'auto' | 'compact' | 'standard' | 'roomy';
 
 interface UiState {

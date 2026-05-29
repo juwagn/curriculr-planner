@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
 import { parseIcs, mapToEvents, type ParsedEvent } from '@/lib/ics-import';
+import { parseKonverterXlsx } from '@/lib/excel-import';
 import { createEmptyDoc } from '@/stores/planner';
 import { createDemoDoc } from '@/lib/demo';
 import { IcsImportDialog } from '@/components/import/IcsImportDialog';
@@ -19,6 +20,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
   const [docs, setDocs] = useState<DocSummary[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const icsInputRef = useRef<HTMLInputElement>(null);
+  const xlsxInputRef = useRef<HTMLInputElement>(null);
   const [icsParsed, setIcsParsed] = useState<ParsedEvent[] | null>(null);
   const defaultCategories = useMemo(
     () => createEmptyDoc('_', '_', '2000-01-01', '2000-01-01', '2000-01-02').categories,
@@ -62,6 +64,33 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
     const fallbackId = doc.categories.find((c) => c.slug === 'sondertag')?.id ?? doc.categories[0].id;
     doc.events = mapToEvents(parsed, doc.categories, fallbackId);
     return doc;
+  };
+
+  const handleXlsx = async (file: File) => {
+    try {
+      const buffer = await file.arrayBuffer();
+      const { schoolyear, parsed } = parseKonverterXlsx(buffer);
+      if (parsed.length === 0) {
+        toast.error('Keine Termine in der Excel-Datei gefunden');
+        return;
+      }
+      // Excel carries no schoolyear bounds — derive them from the event range,
+      // mirroring the ICS new-plan path (buildDocFromIcs).
+      const minStart = parsed.reduce((m, e) => (e.start < m ? e.start : m), parsed[0].start);
+      const maxEnd = parsed.reduce((m, e) => (e.end > m ? e.end : m), parsed[0].end);
+      const startYear = Number(minStart.slice(0, 4));
+      const label = `${startYear}/${(startYear + 1) % 100}`;
+      const doc = createEmptyDoc(`Import ${label}`, label, minStart, minStart, maxEnd);
+      if (schoolyear?.holidays && schoolyear.holidays.length > 0) {
+        doc.schoolyear.holidays = schoolyear.holidays;
+      }
+      const fallbackId = doc.categories.find((c) => c.slug === 'sondertag')?.id ?? doc.categories[0].id;
+      doc.events = mapToEvents(parsed, doc.categories, fallbackId);
+      onImportJson(doc);
+      toast.success(`${doc.events.length} Termine aus Excel importiert`);
+    } catch (e) {
+      toast.error('Excel ungültig: ' + (e as Error).message);
+    }
   };
 
   return (
@@ -131,12 +160,23 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
               e.target.value = '';
             }}
           />
+          <Button variant="outline" onClick={() => xlsxInputRef.current?.click()}>
+            Aus Excel-Datei erstellen
+          </Button>
+          <input
+            ref={xlsxInputRef}
+            type="file"
+            accept=".xlsx"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleXlsx(f);
+              e.target.value = '';
+            }}
+          />
           <Button variant="ghost" onClick={() => onImportJson(createDemoDoc())}>
             Demo ausprobieren
           </Button>
-          <div className="text-[12px] text-[var(--color-ink-500)] mt-4 text-center">
-            Phase 2: Excel-Import
-          </div>
         </div>
       </Card>
       <IcsImportDialog

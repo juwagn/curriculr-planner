@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
 import { parseIcs, mapToEvents, type ParsedEvent } from '@/lib/ics-import';
 import { createEmptyDoc } from '@/stores/planner';
+import { createDemoDoc } from '@/lib/demo';
 import { IcsImportDialog } from '@/components/import/IcsImportDialog';
 import { toast } from 'sonner';
 import type { PlannerDocument } from '@/types';
@@ -126,6 +127,9 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
               e.target.value = '';
             }}
           />
+          <Button variant="ghost" onClick={() => onImportJson(createDemoDoc())}>
+            Demo ausprobieren
+          </Button>
           <div className="text-[12px] text-[var(--color-ink-500)] mt-4 text-center">
             Phase 2: Excel-Import
           </div>

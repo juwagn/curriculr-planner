@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseIcs, mapToEvents, shiftToSchoolyear, type ParsedEvent } from './ics-import';
+import { PlanEventSchema } from './schemas';
 import type { Category, Schoolyear } from '@/types';
 
 const ICS = [
@@ -69,6 +70,21 @@ describe('mapToEvents', () => {
     const evs = mapToEvents(parsed, cats, 'cS');
     expect(evs[0].groups).toEqual(['Kollegium', 'Eltern']);
   });
+
+  it('produces only schema-valid events (empty title + timed-without-endTime)', () => {
+    const parsed = [
+      { uid: '1', summary: '', start: '2025-09-01', end: '2025-09-01', allDay: true, categories: [] },
+      { uid: '2', summary: 'Timed ohne Ende', start: '2025-09-02', end: '2025-09-02', allDay: false, startTime: '09:00', endTime: undefined, categories: [] }
+    ];
+    const evs = mapToEvents(parsed, cats, 'cS');
+    expect(evs[0].title).toBe('(ohne Titel)');
+    expect(evs[1].allDay).toBe(true);
+    expect(evs[1].startTime).toBeUndefined();
+    expect(evs[1].endTime).toBeUndefined();
+    for (const ev of evs) {
+      expect(PlanEventSchema.safeParse(ev).success).toBe(true);
+    }
+  });
 });
 
 describe('shiftToSchoolyear', () => {
@@ -83,5 +99,13 @@ describe('shiftToSchoolyear', () => {
     const day = new Date(shifted[0].start + 'T00:00:00').getDay();
     expect(day).toBe(1); // Monday
     expect(shifted[0].start >= target.firstSchoolDay).toBe(true);
+  });
+
+  it('never lands the earliest event before firstSchoolDay when weekdays differ', () => {
+    // 2025-09-03 is a Wednesday; target firstSchoolDay 2026-08-10 is a Monday.
+    const evs = mapToEvents([{ uid: '1', summary: 'X', start: '2025-09-03', end: '2025-09-03', allDay: true, categories: [] }], cats, 'cS');
+    const shifted = shiftToSchoolyear(evs, target);
+    expect(shifted[0].start >= target.firstSchoolDay).toBe(true);
+    expect(new Date(shifted[0].start + 'T00:00:00').getDay()).toBe(3); // still Wednesday
   });
 });

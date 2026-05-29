@@ -72,8 +72,8 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               onClick={() => setPanelOpen((v) => !v)}
               className="flex items-center gap-1 rounded-[var(--radius-block)] px-2.5 py-1.5 text-[12.5px] font-semibold"
               style={{
-                background: hasError ? 'rgba(224,36,36,0.1)' : 'var(--color-gelb-100)',
-                color: hasError ? '#E02424' : '#B45309'
+                background: hasError ? 'color-mix(in srgb, var(--color-danger) 10%, transparent)' : 'var(--color-gelb-100)',
+                color: hasError ? 'var(--color-danger)' : 'var(--color-warning)'
               }}
             >
               ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}

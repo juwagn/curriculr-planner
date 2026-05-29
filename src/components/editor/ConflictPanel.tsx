@@ -48,7 +48,7 @@ export function ConflictPanel({ open, onClose }: Props) {
             className="rounded-[var(--radius-block)] border border-[var(--color-ink-200)] p-2"
           >
             <div className="flex items-start gap-1.5">
-              <span style={{ color: c.severity === 'error' ? '#E02424' : '#B45309' }}>⚠</span>
+              <span style={{ color: c.severity === 'error' ? 'var(--color-danger)' : 'var(--color-warning)' }}>⚠</span>
               <span className="text-[12.5px] text-[var(--color-ink-900)] leading-snug flex-1">
                 {c.message}
               </span>

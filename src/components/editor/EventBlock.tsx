@@ -30,7 +30,6 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
     data: { type: 'event', eventId: event.id }
   });
   const {
-    attributes: resizeAttributes,
     listeners: resizeListeners,
     setNodeRef: setResizeNodeRef
   } = useDraggable({
@@ -82,7 +81,7 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
             <span
               aria-label={conflictSeverity === 'error' ? 'Konflikt' : 'Warnung'}
               className="mr-1 align-middle"
-              style={{ color: conflictSeverity === 'error' ? '#E02424' : '#B45309' }}
+              style={{ color: conflictSeverity === 'error' ? 'var(--color-danger)' : 'var(--color-warning)' }}
             >
               ⚠
             </span>
@@ -99,7 +98,6 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
         <span
           ref={setResizeNodeRef}
           {...resizeListeners}
-          {...resizeAttributes}
           onClick={(e) => e.stopPropagation()}
           className="absolute right-0 top-0 h-full w-2 cursor-ew-resize"
           aria-label="Dauer ändern"

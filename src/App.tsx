@@ -6,6 +6,7 @@ import { Editor } from '@/components/editor/Editor';
 import { PlanSwitcherDialog } from '@/components/welcome/PlanSwitcherDialog';
 import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
+import { toast } from 'sonner';
 import type { PlannerDocument, UUID } from '@/types';
 
 type Route = 'loading' | 'welcome' | 'wizard' | 'editor';
@@ -40,10 +41,14 @@ export default function App() {
   };
 
   const importDoc = async (doc: PlannerDocument) => {
-    await storage.saveDoc(doc);
-    await storage.setActiveDoc(doc.schoolyear.id);
-    setDoc(doc);
-    setRoute('editor');
+    try {
+      await storage.saveDoc(doc);
+      await storage.setActiveDoc(doc.schoolyear.id);
+      setDoc(doc);
+      setRoute('editor');
+    } catch (err) {
+      toast.error('Import fehlgeschlagen: ' + (err as Error).message);
+    }
   };
 
   return (

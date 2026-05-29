@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
@@ -20,6 +20,10 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const icsInputRef = useRef<HTMLInputElement>(null);
   const [icsParsed, setIcsParsed] = useState<ParsedEvent[] | null>(null);
+  const defaultCategories = useMemo(
+    () => createEmptyDoc('_', '_', '2000-01-01', '2000-01-01', '2000-01-02').categories,
+    []
+  );
 
   useEffect(() => {
     storage.listDocs().then(setDocs);
@@ -138,7 +142,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
       <IcsImportDialog
         open={icsParsed !== null}
         parsed={icsParsed ?? []}
-        categories={createEmptyDoc('_', '_', '2000-01-01', '2000-01-01', '2000-01-02').categories}
+        categories={defaultCategories}
         targetSchoolyear={null}
         onCancel={() => setIcsParsed(null)}
         onConfirm={() => {

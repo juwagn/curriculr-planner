@@ -96,7 +96,7 @@ export function parseIcs(text: string): ParsedEvent[] {
       case 'CATEGORIES': cur.categories = unescape(p.value).split(',').map((s) => s.trim()).filter(Boolean); break;
       case 'DTSTART':
         cur.start = toIsoDate(p.value);
-        cur._allDay = p.params.includes('VALUE=DATE') && !p.value.includes('T');
+        cur._allDay = !p.value.includes('T');
         if (!cur._allDay) cur.startTime = toTime(p.value);
         break;
       case 'DTEND':
@@ -131,19 +131,26 @@ function matchCategory(p: ParsedEvent, categories: Category[], fallbackId: UUID)
 }
 
 export function mapToEvents(parsed: ParsedEvent[], categories: Category[], fallbackCategoryId: UUID): PlanEvent[] {
-  return parsed.map((p) => ({
-    id: crypto.randomUUID(),
-    title: p.summary,
-    start: p.start,
-    end: p.end,
-    allDay: p.allDay,
-    startTime: p.allDay ? undefined : p.startTime,
-    endTime: p.allDay ? undefined : p.endTime,
-    categoryId: matchCategory(p, categories, fallbackCategoryId),
-    location: p.location,
-    notes: p.description,
-    groups: groupsFromDescription(p.description)
-  }));
+  return parsed.map((p) => {
+    const title = p.summary.trim() || '(ohne Titel)';
+    // A timed event needs BOTH times; otherwise degrade to all-day so the result
+    // stays valid against PlanEventSchema (which rejects timed events missing a time).
+    const hasBothTimes = !p.allDay && !!p.startTime && !!p.endTime;
+    const allDay = p.allDay || !hasBothTimes;
+    return {
+      id: crypto.randomUUID(),
+      title,
+      start: p.start,
+      end: p.end,
+      allDay,
+      startTime: allDay ? undefined : p.startTime,
+      endTime: allDay ? undefined : p.endTime,
+      categoryId: matchCategory(p, categories, fallbackCategoryId),
+      location: p.location,
+      notes: p.description,
+      groups: groupsFromDescription(p.description)
+    };
+  });
 }
 
 /**
@@ -155,7 +162,7 @@ export function shiftToSchoolyear(events: PlanEvent[], target: Schoolyear): Plan
   if (events.length === 0) return events;
   const minStart = events.reduce((m, e) => (e.start < m ? e.start : m), events[0].start);
   const rawDelta = differenceInCalendarDays(parseISO(target.firstSchoolDay), parseISO(minStart));
-  const weekDelta = Math.round(rawDelta / 7) * 7;
+  const weekDelta = Math.ceil(rawDelta / 7) * 7;
   const shift = (iso: string) => format(addDays(parseISO(iso), weekDelta), 'yyyy-MM-dd');
   return events.map((e) => ({ ...e, start: shift(e.start), end: shift(e.end) }));
 }

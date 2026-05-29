@@ -6,8 +6,8 @@ export function useUndoRedo() {
   const undo = usePlannerStore((s) => s.undo);
   const redo = usePlannerStore((s) => s.redo);
   // subscribe so buttons re-render when stacks change
-  const canUndo = useHistoryStore((s) => s.past.length > 0);
-  const canRedo = useHistoryStore((s) => s.future.length > 0);
+  const canUndo = useHistoryStore((s) => s.canUndo());
+  const canRedo = useHistoryStore((s) => s.canRedo());
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {

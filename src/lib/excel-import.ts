@@ -1,4 +1,4 @@
-import { read, utils } from 'xlsx';
+import { read, utils, SSF } from 'xlsx';
 import type { Holiday, Schoolyear } from '@/types';
 import type { ParsedEvent } from './ics-import';
 
@@ -6,6 +6,38 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function uid(): string {
   return crypto.randomUUID();
+}
+
+/**
+ * Coerces a cell value to an ISO date string (YYYY-MM-DD).
+ *
+ * When a Konverter .xlsx is opened and re-saved in Excel, date cells that were
+ * originally ISO strings get converted to real date cells.  The xlsx `read()`
+ * call (with default `cellDates: false`) then returns those cells as OLE serial
+ * numbers instead of strings.  With `cellDates: true` they would come back as
+ * JS Date objects.  This helper handles all three forms so import is stable
+ * regardless of how the file was last saved.
+ *
+ * For numeric serials we use `SSF.parse_date_code` from the xlsx package — it
+ * is already loaded, is timezone-free, and correctly handles the Excel
+ * 1900-leap-year quirk.  For Date objects we use UTC getters to avoid TZ
+ * off-by-one issues.
+ */
+function toIsoDate(v: unknown): string {
+  if (v instanceof Date) {
+    const y = v.getUTCFullYear();
+    const m = String(v.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(v.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof v === 'number') {
+    const parts = SSF.parse_date_code(v);
+    // SSF returns { y, m, d } with 1-indexed month
+    const m = String(parts.m).padStart(2, '0');
+    const d = String(parts.d).padStart(2, '0');
+    return `${parts.y}-${m}-${d}`;
+  }
+  return String(v ?? '').trim();
 }
 
 export interface KonverterParseResult {
@@ -27,8 +59,8 @@ export function parseKonverterXlsx(buffer: ArrayBuffer): KonverterParseResult {
     const holidays: Holiday[] = [];
     for (const row of ferienRows.slice(1)) {
       const label = String(row[0] ?? '').trim();
-      const start = String(row[1] ?? '').trim();
-      const end = String(row[2] ?? '').trim();
+      const start = toIsoDate(row[1]);
+      const end = toIsoDate(row[2]);
       if (label && ISO_DATE.test(start) && ISO_DATE.test(end)) {
         holidays.push({ id: uid(), label, start, end });
       }
@@ -38,7 +70,7 @@ export function parseKonverterXlsx(buffer: ArrayBuffer): KonverterParseResult {
 
   const planRows = utils.sheet_to_json<(string | number)[]>(planSheet, { header: 1 });
   for (const row of planRows.slice(1)) {
-    const datum = String(row[0] ?? '').trim();
+    const datum = toIsoDate(row[0]);
     if (!ISO_DATE.test(datum)) continue; // skip SW-divider + blank rows
     const allDay = String(row[3] ?? '').trim().toLowerCase() === 'ja';
     const startTime = String(row[1] ?? '').trim() || undefined;

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/storage';
-import type { PlannerDocument, PlanEvent, Category, UUID } from '@/types';
+import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID } from '@/types';
 
 const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: ['konferenz', 'fk'] },
@@ -27,7 +27,7 @@ export function createEmptyDoc(
 ): PlannerDocument {
   const now = new Date().toISOString();
   return {
-    version: 2,
+    version: 3,
     schoolyear: {
       id: uid(),
       label,
@@ -44,6 +44,7 @@ export function createEmptyDoc(
     annotations: [],
     availableGroups: [...DEFAULT_GROUPS],
     ignoredConflicts: [],
+    templates: [],
     meta: { name, lastSaved: now }
   };
 }
@@ -72,6 +73,10 @@ interface PlannerState {
 
   ignoreConflict(key: string): void;
   unignoreConflict(key: string): void;
+
+  addTemplate(t: EventTemplate): void;
+  updateTemplate(id: UUID, patch: Partial<EventTemplate>): void;
+  deleteTemplate(id: UUID): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -201,6 +206,27 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc) return;
     set({ doc: { ...doc, ignoredConflicts: doc.ignoredConflicts.filter((k) => k !== key) } });
+    debouncedSave(get);
+  },
+
+  addTemplate(t) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, templates: [...doc.templates, t] } });
+    debouncedSave(get);
+  },
+
+  updateTemplate(id, patch) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, templates: doc.templates.map((t) => (t.id === id ? { ...t, ...patch } : t)) } });
+    debouncedSave(get);
+  },
+
+  deleteTemplate(id) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, templates: doc.templates.filter((t) => t.id !== id) } });
     debouncedSave(get);
   }
 }));

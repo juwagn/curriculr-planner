@@ -1,10 +1,12 @@
 import { useMemo, useState, useRef, useLayoutEffect } from 'react';
 import { DndContext, useDroppable, type DragEndEvent } from '@dnd-kit/core';
-import { addDays, format, parseISO } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore, type Density } from '@/stores/ui';
 import { computeWeekRows, getQuarterRange, type WeekRow } from '@/lib/schoolweeks';
 import type { Category, PlanEvent } from '@/types';
+import { useConflicts, conflictsByEvent } from '@/hooks/useConflicts';
+import type { Conflict } from '@/lib/conflicts';
 import { EventBlock } from './EventBlock';
 import { NotePopover } from './NotePopover';
 
@@ -31,10 +33,11 @@ interface DayCellProps {
   dayIdx: number;
   events: PlanEvent[];
   categoryById: Map<string, Category>;
+  conflictMap: Map<string, Conflict[]>;
   rowHeight: number;
 }
 
-function DayCell({ mondayIso, dayIdx, events, categoryById, rowHeight }: DayCellProps) {
+function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeight }: DayCellProps) {
   const iso = dayIso(mondayIso, dayIdx);
   const openCreate = useUiStore((s) => s.openCreateEvent);
   const openEdit = useUiStore((s) => s.openEditEvent);
@@ -56,12 +59,23 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, rowHeight }: DayCell
         {events.map((ev) => {
           const cat = categoryById.get(ev.categoryId);
           if (!cat) return null;
+          const evConflicts = conflictMap.get(ev.id) ?? [];
+          const severity = evConflicts.some((c) => c.severity === 'error')
+            ? 'error'
+            : evConflicts.length > 0
+              ? 'warning'
+              : undefined;
+          const isStart = ev.start === iso;
+          const isEnd = ev.end === iso;
+          const pos = isStart && isEnd ? 'single' : isStart ? 'start' : isEnd ? 'end' : 'middle';
           return (
             <EventBlock
               key={ev.id}
               event={ev}
               category={cat}
               onClick={() => openEdit(ev.id)}
+              conflictSeverity={severity}
+              segmentPosition={pos}
             />
           );
         })}
@@ -135,12 +149,19 @@ export function WeekTable() {
     const m = new Map<string, PlanEvent[]>();
     if (!doc) return m;
     for (const ev of doc.events) {
-      const arr = m.get(ev.start) ?? [];
-      arr.push(ev);
-      m.set(ev.start, arr);
+      const span = Math.max(0, differenceInCalendarDays(parseISO(ev.end), parseISO(ev.start)));
+      for (let i = 0; i <= span; i++) {
+        const iso = format(addDays(parseISO(ev.start), i), 'yyyy-MM-dd');
+        const arr = m.get(iso) ?? [];
+        arr.push(ev);
+        m.set(iso, arr);
+      }
     }
     return m;
   }, [doc?.events]);
+
+  const conflicts = useConflicts();
+  const conflictMap = useMemo(() => conflictsByEvent(conflicts), [conflicts]);
 
   const holidayCount = filteredRows.filter((r) => r.kind === 'holiday').length;
   const schoolweekCount = filteredRows.length - holidayCount;
@@ -173,13 +194,25 @@ export function WeekTable() {
     if (!over) return;
     const activeData = active.data.current as { type?: string; eventId?: string } | undefined;
     const overData = over.data.current as { type?: string; iso?: string } | undefined;
+    if (activeData?.type === 'resize-end' && overData?.type === 'cell') {
+      const id = activeData.eventId;
+      const newIso = overData.iso;
+      if (!id || !newIso) return;
+      const ev = doc.events.find((x) => x.id === id);
+      if (!ev) return;
+      const clamped = newIso < ev.start ? ev.start : newIso;
+      if (clamped !== ev.end) updateEvent(id, { end: clamped });
+      return;
+    }
     if (activeData?.type !== 'event' || overData?.type !== 'cell') return;
     const id = activeData.eventId;
     const newIso = overData.iso;
     if (!id || !newIso) return;
     const ev = doc.events.find((x) => x.id === id);
     if (!ev || ev.start === newIso) return;
-    updateEvent(id, { start: newIso, end: newIso });
+    const span = differenceInCalendarDays(parseISO(ev.end), parseISO(ev.start));
+    const newEnd = format(addDays(parseISO(newIso), span), 'yyyy-MM-dd');
+    updateEvent(id, { start: newIso, end: newEnd });
   };
 
   const popoverWeek =
@@ -271,6 +304,7 @@ export function WeekTable() {
                         dayIdx={dayIdx}
                         events={events}
                         categoryById={categoryById}
+                        conflictMap={conflictMap}
                         rowHeight={rowHeight}
                       />
                     );

@@ -50,12 +50,13 @@ export interface WeekAnnotation {
 }
 
 export interface PlannerDocument {
-  version: 1;
+  version: 2;
   schoolyear: Schoolyear;
   categories: Category[];
   events: PlanEvent[];
   annotations: WeekAnnotation[];
   availableGroups: string[];
+  ignoredConflicts: string[];
   meta: {
     name: string;
     lastSaved: string;

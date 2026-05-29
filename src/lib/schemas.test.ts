@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PlanEventSchema, SchoolyearSchema, PlannerDocumentSchema } from './schemas';
+import { PlanEventSchema, SchoolyearSchema, PlannerDocumentSchema, migrate } from './schemas';
 
 describe('SchoolyearSchema', () => {
   it('accepts valid schoolyear', () => {
@@ -66,7 +66,7 @@ describe('PlanEventSchema', () => {
 describe('PlannerDocumentSchema', () => {
   it('accepts complete document', () => {
     const doc = {
-      version: 1,
+      version: 2,
       schoolyear: {
         id: 'sy',
         label: '2026/27',
@@ -82,8 +82,40 @@ describe('PlannerDocumentSchema', () => {
       events: [],
       annotations: [],
       availableGroups: [],
+      ignoredConflicts: [],
       meta: { name: 'Plan', lastSaved: 'now' }
     };
     expect(PlannerDocumentSchema.safeParse(doc).success).toBe(true);
+  });
+});
+
+describe('migrate v1 -> v2', () => {
+  const v1Doc = {
+    version: 1,
+    schoolyear: {
+      id: 'sy1', label: '2025/26',
+      firstSchoolDay: '2025-08-11', firstTeachingDay: '2025-08-11', lastSchoolDay: '2026-06-26',
+      holidays: [], quarterBoundaries: ['2025-10-31', '2026-01-31', '2026-04-15'],
+      createdAt: '2025-01-01T00:00:00.000Z', updatedAt: '2025-01-01T00:00:00.000Z'
+    },
+    categories: [{ id: 'c1', label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: [] }],
+    events: [],
+    annotations: [],
+    availableGroups: [],
+    meta: { name: 'Test', lastSaved: '2025-01-01T00:00:00.000Z' }
+  };
+
+  it('adds ignoredConflicts and bumps version', () => {
+    const migrated = migrate(v1Doc);
+    expect(migrated.version).toBe(2);
+    expect(migrated.ignoredConflicts).toEqual([]);
+    expect(PlannerDocumentSchema.safeParse(migrated).success).toBe(true);
+  });
+
+  it('leaves an already-v2 doc untouched', () => {
+    const v2 = { ...v1Doc, version: 2, ignoredConflicts: ['x'] };
+    const migrated = migrate(v2);
+    expect(migrated.version).toBe(2);
+    expect(migrated.ignoredConflicts).toEqual(['x']);
   });
 });

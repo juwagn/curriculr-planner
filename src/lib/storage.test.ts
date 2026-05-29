@@ -3,7 +3,7 @@ import { LocalStorageAdapter } from './storage';
 import type { PlannerDocument } from '@/types';
 
 const sampleDoc: PlannerDocument = {
-  version: 1,
+  version: 2,
   schoolyear: {
     id: 'sy1',
     label: '2026/27',
@@ -19,6 +19,7 @@ const sampleDoc: PlannerDocument = {
   events: [],
   annotations: [],
   availableGroups: [],
+  ignoredConflicts: [],
   meta: { name: 'Plan', lastSaved: '2026-05-26T00:00:00Z' }
 };
 
@@ -65,7 +66,7 @@ describe('LocalStorageAdapter', () => {
   it('exports JSON backup string', () => {
     const json = adapter.exportJson(sampleDoc);
     const parsed = JSON.parse(json);
-    expect(parsed.version).toBe(1);
+    expect(parsed.version).toBe(2);
     expect(parsed.meta.name).toBe('Plan');
   });
 
@@ -77,5 +78,44 @@ describe('LocalStorageAdapter', () => {
 
   it('rejects malformed JSON on import', async () => {
     await expect(adapter.importJson('{not json}')).rejects.toThrow();
+  });
+
+  it('migrates a v1 doc on load', async () => {
+    const v1 = {
+      version: 1,
+      schoolyear: {
+        id: 'sy-mig', label: '2025/26',
+        firstSchoolDay: '2025-08-11', firstTeachingDay: '2025-08-11', lastSchoolDay: '2026-06-26',
+        holidays: [], quarterBoundaries: ['2025-10-31', '2026-01-31', '2026-04-15'],
+        createdAt: '2025-01-01T00:00:00.000Z', updatedAt: '2025-01-01T00:00:00.000Z'
+      },
+      categories: [{ id: 'c1', label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: [] }],
+      events: [], annotations: [], availableGroups: [],
+      meta: { name: 'Alt', lastSaved: '2025-01-01T00:00:00.000Z' }
+    };
+    localStorage.setItem('curriculr-planner:doc:sy-mig', JSON.stringify(v1));
+    localStorage.setItem('curriculr-planner:docs', JSON.stringify(['sy-mig']));
+
+    const loaded = await adapter.loadDoc('sy-mig');
+    expect(loaded.version).toBe(2);
+    expect(loaded.ignoredConflicts).toEqual([]);
+  });
+
+  it('migrates a v1 doc on importJson', async () => {
+    const v1Json = JSON.stringify({
+      version: 1,
+      schoolyear: {
+        id: 'sy-imp', label: '2025/26',
+        firstSchoolDay: '2025-08-11', firstTeachingDay: '2025-08-11', lastSchoolDay: '2026-06-26',
+        holidays: [], quarterBoundaries: ['2025-10-31', '2026-01-31', '2026-04-15'],
+        createdAt: '2025-01-01T00:00:00.000Z', updatedAt: '2025-01-01T00:00:00.000Z'
+      },
+      categories: [{ id: 'c1', label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: [] }],
+      events: [], annotations: [], availableGroups: [],
+      meta: { name: 'Alt', lastSaved: '2025-01-01T00:00:00.000Z' }
+    });
+    const doc = await adapter.importJson(v1Json);
+    expect(doc.version).toBe(2);
+    expect(doc.ignoredConflicts).toEqual([]);
   });
 });

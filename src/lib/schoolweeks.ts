@@ -91,6 +91,10 @@ export type WeekRow =
   | { kind: 'schoolweek'; index: number; startDate: ISODate; endDate: ISODate }
   | { kind: 'holiday'; label: string; startDate: ISODate; endDate: ISODate };
 
+export function isWithinSchoolyear(iso: ISODate, sy: Schoolyear): boolean {
+  return iso >= sy.firstSchoolDay && iso <= sy.lastSchoolDay;
+}
+
 export function computeWeekRows(sy: Schoolyear): WeekRow[] {
   const start = startOfWeek(parseISO(sy.firstSchoolDay), { weekStartsOn: 1 });
   const last = parseISO(sy.lastSchoolDay);

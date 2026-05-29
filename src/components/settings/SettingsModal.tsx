@@ -5,6 +5,7 @@ import { SchoolyearTab } from './SchoolyearTab';
 import { CategoriesTab } from './CategoriesTab';
 import { GroupsTab } from './GroupsTab';
 import { ExportTab } from './ExportTab';
+import { ImportTab } from './ImportTab';
 import { AppearanceTab } from './AppearanceTab';
 import { AboutTab } from './AboutTab';
 
@@ -25,6 +26,7 @@ export function SettingsModal() {
             <TabsTrigger value="groups">Gruppen</TabsTrigger>
             <TabsTrigger value="appearance">Ansicht</TabsTrigger>
             <TabsTrigger value="export">Export</TabsTrigger>
+            <TabsTrigger value="import">Import</TabsTrigger>
             <TabsTrigger value="about">Über</TabsTrigger>
           </TabsList>
           <TabsContent value="schoolyear"><SchoolyearTab /></TabsContent>
@@ -32,6 +34,7 @@ export function SettingsModal() {
           <TabsContent value="groups"><GroupsTab /></TabsContent>
           <TabsContent value="appearance"><AppearanceTab /></TabsContent>
           <TabsContent value="export"><ExportTab /></TabsContent>
+          <TabsContent value="import"><ImportTab /></TabsContent>
           <TabsContent value="about"><AboutTab /></TabsContent>
         </Tabs>
       </DialogContent>

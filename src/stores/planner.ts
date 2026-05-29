@@ -27,7 +27,7 @@ export function createEmptyDoc(
 ): PlannerDocument {
   const now = new Date().toISOString();
   return {
-    version: 1,
+    version: 2,
     schoolyear: {
       id: uid(),
       label,
@@ -43,6 +43,7 @@ export function createEmptyDoc(
     events: [],
     annotations: [],
     availableGroups: [...DEFAULT_GROUPS],
+    ignoredConflicts: [],
     meta: { name, lastSaved: now }
   };
 }
@@ -68,6 +69,9 @@ interface PlannerState {
   updateCategories(cats: Category[]): void;
   updateGroups(groups: string[]): void;
   updateMeta(patch: Partial<PlannerDocument['meta']>): void;
+
+  ignoreConflict(key: string): void;
+  unignoreConflict(key: string): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -183,6 +187,20 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc) return;
     set({ doc: { ...doc, meta: { ...doc.meta, ...patch } } });
+    debouncedSave(get);
+  },
+
+  ignoreConflict(key) {
+    const doc = get().doc;
+    if (!doc || doc.ignoredConflicts.includes(key)) return;
+    set({ doc: { ...doc, ignoredConflicts: [...doc.ignoredConflicts, key] } });
+    debouncedSave(get);
+  },
+
+  unignoreConflict(key) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, ignoredConflicts: doc.ignoredConflicts.filter((k) => k !== key) } });
     debouncedSave(get);
   }
 }));

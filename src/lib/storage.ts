@@ -1,5 +1,5 @@
 import type { PlannerDocument, UUID } from '@/types';
-import { PlannerDocumentSchema } from './schemas';
+import { PlannerDocumentSchema, migrate } from './schemas';
 
 const PREFIX = 'curriculr-planner';
 const KEY_DOCS = `${PREFIX}:docs`;
@@ -53,7 +53,7 @@ export class LocalStorageAdapter implements StorageAdapter {
     if (!raw) throw new Error(`Doc ${id} not found`);
     let parsed: unknown;
     try {
-      parsed = JSON.parse(raw);
+      parsed = migrate(JSON.parse(raw));
     } catch {
       throw new Error(`Doc ${id}: invalid JSON`);
     }
@@ -99,7 +99,7 @@ export class LocalStorageAdapter implements StorageAdapter {
   }
 
   async importJson(json: string): Promise<PlannerDocument> {
-    const parsed = JSON.parse(json);
+    const parsed = migrate(JSON.parse(json));
     const result = PlannerDocumentSchema.safeParse(parsed);
     if (!result.success) throw new Error(`Invalid backup: ${result.error.message}`);
     return result.data as PlannerDocument;

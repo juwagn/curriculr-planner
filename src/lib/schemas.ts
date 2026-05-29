@@ -60,14 +60,26 @@ export const WeekAnnotationSchema = z.object({
 });
 
 export const PlannerDocumentSchema = z.object({
-  version: z.literal(1),
+  version: z.literal(2),
   schoolyear: SchoolyearSchema,
   categories: z.array(CategorySchema),
   events: z.array(PlanEventSchema),
   annotations: z.array(WeekAnnotationSchema),
   availableGroups: z.array(z.string()),
+  ignoredConflicts: z.array(z.string()),
   meta: z.object({
     name: z.string().min(1),
     lastSaved: z.string()
   })
 });
+
+/** Upgrade older persisted docs in-place to the current shape before Zod parse. */
+export function migrate(raw: unknown): Record<string, unknown> {
+  if (typeof raw !== 'object' || raw === null) return raw as Record<string, unknown>;
+  const doc = { ...(raw as Record<string, unknown>) };
+  if (doc.version === 1) {
+    doc.version = 2;
+    if (!Array.isArray(doc.ignoredConflicts)) doc.ignoredConflicts = [];
+  }
+  return doc;
+}

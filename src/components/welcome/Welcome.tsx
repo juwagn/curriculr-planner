@@ -1,18 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
+import { parseIcs, mapToEvents, type ParsedEvent } from '@/lib/ics-import';
+import { createEmptyDoc } from '@/stores/planner';
+import { createDemoDoc } from '@/lib/demo';
+import { IcsImportDialog } from '@/components/import/IcsImportDialog';
 import { toast } from 'sonner';
+import type { PlannerDocument } from '@/types';
 
 interface Props {
   onCreateNew(): void;
   onOpenDoc(id: string): void;
-  onImportJson(doc: import('@/types').PlannerDocument): void;
+  onImportJson(doc: PlannerDocument): void;
 }
 
 export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
   const [docs, setDocs] = useState<DocSummary[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const icsInputRef = useRef<HTMLInputElement>(null);
+  const [icsParsed, setIcsParsed] = useState<ParsedEvent[] | null>(null);
+  const defaultCategories = useMemo(
+    () => createEmptyDoc('_', '_', '2000-01-01', '2000-01-01', '2000-01-02').categories,
+    []
+  );
 
   useEffect(() => {
     storage.listDocs().then(setDocs);
@@ -27,6 +38,30 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
     } catch (err) {
       toast.error('Backup ungültig: ' + (err as Error).message);
     }
+  };
+
+  const handleIcs = async (file: File) => {
+    try {
+      const events = parseIcs(await file.text());
+      if (events.length === 0) {
+        toast.error('Keine Termine in der ICS gefunden');
+        return;
+      }
+      setIcsParsed(events);
+    } catch (e) {
+      toast.error('ICS ungültig: ' + (e as Error).message);
+    }
+  };
+
+  const buildDocFromIcs = (parsed: ParsedEvent[]): PlannerDocument => {
+    const minStart = parsed.reduce((m, e) => (e.start < m ? e.start : m), parsed[0].start);
+    const maxEnd = parsed.reduce((m, e) => (e.end > m ? e.end : m), parsed[0].end);
+    const startYear = Number(minStart.slice(0, 4));
+    const label = `${startYear}/${(startYear + 1) % 100}`;
+    const doc = createEmptyDoc(`Import ${label}`, label, minStart, minStart, maxEnd);
+    const fallbackId = doc.categories.find((c) => c.slug === 'sondertag')?.id ?? doc.categories[0].id;
+    doc.events = mapToEvents(parsed, doc.categories, fallbackId);
+    return doc;
   };
 
   return (
@@ -82,11 +117,39 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
               e.target.value = '';
             }}
           />
+          <Button variant="outline" onClick={() => icsInputRef.current?.click()}>
+            Aus ICS-Datei erstellen
+          </Button>
+          <input
+            ref={icsInputRef}
+            type="file"
+            accept=".ics"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleIcs(f);
+              e.target.value = '';
+            }}
+          />
+          <Button variant="ghost" onClick={() => onImportJson(createDemoDoc())}>
+            Demo ausprobieren
+          </Button>
           <div className="text-[12px] text-[var(--color-ink-500)] mt-4 text-center">
-            Phase 2: Excel-Import + ICS-Vorjahresplan
+            Phase 2: Excel-Import
           </div>
         </div>
       </Card>
+      <IcsImportDialog
+        open={icsParsed !== null}
+        parsed={icsParsed ?? []}
+        categories={defaultCategories}
+        targetSchoolyear={null}
+        onCancel={() => setIcsParsed(null)}
+        onConfirm={() => {
+          if (icsParsed) onImportJson(buildDocFromIcs(icsParsed));
+          setIcsParsed(null);
+        }}
+      />
     </div>
   );
 }

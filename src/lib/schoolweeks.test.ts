@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeSchoolweeks, isHoliday, isWeekend } from './schoolweeks';
+import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear } from './schoolweeks';
 import type { Schoolyear } from '@/types';
 
 const sy: Schoolyear = {
@@ -65,5 +65,23 @@ describe('computeSchoolweeks', () => {
     const weeks = computeSchoolweeks(sy);
     expect(weeks.length).toBeGreaterThanOrEqual(38);
     expect(weeks.length).toBeLessThanOrEqual(45);
+  });
+});
+
+const sy2: Schoolyear = {
+  id: 's', label: '25/26',
+  firstSchoolDay: '2025-08-11', firstTeachingDay: '2025-08-11', lastSchoolDay: '2026-06-26',
+  holidays: [], quarterBoundaries: ['2025-10-31', '2026-01-31', '2026-04-15'],
+  createdAt: '', updatedAt: ''
+};
+
+describe('isWithinSchoolyear', () => {
+  it('true on boundaries', () => {
+    expect(isWithinSchoolyear('2025-08-11', sy2)).toBe(true);
+    expect(isWithinSchoolyear('2026-06-26', sy2)).toBe(true);
+  });
+  it('false outside', () => {
+    expect(isWithinSchoolyear('2025-08-10', sy2)).toBe(false);
+    expect(isWithinSchoolyear('2026-06-27', sy2)).toBe(false);
   });
 });

@@ -38,7 +38,7 @@ export function Wizard({ onCancel, onComplete }: Props) {
 
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
+      <DialogContent className="w-full sm:max-w-3xl max-h-[90vh] overflow-auto">
         <DialogTitle className="sr-only">Setup-Wizard</DialogTitle>
         <div className="flex items-center gap-3 mb-6">
           {[1, 2, 3].map((s) => (

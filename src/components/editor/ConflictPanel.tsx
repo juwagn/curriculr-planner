@@ -42,27 +42,40 @@ export function ConflictPanel({ open, onClose }: Props) {
         </div>
       )}
       <ul className="space-y-2">
-        {conflicts.map((c) => (
-          <li
-            key={c.key}
-            className="rounded-[var(--radius-block)] border border-[var(--color-ink-200)] p-2"
-          >
-            <div className="flex items-start gap-1.5">
-              <span style={{ color: c.severity === 'error' ? 'var(--color-danger)' : 'var(--color-warning)' }}>⚠</span>
-              <span className="text-[12.5px] text-[var(--color-ink-900)] leading-snug flex-1">
-                {c.message}
-              </span>
-            </div>
-            <div className="flex gap-2 mt-1.5">
-              <Button size="sm" variant="outline" onClick={() => jump(c.eventIds[0])}>
-                Anzeigen
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => ignoreConflict(c.key)}>
-                Ignorieren
-              </Button>
-            </div>
-          </li>
-        ))}
+        {conflicts.map((c) => {
+          const isError = c.severity === 'error';
+          const accent = isError ? 'var(--color-danger)' : 'var(--color-warning)';
+          return (
+            <li
+              key={c.key}
+              className="rounded-[var(--radius-block)] p-2.5"
+              style={{
+                borderLeft: `3px solid ${accent}`,
+                background: isError
+                  ? 'color-mix(in srgb, var(--color-danger) 8%, var(--color-paper-card))'
+                  : 'var(--color-gelb-100)'
+              }}
+            >
+              <div className="flex items-start gap-1.5">
+                <span style={{ color: accent }}>⚠</span>
+                <span className="text-[12.5px] text-[var(--color-ink-900)] leading-snug flex-1">
+                  {c.message}
+                </span>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Button size="sm" onClick={() => jump(c.eventIds[0])}>
+                  Anzeigen
+                </Button>
+                <button
+                  onClick={() => ignoreConflict(c.key)}
+                  className="text-[0.8rem] font-medium px-2.5 py-1 rounded-[var(--radius-block)] text-[var(--color-ink-500)] hover:bg-black/5 transition-colors"
+                >
+                  Ignorieren
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

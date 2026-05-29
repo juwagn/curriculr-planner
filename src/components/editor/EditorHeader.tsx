@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
+import { useConflicts } from '@/hooks/useConflicts';
 import { ExportDropdown } from '@/components/export/ExportDropdown';
+import { ConflictPanel } from './ConflictPanel';
 
 interface Props {
   onSwitchPlan(): void;
@@ -14,6 +17,9 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const openSettings = useUiStore((s) => s.openSettings);
   const viewMode = useUiStore((s) => s.viewMode);
   const setViewMode = useUiStore((s) => s.setViewMode);
+  const conflicts = useConflicts();
+  const [panelOpen, setPanelOpen] = useState(false);
+  const hasError = conflicts.some((c) => c.severity === 'error');
 
   if (!doc) return null;
 
@@ -25,7 +31,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   }[savingState];
 
   return (
-    <header className="bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
+    <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
       <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
         <img src="/curriculr-logo.svg" alt="Curriculr" className="h-6" />
         <button
@@ -61,12 +67,25 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               Kalender
             </button>
           </div>
+          {conflicts.length > 0 && (
+            <button
+              onClick={() => setPanelOpen((v) => !v)}
+              className="flex items-center gap-1 rounded-[var(--radius-block)] px-2.5 py-1.5 text-[12.5px] font-semibold"
+              style={{
+                background: hasError ? 'rgba(224,36,36,0.1)' : 'var(--color-gelb-100)',
+                color: hasError ? '#E02424' : '#B45309'
+              }}
+            >
+              ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
+            </button>
+          )}
           <Button variant="ghost" size="icon" onClick={openSettings} className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]">
             <SettingsIcon className="w-4 h-4" />
           </Button>
           <ExportDropdown />
         </div>
       </div>
+      <ConflictPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
     </header>
   );
 }

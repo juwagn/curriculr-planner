@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseIcs, type ParsedEvent } from './ics-import';
+import { parseIcs, mapToEvents, shiftToSchoolyear, type ParsedEvent } from './ics-import';
+import type { Category, Schoolyear } from '@/types';
 
 const ICS = [
   'BEGIN:VCALENDAR',
@@ -41,5 +42,46 @@ describe('parseIcs', () => {
     expect(e.startTime).toBe('18:00');
     expect(e.endTime).toBe('20:00');
     expect(e.summary).toBe('Elternabend lange Zeile die gefaltet wurde');
+  });
+});
+
+const cats: Category[] = [
+  { id: 'cK', label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: ['konferenz', 'fk'] },
+  { id: 'cE', label: 'Elternabend', color: '#0E9F6E', slug: 'elternabend', keywords: ['eltern'] },
+  { id: 'cS', label: 'Sondertag', color: '#FFC857', slug: 'sondertag', keywords: [] }
+];
+
+describe('mapToEvents', () => {
+  it('matches category by CATEGORIES label, then keyword, then fallback', () => {
+    const parsed = [
+      { uid: '1', summary: 'X', start: '2025-09-01', end: '2025-09-01', allDay: true, categories: ['Konferenz'] },
+      { uid: '2', summary: 'Großer Elternabend', start: '2025-09-02', end: '2025-09-02', allDay: true, categories: [] },
+      { uid: '3', summary: 'Irgendwas', start: '2025-09-03', end: '2025-09-03', allDay: true, categories: [] }
+    ];
+    const evs = mapToEvents(parsed, cats, 'cS');
+    expect(evs[0].categoryId).toBe('cK');
+    expect(evs[1].categoryId).toBe('cE');
+    expect(evs[2].categoryId).toBe('cS');
+  });
+
+  it('extracts groups from a "Gruppen:" line in the description', () => {
+    const parsed = [{ uid: '1', summary: 'X', start: '2025-09-01', end: '2025-09-01', allDay: true, categories: [], description: 'Info\nGruppen: Kollegium, Eltern' }];
+    const evs = mapToEvents(parsed, cats, 'cS');
+    expect(evs[0].groups).toEqual(['Kollegium', 'Eltern']);
+  });
+});
+
+describe('shiftToSchoolyear', () => {
+  const target: Schoolyear = {
+    id: 's', label: '26/27', firstSchoolDay: '2026-08-10', firstTeachingDay: '2026-08-10',
+    lastSchoolDay: '2027-06-25', holidays: [], quarterBoundaries: ['2026-10-31', '2027-01-31', '2027-04-15'],
+    createdAt: '', updatedAt: ''
+  };
+  it('shifts by whole weeks and preserves weekday', () => {
+    const evs = mapToEvents([{ uid: '1', summary: 'X', start: '2025-09-01', end: '2025-09-01', allDay: true, categories: [] }], cats, 'cS');
+    const shifted = shiftToSchoolyear(evs, target);
+    const day = new Date(shifted[0].start + 'T00:00:00').getDay();
+    expect(day).toBe(1); // Monday
+    expect(shifted[0].start >= target.firstSchoolDay).toBe(true);
   });
 });

@@ -49,14 +49,26 @@ export interface WeekAnnotation {
   updatedAt: string;
 }
 
+export interface EventTemplate {
+  id: UUID;
+  name: string;
+  categoryId: UUID;
+  defaultTitle?: string;
+  allDay: boolean;
+  startTime?: ISOTime;
+  endTime?: ISOTime;
+  defaultGroups: string[];
+}
+
 export interface PlannerDocument {
-  version: 2;
+  version: 3;
   schoolyear: Schoolyear;
   categories: Category[];
   events: PlanEvent[];
   annotations: WeekAnnotation[];
   availableGroups: string[];
   ignoredConflicts: string[];
+  templates: EventTemplate[];
   meta: {
     name: string;
     lastSaved: string;

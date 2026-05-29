@@ -4,7 +4,7 @@ import type { PlannerDocument, PlanEvent } from '@/types';
 
 function baseDoc(events: PlanEvent[]): PlannerDocument {
   return {
-    version: 2,
+    version: 3,
     schoolyear: {
       id: 's', label: '25/26',
       firstSchoolDay: '2025-08-11', firstTeachingDay: '2025-08-11', lastSchoolDay: '2026-06-26',
@@ -18,7 +18,7 @@ function baseDoc(events: PlanEvent[]): PlannerDocument {
       { id: 'cS', label: 'Sonderveranstaltung', color: '#7C3AED', slug: 'sonder', keywords: [] }
     ],
     events,
-    annotations: [], availableGroups: [], ignoredConflicts: [],
+    annotations: [], availableGroups: [], ignoredConflicts: [], templates: [],
     meta: { name: 'T', lastSaved: '' }
   };
 }

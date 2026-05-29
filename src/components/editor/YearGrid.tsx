@@ -69,7 +69,7 @@ export function YearGrid() {
           <tr>
             <th className="sticky left-0 bg-[var(--color-paper-card)] px-2 py-1 text-left">Monat</th>
             {cols.map((d) => (
-              <th key={d} scope="col" className="w-6 px-0 py-1 text-center text-[var(--color-ink-400)]">
+              <th key={d} scope="col" className="w-6 px-0 py-1 text-center text-[var(--color-ink-500)]">
                 {d}
               </th>
             ))}
@@ -87,7 +87,7 @@ export function YearGrid() {
                   {row.label}
                 </th>
                 {cols.map((d) => {
-                  if (d > dim) return <td key={d} className="bg-[var(--color-ink-50)]" aria-hidden="true" />;
+                  if (d > dim) return <td key={d} className="bg-[var(--color-paper-bg)]" aria-hidden="true" />;
                   const iso = `${row.year}-${pad(row.month + 1)}-${pad(d)}`;
                   const evs = eventsByDate.get(iso) ?? [];
                   const holiday = isHoliday(iso, doc.schoolyear.holidays);
@@ -101,7 +101,7 @@ export function YearGrid() {
                       title={evs.map((e) => e.title).join(', ') || holiday?.label || iso}
                       onClick={() => (first ? openEditEvent(first.id) : openCreateEvent(iso))}
                       className={
-                        'h-6 w-6 cursor-pointer border border-[var(--color-ink-100)] text-center ' +
+                        'h-6 w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
                         (holiday && evs.length === 0
                           ? 'bg-[repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9_3px,#e2e8f0_3px,#e2e8f0_6px)]'
                           : '')

@@ -194,6 +194,16 @@ export function WeekTable() {
     if (!over) return;
     const activeData = active.data.current as { type?: string; eventId?: string } | undefined;
     const overData = over.data.current as { type?: string; iso?: string } | undefined;
+    if (activeData?.type === 'resize-end' && overData?.type === 'cell') {
+      const id = activeData.eventId;
+      const newIso = overData.iso;
+      if (!id || !newIso) return;
+      const ev = doc.events.find((x) => x.id === id);
+      if (!ev) return;
+      const clamped = newIso < ev.start ? ev.start : newIso;
+      if (clamped !== ev.end) updateEvent(id, { end: clamped });
+      return;
+    }
     if (activeData?.type !== 'event' || overData?.type !== 'cell') return;
     const id = activeData.eventId;
     const newIso = overData.iso;

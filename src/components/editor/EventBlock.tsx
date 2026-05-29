@@ -6,6 +6,7 @@ interface Props {
   event: PlanEvent;
   category: Category;
   onClick(e: React.MouseEvent): void;
+  conflictSeverity?: 'error' | 'warning';
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -21,7 +22,7 @@ function fmtTime(t?: string): string {
   return t.replace(':', '.');
 }
 
-export function EventBlock({ event, category, onClick }: Props) {
+export function EventBlock({ event, category, onClick, conflictSeverity }: Props) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `event:${event.id}`,
     data: { type: 'event', eventId: event.id }
@@ -56,6 +57,15 @@ export function EventBlock({ event, category, onClick }: Props) {
       }}
       title={event.title}
     >
+      {conflictSeverity && (
+        <span
+          aria-label={conflictSeverity === 'error' ? 'Konflikt' : 'Warnung'}
+          className="mr-1 align-middle"
+          style={{ color: conflictSeverity === 'error' ? '#E02424' : '#B45309' }}
+        >
+          ⚠
+        </span>
+      )}
       {timeLabel && (
         <span className="font-bold tabular-nums mr-1">{timeLabel}</span>
       )}

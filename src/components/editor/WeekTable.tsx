@@ -5,6 +5,8 @@ import { usePlannerStore } from '@/stores/planner';
 import { useUiStore, type Density } from '@/stores/ui';
 import { computeWeekRows, getQuarterRange, type WeekRow } from '@/lib/schoolweeks';
 import type { Category, PlanEvent } from '@/types';
+import { useConflicts, conflictsByEvent } from '@/hooks/useConflicts';
+import type { Conflict } from '@/lib/conflicts';
 import { EventBlock } from './EventBlock';
 import { NotePopover } from './NotePopover';
 
@@ -31,10 +33,11 @@ interface DayCellProps {
   dayIdx: number;
   events: PlanEvent[];
   categoryById: Map<string, Category>;
+  conflictMap: Map<string, Conflict[]>;
   rowHeight: number;
 }
 
-function DayCell({ mondayIso, dayIdx, events, categoryById, rowHeight }: DayCellProps) {
+function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeight }: DayCellProps) {
   const iso = dayIso(mondayIso, dayIdx);
   const openCreate = useUiStore((s) => s.openCreateEvent);
   const openEdit = useUiStore((s) => s.openEditEvent);
@@ -56,12 +59,19 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, rowHeight }: DayCell
         {events.map((ev) => {
           const cat = categoryById.get(ev.categoryId);
           if (!cat) return null;
+          const evConflicts = conflictMap.get(ev.id) ?? [];
+          const severity = evConflicts.some((c) => c.severity === 'error')
+            ? 'error'
+            : evConflicts.length > 0
+              ? 'warning'
+              : undefined;
           return (
             <EventBlock
               key={ev.id}
               event={ev}
               category={cat}
               onClick={() => openEdit(ev.id)}
+              conflictSeverity={severity}
             />
           );
         })}
@@ -141,6 +151,9 @@ export function WeekTable() {
     }
     return m;
   }, [doc?.events]);
+
+  const conflicts = useConflicts();
+  const conflictMap = useMemo(() => conflictsByEvent(conflicts), [conflicts]);
 
   const holidayCount = filteredRows.filter((r) => r.kind === 'holiday').length;
   const schoolweekCount = filteredRows.length - holidayCount;
@@ -271,6 +284,7 @@ export function WeekTable() {
                         dayIdx={dayIdx}
                         events={events}
                         categoryById={categoryById}
+                        conflictMap={conflictMap}
                         rowHeight={rowHeight}
                       />
                     );

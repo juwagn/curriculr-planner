@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { usePlannerStore } from '@/stores/planner';
 import type { Holiday } from '@/types';
 import { toast } from 'sonner';
+import { HolidayFetchControl } from './HolidayFetchControl';
 
 export function SchoolyearTab() {
   const doc = usePlannerStore((s) => s.doc);
@@ -47,6 +48,14 @@ export function SchoolyearTab() {
           <Input type="date" value={sy.lastSchoolDay} onChange={(e) => setSy({ ...sy, lastSchoolDay: e.target.value })} />
         </div>
       </div>
+
+      <HolidayFetchControl
+        stateCode={sy.stateCode}
+        from={sy.firstSchoolDay}
+        to={sy.lastSchoolDay}
+        holidays={sy.holidays}
+        onApply={(holidays, stateCode) => setSy({ ...sy, holidays, stateCode })}
+      />
 
       <div>
         <Label className="mb-2">Ferien</Label>

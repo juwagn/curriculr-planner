@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, type MouseEvent } from 'react';
 import { useDroppable } from '@dnd-kit/core';
+import { Plus } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { isHoliday } from '@/lib/schoolweeks';
@@ -66,16 +67,34 @@ function GridCell({ iso, events, holiday, bg, title }: GridCellProps) {
     else openCreateEvent(iso);
   };
 
+  // Add a further event to a day that already holds one, without opening the
+  // existing event. Honors an armed template, otherwise opens the create modal.
+  const handleAdd = (e: MouseEvent) => {
+    e.stopPropagation();
+    const armed = useUiStore.getState().armedTemplateId;
+    if (armed) {
+      const newId = usePlannerStore.getState().createEventFromTemplate(armed, iso);
+      if (newId) {
+        openEditEvent(newId);
+        useUiStore.getState().armTemplate(null);
+      }
+      return;
+    }
+    openCreateEvent(iso);
+  };
+
+  const hasEvent = events.length > 0;
+
   return (
     <td
       ref={setNodeRef}
       aria-label={iso}
-      data-has-event={events.length > 0 ? 'true' : 'false'}
+      data-has-event={hasEvent ? 'true' : 'false'}
       data-event-count={events.length}
       title={title}
       onClick={handleClick}
       className={
-        'relative min-w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
+        'group relative min-w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
         (isOver ? 'ring-2 ring-inset ring-[var(--color-marine-500)] ' : '') +
         (holiday && events.length === 0
           ? 'bg-[repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9_3px,#e2e8f0_3px,#e2e8f0_6px)]'
@@ -84,9 +103,20 @@ function GridCell({ iso, events, holiday, bg, title }: GridCellProps) {
       style={bg ? { backgroundColor: bg } : undefined}
     >
       {events.length > 1 && (
-        <span className="pointer-events-none absolute right-0 top-0 rounded-bl bg-[var(--color-marine-800)] px-[2px] text-[8px] font-semibold leading-none text-white">
+        <span className="pointer-events-none absolute left-0 top-0 rounded-br bg-[var(--color-marine-800)] px-[3px] text-[10px] font-semibold leading-tight text-white">
           {events.length}
         </span>
+      )}
+      {hasEvent && (
+        <button
+          type="button"
+          onClick={handleAdd}
+          aria-label={`Weiteren Termin am ${iso} hinzufügen`}
+          title="Weiteren Termin hinzufügen"
+          className="absolute bottom-0.5 right-0.5 hidden h-4 w-4 items-center justify-center rounded-full bg-[var(--color-marine-800)] text-white shadow-sm hover:opacity-90 group-hover:flex"
+        >
+          <Plus className="h-3 w-3" strokeWidth={3} />
+        </button>
       )}
     </td>
   );

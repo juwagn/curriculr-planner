@@ -60,9 +60,17 @@ export function Editor({ onSwitchPlan }: Props) {
         </div>
         <DragOverlay dropAnimation={null}>
           {draggedTemplate ? (
-            <div className="flex items-center gap-2 rounded-md border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-2 py-1 text-sm shadow-[var(--shadow-modal)]">
-              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: draggedColor }} />
-              {draggedTemplate.name}
+            <div className="flex cursor-grabbing items-center gap-2.5 rounded-lg border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-3 py-2 shadow-[var(--shadow-modal)] ring-2 ring-[var(--color-gelb-400)]">
+              <span
+                className="inline-block h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-black/10"
+                style={{ backgroundColor: draggedColor }}
+              />
+              <span className="text-sm font-medium text-[var(--color-ink-900)]">{draggedTemplate.name}</span>
+              <span className="ml-1 rounded bg-[var(--color-paper-bg)] px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-[var(--color-ink-500)]">
+                {draggedTemplate.allDay
+                  ? 'ganztägig'
+                  : `${draggedTemplate.startTime ?? ''}–${draggedTemplate.endTime ?? ''}`}
+              </span>
             </div>
           ) : null}
         </DragOverlay>

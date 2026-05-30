@@ -75,7 +75,7 @@ function GridCell({ iso, events, holiday, bg, title }: GridCellProps) {
       title={title}
       onClick={handleClick}
       className={
-        'relative h-6 w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
+        'relative min-w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
         (isOver ? 'ring-2 ring-inset ring-[var(--color-marine-500)] ' : '') +
         (holiday && events.length === 0
           ? 'bg-[repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9_3px,#e2e8f0_3px,#e2e8f0_6px)]'
@@ -116,13 +116,13 @@ export function YearGrid() {
   const cols = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
-    <div className="overflow-x-auto">
-      <table className="border-collapse text-xs">
+    <div className="h-full w-full overflow-auto">
+      <table className="h-full w-full table-fixed border-collapse text-sm">
         <thead>
           <tr>
-            <th className="sticky left-0 bg-[var(--color-paper-card)] px-2 py-1 text-left">Monat</th>
+            <th className="sticky left-0 z-10 w-24 bg-[var(--color-paper-card)] px-2 py-1 text-left">Monat</th>
             {cols.map((d) => (
-              <th key={d} scope="col" className="w-6 px-0 py-1 text-center text-[var(--color-ink-500)]">
+              <th key={d} scope="col" className="px-0 py-1 text-center text-[var(--color-ink-500)]">
                 {d}
               </th>
             ))}
@@ -135,7 +135,7 @@ export function YearGrid() {
               <tr key={`${row.year}-${row.month}`}>
                 <th
                   scope="row"
-                  className="sticky left-0 bg-[var(--color-paper-card)] px-2 py-1 text-left font-medium text-[var(--color-marine-800)]"
+                  className="sticky left-0 z-10 w-24 whitespace-nowrap bg-[var(--color-paper-card)] px-2 py-1 text-left font-medium text-[var(--color-marine-800)]"
                 >
                   {row.label}
                 </th>

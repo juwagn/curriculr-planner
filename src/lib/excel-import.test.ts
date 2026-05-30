@@ -19,7 +19,7 @@ describe('parseKonverterXlsx', () => {
     );
     const { schoolyear } = parseKonverterXlsx(buf);
     expect(schoolyear?.holidays).toEqual([
-      { id: expect.any(String), label: 'Herbst', start: '2026-10-19', end: '2026-10-30' }
+      { id: expect.any(String), label: 'Herbst', start: '2026-10-19', end: '2026-10-30', type: 'ferien' }
     ]);
   });
 
@@ -114,7 +114,7 @@ describe('parseKonverterXlsx', () => {
 
     // Ferien: OLE serial roundtrips to correct calendar day
     expect(schoolyear?.holidays).toEqual([
-      { id: expect.any(String), label: 'Herbstferien', start: '2026-10-19', end: '2026-10-30' },
+      { id: expect.any(String), label: 'Herbstferien', start: '2026-10-19', end: '2026-10-30', type: 'ferien' },
     ]);
 
     // Event: OLE serial roundtrips to correct calendar day

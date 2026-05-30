@@ -191,7 +191,7 @@ describe('migrate v3 → v4', () => {
   it('bumps version to 4 and defaults holiday.type to ferien', () => {
     const out = migrate(v3Doc) as typeof v3Doc & { version: number };
     expect(out.version).toBe(4);
-    expect((out.schoolyear.holidays[0] as { type: string }).type).toBe('ferien');
+    expect((out.schoolyear.holidays[0] as unknown as { type: string }).type).toBe('ferien');
   });
 
   it('migrated doc passes the current schema', () => {

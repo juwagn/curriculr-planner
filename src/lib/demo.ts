@@ -43,7 +43,7 @@ export function createDemoDoc(): PlannerDocument {
   ];
 
   return {
-    version: 3,
+    version: 4,
     schoolyear: {
       id: 'demo-2026-27',
       label: '2026/27',
@@ -51,10 +51,10 @@ export function createDemoDoc(): PlannerDocument {
       firstTeachingDay: '2026-08-12',
       lastSchoolDay: '2027-07-02',
       holidays: [
-        { id: uid(), label: 'Herbstferien', start: '2026-10-12', end: '2026-10-24' },
-        { id: uid(), label: 'Weihnachtsferien', start: '2026-12-23', end: '2027-01-06' },
-        { id: uid(), label: 'Osterferien', start: '2027-03-29', end: '2027-04-10' },
-        { id: uid(), label: 'Pfingstferien', start: '2027-05-18', end: '2027-05-21' }
+        { id: uid(), label: 'Herbstferien', start: '2026-10-12', end: '2026-10-24', type: 'ferien' },
+        { id: uid(), label: 'Weihnachtsferien', start: '2026-12-23', end: '2027-01-06', type: 'ferien' },
+        { id: uid(), label: 'Osterferien', start: '2027-03-29', end: '2027-04-10', type: 'ferien' },
+        { id: uid(), label: 'Pfingstferien', start: '2027-05-18', end: '2027-05-21', type: 'ferien' }
       ],
       quarterBoundaries: ['2026-10-31', '2027-01-31', '2027-04-15'],
       createdAt: now,

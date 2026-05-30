@@ -9,8 +9,8 @@ const sy: Schoolyear = {
   firstTeachingDay: '2026-08-31',
   lastSchoolDay: '2027-07-16',
   holidays: [
-    { id: 'h1', label: 'Herbst', start: '2026-10-19', end: '2026-10-30' },
-    { id: 'h2', label: 'Weihnachten', start: '2026-12-23', end: '2027-01-07' }
+    { id: 'h1', label: 'Herbst', start: '2026-10-19', end: '2026-10-30', type: 'ferien' },
+    { id: 'h2', label: 'Weihnachten', start: '2026-12-23', end: '2027-01-07', type: 'ferien' }
   ],
   quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-09'],
   createdAt: '',
@@ -25,7 +25,7 @@ describe('isWeekend', () => {
 
 describe('isHoliday', () => {
   it('detects date inside Herbst', () =>
-    expect(isHoliday('2026-10-25', sy.holidays)).toEqual({ id: 'h1', label: 'Herbst', start: '2026-10-19', end: '2026-10-30' }));
+    expect(isHoliday('2026-10-25', sy.holidays)).toEqual({ id: 'h1', label: 'Herbst', start: '2026-10-19', end: '2026-10-30', type: 'ferien' }));
   it('returns null for non-holiday date', () =>
     expect(isHoliday('2026-09-15', sy.holidays)).toBeNull());
   it('includes start + end inclusively', () => {

@@ -85,7 +85,7 @@ export function parseKonverterXlsx(buffer: ArrayBuffer): KonverterParseResult {
       const start = toIsoDate(row[1]);
       const end = toIsoDate(row[2]);
       if (label && ISO_DATE.test(start) && ISO_DATE.test(end)) {
-        holidays.push({ id: uid(), label, start, end });
+        holidays.push({ id: uid(), label, start, end, type: 'ferien' });
       }
     }
     if (holidays.length > 0) result.schoolyear = { holidays };

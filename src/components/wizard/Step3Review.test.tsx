@@ -8,7 +8,7 @@ describe('Step3Review', () => {
   it('shows computed schoolweek count', () => {
     const doc = createEmptyDoc('Plan', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
     doc.schoolyear.holidays = [
-      { id: 'h1', label: 'Herbst', start: '2026-10-19', end: '2026-10-30' }
+      { id: 'h1', label: 'Herbst', start: '2026-10-19', end: '2026-10-30', type: 'ferien' }
     ];
     doc.schoolyear.quarterBoundaries = ['2026-10-30', '2027-01-29', '2027-04-09'];
     render(<Step3Review doc={doc} onBack={() => {}} onCreate={() => {}} />);

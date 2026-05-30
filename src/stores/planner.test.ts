@@ -128,6 +128,16 @@ describe('templates', () => {
     usePlannerStore.getState().deleteTemplate('t1');
     expect(usePlannerStore.getState().doc?.templates).toHaveLength(0);
   });
+
+  it('createEventFromTemplate makes an event with template defaults + pushes history', () => {
+    const doc = createEmptyDoc('T', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().addTemplate({ id: 't1', name: 'FK', categoryId: doc.categories[0].id, allDay: false, startTime: '14:00', endTime: '16:00', defaultGroups: ['Kollegium'] });
+    const id = usePlannerStore.getState().createEventFromTemplate('t1', '2026-09-16');
+    const ev = usePlannerStore.getState().doc?.events.find((e) => e.id === id);
+    expect(ev).toMatchObject({ title: 'FK', start: '2026-09-16', end: '2026-09-16', allDay: false, startTime: '14:00', endTime: '16:00', groups: ['Kollegium'] });
+    expect(useHistoryStore.getState().canUndo()).toBe(true);
+  });
 });
 
 describe('undo/redo integration', () => {

@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useLayoutEffect } from 'react';
-import { DndContext, useDroppable, type DragEndEvent } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore, type Density } from '@/stores/ui';
@@ -46,10 +46,23 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeig
     data: { type: 'cell', iso }
   });
 
+  const handleCellClick = () => {
+    const armed = useUiStore.getState().armedTemplateId;
+    if (armed) {
+      const newId = usePlannerStore.getState().createEventFromTemplate(armed, iso);
+      if (newId) {
+        openEdit(newId);
+        useUiStore.getState().armTemplate(null);
+      }
+      return;
+    }
+    openCreate(iso);
+  };
+
   return (
     <td
       ref={setNodeRef}
-      onClick={() => openCreate(iso)}
+      onClick={handleCellClick}
       className={`group align-top border-r border-b border-[var(--color-ink-200)] px-1.5 py-1.5 cursor-pointer relative transition-colors ${
         isOver ? 'bg-[var(--color-marine-100)]/60' : 'hover:bg-[var(--color-paper-bg)]/60'
       }`}
@@ -121,7 +134,6 @@ function AnnotationCell({ text, onClick, rowHeight }: AnnotationCellProps) {
 
 export function WeekTable() {
   const doc = usePlannerStore((s) => s.doc);
-  const updateEvent = usePlannerStore((s) => s.updateEvent);
   const currentQuarter = useUiStore((s) => s.currentQuarter);
   const density = useUiStore((s) => s.density);
   const [notePopoverSw, setNotePopoverSw] = useState<number | null>(null);
@@ -189,39 +201,13 @@ export function WeekTable() {
   if (!doc) return null;
   const rowHeight = density === 'auto' ? autoHeight : ROW_MIN_HEIGHT_BY_DENSITY[density];
 
-  const handleDragEnd = (e: DragEndEvent) => {
-    const { active, over } = e;
-    if (!over) return;
-    const activeData = active.data.current as { type?: string; eventId?: string } | undefined;
-    const overData = over.data.current as { type?: string; iso?: string } | undefined;
-    if (activeData?.type === 'resize-end' && overData?.type === 'cell') {
-      const id = activeData.eventId;
-      const newIso = overData.iso;
-      if (!id || !newIso) return;
-      const ev = doc.events.find((x) => x.id === id);
-      if (!ev) return;
-      const clamped = newIso < ev.start ? ev.start : newIso;
-      if (clamped !== ev.end) updateEvent(id, { end: clamped });
-      return;
-    }
-    if (activeData?.type !== 'event' || overData?.type !== 'cell') return;
-    const id = activeData.eventId;
-    const newIso = overData.iso;
-    if (!id || !newIso) return;
-    const ev = doc.events.find((x) => x.id === id);
-    if (!ev || ev.start === newIso) return;
-    const span = differenceInCalendarDays(parseISO(ev.end), parseISO(ev.start));
-    const newEnd = format(addDays(parseISO(newIso), span), 'yyyy-MM-dd');
-    updateEvent(id, { start: newIso, end: newEnd });
-  };
-
   const popoverWeek =
     notePopoverSw !== null
       ? rows.find((r) => r.kind === 'schoolweek' && r.index === notePopoverSw)
       : null;
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <>
       <div
         ref={containerRef}
         className="h-full bg-[var(--color-paper-card)] rounded-[var(--radius-default)] border border-[var(--color-ink-200)] overflow-auto"
@@ -329,6 +315,6 @@ export function WeekTable() {
         }
         onClose={() => setNotePopoverSw(null)}
       />
-    </DndContext>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/storage';
 import { useHistoryStore } from './history';
-import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID } from '@/types';
+import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID, ISODate } from '@/types';
 
 const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: ['konferenz', 'fk'] },
@@ -78,6 +78,7 @@ interface PlannerState {
   addTemplate(t: EventTemplate): void;
   updateTemplate(id: UUID, patch: Partial<EventTemplate>): void;
   deleteTemplate(id: UUID): void;
+  createEventFromTemplate(templateId: UUID, date: ISODate): UUID | null;
 
   undo(): void;
   redo(): void;
@@ -252,6 +253,32 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     if (!doc) return;
     set({ doc: { ...doc, templates: doc.templates.filter((t) => t.id !== id) } });
     debouncedSave(get);
+  },
+
+  createEventFromTemplate(templateId, date) {
+    const doc = get().doc;
+    if (!doc) return null;
+    const t = doc.templates.find((x) => x.id === templateId);
+    if (!t) return null;
+    const id = crypto.randomUUID();
+    const event: PlanEvent = {
+      id,
+      title: t.defaultTitle ?? t.name,
+      start: date,
+      end: date,
+      allDay: t.allDay,
+      startTime: t.allDay ? undefined : t.startTime,
+      endTime: t.allDay ? undefined : t.endTime,
+      categoryId: t.categoryId,
+      notes: undefined,
+      location: undefined,
+      groups: [...t.defaultGroups]
+    };
+    snapshot(get);
+    lastAnnoWeek = null;
+    set({ doc: { ...doc, events: [...doc.events, event] } });
+    debouncedSave(get);
+    return id;
   },
 
   undo() {

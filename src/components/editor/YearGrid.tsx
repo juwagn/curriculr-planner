@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { isHoliday } from '@/lib/schoolweeks';
@@ -37,10 +38,55 @@ function daysInMonth(year: number, month0: number): number {
   return new Date(year, month0 + 1, 0).getDate();
 }
 
-export function YearGrid() {
-  const doc = usePlannerStore((s) => s.doc);
+interface GridCellProps {
+  iso: string;
+  events: PlanEvent[];
+  holiday: boolean;
+  bg?: string;
+  title: string;
+}
+
+function GridCell({ iso, events, holiday, bg, title }: GridCellProps) {
   const openCreateEvent = useUiStore((s) => s.openCreateEvent);
   const openEditEvent = useUiStore((s) => s.openEditEvent);
+  const { isOver, setNodeRef } = useDroppable({ id: `cell:${iso}`, data: { type: 'cell', iso } });
+
+  const handleClick = () => {
+    const armed = useUiStore.getState().armedTemplateId;
+    if (armed) {
+      const newId = usePlannerStore.getState().createEventFromTemplate(armed, iso);
+      if (newId) {
+        openEditEvent(newId);
+        useUiStore.getState().armTemplate(null);
+      }
+      return;
+    }
+    const first = events[0];
+    if (first) openEditEvent(first.id);
+    else openCreateEvent(iso);
+  };
+
+  return (
+    <td
+      ref={setNodeRef}
+      aria-label={iso}
+      data-has-event={events.length > 0 ? 'true' : 'false'}
+      title={title}
+      onClick={handleClick}
+      className={
+        'h-6 w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
+        (isOver ? 'ring-2 ring-inset ring-[var(--color-marine-500)] ' : '') +
+        (holiday && events.length === 0
+          ? 'bg-[repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9_3px,#e2e8f0_3px,#e2e8f0_6px)]'
+          : '')
+      }
+      style={bg ? { backgroundColor: bg } : undefined}
+    />
+  );
+}
+
+export function YearGrid() {
+  const doc = usePlannerStore((s) => s.doc);
 
   const rows = useMemo(
     () => (doc ? monthRows(doc.schoolyear.firstSchoolDay, doc.schoolyear.lastSchoolDay) : []),
@@ -94,19 +140,13 @@ export function YearGrid() {
                   const first = evs[0];
                   const bg = first ? doc.categories.find((c) => c.id === first.categoryId)?.color : undefined;
                   return (
-                    <td
+                    <GridCell
                       key={d}
-                      aria-label={iso}
-                      data-has-event={evs.length > 0 ? 'true' : 'false'}
+                      iso={iso}
+                      events={evs}
+                      holiday={!!holiday}
+                      bg={bg}
                       title={evs.map((e) => e.title).join(', ') || holiday?.label || iso}
-                      onClick={() => (first ? openEditEvent(first.id) : openCreateEvent(iso))}
-                      className={
-                        'h-6 w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
-                        (holiday && evs.length === 0
-                          ? 'bg-[repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9_3px,#e2e8f0_3px,#e2e8f0_6px)]'
-                          : '')
-                      }
-                      style={bg ? { backgroundColor: bg } : undefined}
                     />
                   );
                 })}

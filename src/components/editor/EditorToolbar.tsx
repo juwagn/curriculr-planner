@@ -4,13 +4,14 @@ import { useUiStore } from '@/stores/ui';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Undo2, Redo2 } from 'lucide-react';
+import { Undo2, Redo2, LayoutTemplate } from 'lucide-react';
 
 export function EditorToolbar() {
   const doc = usePlannerStore((s) => s.doc);
   const currentQuarter = useUiStore((s) => s.currentQuarter);
   const setQuarter = useUiStore((s) => s.setQuarter);
   const toggleNotes = useUiStore((s) => s.toggleNotesSidebar);
+  const toggleTemplates = useUiStore((s) => s.toggleTemplatesSidebar);
   const openCreate = useUiStore((s) => s.openCreateEvent);
   const { undo, redo, canUndo, canRedo } = useUndoRedo();
 
@@ -61,6 +62,10 @@ export function EditorToolbar() {
         </Button>
         <Button variant="ghost" size="icon-sm" disabled={!canRedo} onClick={redo} aria-label="Wiederholen" title="Wiederholen (Strg+Umschalt+Z)">
           <Redo2 />
+        </Button>
+        <Button variant="outline" size="sm" onClick={toggleTemplates} aria-label="Vorlagen anzeigen" title="Vorlagen">
+          <LayoutTemplate />
+          Vorlagen
         </Button>
         <Button variant="outline" size="sm" onClick={toggleNotes}>
           📝 Notizen

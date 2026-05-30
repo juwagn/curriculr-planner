@@ -4,6 +4,7 @@ import { useUiStore } from '@/stores/ui';
 import { SchoolyearTab } from './SchoolyearTab';
 import { CategoriesTab } from './CategoriesTab';
 import { GroupsTab } from './GroupsTab';
+import { TemplatesTab } from './TemplatesTab';
 import { ExportTab } from './ExportTab';
 import { ImportTab } from './ImportTab';
 import { AppearanceTab } from './AppearanceTab';
@@ -24,6 +25,7 @@ export function SettingsModal() {
             <TabsTrigger value="schoolyear">Schuljahr</TabsTrigger>
             <TabsTrigger value="categories">Kategorien</TabsTrigger>
             <TabsTrigger value="groups">Gruppen</TabsTrigger>
+            <TabsTrigger value="templates">Vorlagen</TabsTrigger>
             <TabsTrigger value="appearance">Ansicht</TabsTrigger>
             <TabsTrigger value="export">Export</TabsTrigger>
             <TabsTrigger value="import">Import</TabsTrigger>
@@ -32,6 +34,7 @@ export function SettingsModal() {
           <TabsContent value="schoolyear"><SchoolyearTab /></TabsContent>
           <TabsContent value="categories"><CategoriesTab /></TabsContent>
           <TabsContent value="groups"><GroupsTab /></TabsContent>
+          <TabsContent value="templates"><TemplatesTab /></TabsContent>
           <TabsContent value="appearance"><AppearanceTab /></TabsContent>
           <TabsContent value="export"><ExportTab /></TabsContent>
           <TabsContent value="import"><ImportTab /></TabsContent>

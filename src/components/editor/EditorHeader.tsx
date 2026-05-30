@@ -56,15 +56,15 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               Tabelle
             </button>
             <button
-              onClick={() => setViewMode('calendar')}
+              onClick={() => setViewMode('year')}
               className="px-3 py-1 font-semibold transition-colors"
               style={{
-                background: viewMode === 'calendar' ? 'var(--color-gelb-500)' : 'transparent',
-                color: viewMode === 'calendar' ? 'var(--color-ink-900)' : undefined,
+                background: viewMode === 'year' ? 'var(--color-gelb-500)' : 'transparent',
+                color: viewMode === 'year' ? 'var(--color-ink-900)' : undefined,
                 transitionDuration: 'var(--dur-state)'
               }}
             >
-              Kalender
+              Schuljahr
             </button>
           </div>
           {conflicts.length > 0 && (

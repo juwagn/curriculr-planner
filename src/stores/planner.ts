@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/storage';
-import type { PlannerDocument, PlanEvent, Category, UUID } from '@/types';
+import { useHistoryStore } from './history';
+import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID, ISODate } from '@/types';
 
 const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: ['konferenz', 'fk'] },
@@ -27,7 +28,7 @@ export function createEmptyDoc(
 ): PlannerDocument {
   const now = new Date().toISOString();
   return {
-    version: 2,
+    version: 3,
     schoolyear: {
       id: uid(),
       label,
@@ -44,6 +45,7 @@ export function createEmptyDoc(
     annotations: [],
     availableGroups: [...DEFAULT_GROUPS],
     ignoredConflicts: [],
+    templates: [],
     meta: { name, lastSaved: now }
   };
 }
@@ -59,6 +61,7 @@ interface PlannerState {
   saveDoc(): Promise<void>;
 
   addEvent(e: PlanEvent): void;
+  addEvents(list: PlanEvent[]): void;
   updateEvent(id: UUID, patch: Partial<PlanEvent>): void;
   deleteEvent(id: UUID): void;
 
@@ -72,9 +75,18 @@ interface PlannerState {
 
   ignoreConflict(key: string): void;
   unignoreConflict(key: string): void;
+
+  addTemplate(t: EventTemplate): void;
+  updateTemplate(id: UUID, patch: Partial<EventTemplate>): void;
+  deleteTemplate(id: UUID): void;
+  createEventFromTemplate(templateId: UUID, date: ISODate): UUID | null;
+
+  undo(): void;
+  redo(): void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let lastAnnoWeek: number | null = null;
 
 function debouncedSave(get: () => PlannerState) {
   if (saveTimer) clearTimeout(saveTimer);
@@ -83,12 +95,19 @@ function debouncedSave(get: () => PlannerState) {
   }, 300);
 }
 
+function snapshot(get: () => PlannerState) {
+  const doc = get().doc;
+  if (doc) useHistoryStore.getState().push(doc);
+}
+
 export const usePlannerStore = create<PlannerState>((set, get) => ({
   doc: null,
   savingState: 'idle',
 
   setDoc(doc) {
     set({ doc });
+    useHistoryStore.getState().reset();
+    lastAnnoWeek = null;
   },
 
   async loadDoc(id) {
@@ -113,13 +132,26 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   addEvent(e) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({ doc: { ...doc, events: [...doc.events, e] } });
+    debouncedSave(get);
+  },
+
+  addEvents(list) {
+    const doc = get().doc;
+    if (!doc || list.length === 0) return;
+    snapshot(get);
+    lastAnnoWeek = null;
+    set({ doc: { ...doc, events: [...doc.events, ...list] } });
     debouncedSave(get);
   },
 
   updateEvent(id, patch) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({
       doc: {
         ...doc,
@@ -132,6 +164,8 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   deleteEvent(id) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({ doc: { ...doc, events: doc.events.filter((e) => e.id !== id) } });
     debouncedSave(get);
   },
@@ -139,6 +173,10 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   setAnnotation(schoolweek, text) {
     const doc = get().doc;
     if (!doc) return;
+    if (schoolweek !== lastAnnoWeek) {
+      snapshot(get);
+      lastAnnoWeek = schoolweek;
+    }
     const updatedAt = new Date().toISOString();
     const existing = doc.annotations.find((a) => a.schoolweek === schoolweek);
     const annotations = existing
@@ -151,6 +189,8 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   deleteAnnotation(schoolweek) {
     const doc = get().doc;
     if (!doc) return;
+    snapshot(get);
+    lastAnnoWeek = null;
     set({
       doc: { ...doc, annotations: doc.annotations.filter((a) => a.schoolweek !== schoolweek) }
     });
@@ -202,5 +242,74 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     if (!doc) return;
     set({ doc: { ...doc, ignoredConflicts: doc.ignoredConflicts.filter((k) => k !== key) } });
     debouncedSave(get);
+  },
+
+  addTemplate(t) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, templates: [...doc.templates, t] } });
+    debouncedSave(get);
+  },
+
+  updateTemplate(id, patch) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, templates: doc.templates.map((t) => (t.id === id ? { ...t, ...patch } : t)) } });
+    debouncedSave(get);
+  },
+
+  deleteTemplate(id) {
+    const doc = get().doc;
+    if (!doc) return;
+    set({ doc: { ...doc, templates: doc.templates.filter((t) => t.id !== id) } });
+    debouncedSave(get);
+  },
+
+  createEventFromTemplate(templateId, date) {
+    const doc = get().doc;
+    if (!doc) return null;
+    const t = doc.templates.find((x) => x.id === templateId);
+    if (!t) return null;
+    const id = crypto.randomUUID();
+    const event: PlanEvent = {
+      id,
+      title: t.defaultTitle ?? t.name,
+      start: date,
+      end: date,
+      allDay: t.allDay,
+      startTime: t.allDay ? undefined : t.startTime,
+      endTime: t.allDay ? undefined : t.endTime,
+      categoryId: t.categoryId,
+      notes: undefined,
+      location: undefined,
+      groups: [...t.defaultGroups]
+    };
+    snapshot(get);
+    lastAnnoWeek = null;
+    set({ doc: { ...doc, events: [...doc.events, event] } });
+    debouncedSave(get);
+    return id;
+  },
+
+  undo() {
+    const doc = get().doc;
+    if (!doc) return;
+    const prev = useHistoryStore.getState().undo(doc);
+    if (prev) {
+      set({ doc: prev });
+      lastAnnoWeek = null;
+      debouncedSave(get);
+    }
+  },
+
+  redo() {
+    const doc = get().doc;
+    if (!doc) return;
+    const next = useHistoryStore.getState().redo(doc);
+    if (next) {
+      set({ doc: next });
+      lastAnnoWeek = null;
+      debouncedSave(get);
+    }
   }
 }));

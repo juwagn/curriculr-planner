@@ -59,14 +59,31 @@ export const WeekAnnotationSchema = z.object({
   updatedAt: z.string()
 });
 
+export const EventTemplateSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().trim().min(1, { message: 'Name erforderlich' }),
+    categoryId: z.string().min(1),
+    defaultTitle: z.string().optional(),
+    allDay: z.boolean(),
+    startTime: isoTime.optional(),
+    endTime: isoTime.optional(),
+    defaultGroups: z.array(z.string())
+  })
+  .refine((t) => (t.allDay ? true : !!t.startTime && !!t.endTime), {
+    message: 'Zeiten erforderlich wenn nicht ganztägig',
+    path: ['startTime']
+  });
+
 export const PlannerDocumentSchema = z.object({
-  version: z.literal(2),
+  version: z.literal(3),
   schoolyear: SchoolyearSchema,
   categories: z.array(CategorySchema),
   events: z.array(PlanEventSchema),
   annotations: z.array(WeekAnnotationSchema),
   availableGroups: z.array(z.string()),
   ignoredConflicts: z.array(z.string()),
+  templates: z.array(EventTemplateSchema),
   meta: z.object({
     name: z.string().min(1),
     lastSaved: z.string()
@@ -80,6 +97,10 @@ export function migrate(raw: unknown): Record<string, unknown> {
   if (doc.version === 1) {
     doc.version = 2;
     if (!Array.isArray(doc.ignoredConflicts)) doc.ignoredConflicts = [];
+  }
+  if (doc.version === 2) {
+    doc.version = 3;
+    if (!Array.isArray(doc.templates)) doc.templates = [];
   }
   return doc;
 }

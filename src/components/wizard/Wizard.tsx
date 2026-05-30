@@ -25,7 +25,7 @@ export function Wizard({ onCancel, onComplete }: Props) {
     firstSchoolDay: '',
     firstTeachingDay: '',
     lastSchoolDay: '',
-    holidays: DEFAULT_HOLIDAYS(new Date().getFullYear())
+    holidays: DEFAULT_HOLIDAYS()
   });
   const [step2, setStep2] = useState<Step2Data>(() => {
     const skeleton = createEmptyDoc('', '', '', '', '');

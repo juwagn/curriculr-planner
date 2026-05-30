@@ -43,7 +43,7 @@ export function createDemoDoc(): PlannerDocument {
   ];
 
   return {
-    version: 2,
+    version: 3,
     schoolyear: {
       id: 'demo-2026-27',
       label: '2026/27',
@@ -68,6 +68,7 @@ export function createDemoDoc(): PlannerDocument {
     ],
     availableGroups: ['Kollegium', 'Eltern', 'Klassen 5-7', 'Klassen 8-10', 'Sek I', 'Sek II'],
     ignoredConflicts: [],
+    templates: [],
     meta: { name: 'Demo: Schuljahr 2026/27', lastSaved: now }
   };
 }

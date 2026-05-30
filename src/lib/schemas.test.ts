@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PlanEventSchema, SchoolyearSchema, PlannerDocumentSchema, migrate } from './schemas';
+import { PlanEventSchema, SchoolyearSchema, PlannerDocumentSchema, migrate, EventTemplateSchema } from './schemas';
 
 describe('SchoolyearSchema', () => {
   it('accepts valid schoolyear', () => {
@@ -66,7 +66,7 @@ describe('PlanEventSchema', () => {
 describe('PlannerDocumentSchema', () => {
   it('accepts complete document', () => {
     const doc = {
-      version: 2,
+      version: 3,
       schoolyear: {
         id: 'sy',
         label: '2026/27',
@@ -83,13 +83,14 @@ describe('PlannerDocumentSchema', () => {
       annotations: [],
       availableGroups: [],
       ignoredConflicts: [],
+      templates: [],
       meta: { name: 'Plan', lastSaved: 'now' }
     };
     expect(PlannerDocumentSchema.safeParse(doc).success).toBe(true);
   });
 });
 
-describe('migrate v1 -> v2', () => {
+describe('migrate v1 -> v2 -> v3', () => {
   const v1Doc = {
     version: 1,
     schoolyear: {
@@ -105,17 +106,58 @@ describe('migrate v1 -> v2', () => {
     meta: { name: 'Test', lastSaved: '2025-01-01T00:00:00.000Z' }
   };
 
-  it('adds ignoredConflicts and bumps version', () => {
+  it('chains v1 all the way to v3 (adds ignoredConflicts + templates)', () => {
     const migrated = migrate(v1Doc);
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(3);
     expect(migrated.ignoredConflicts).toEqual([]);
-    expect(PlannerDocumentSchema.safeParse(migrated).success).toBe(true);
+    expect(migrated.templates).toEqual([]);
   });
 
-  it('leaves an already-v2 doc untouched', () => {
+  it('migrates a v2 doc to v3', () => {
     const v2 = { ...v1Doc, version: 2, ignoredConflicts: ['x'] };
     const migrated = migrate(v2);
-    expect(migrated.version).toBe(2);
+    expect(migrated.version).toBe(3);
     expect(migrated.ignoredConflicts).toEqual(['x']);
+    expect(migrated.templates).toEqual([]);
+  });
+});
+
+describe('EventTemplateSchema', () => {
+  it('accepts an all-day template without times', () => {
+    const t = { id: 't1', name: 'Konferenz', categoryId: 'c1', allDay: true, defaultGroups: [] };
+    expect(EventTemplateSchema.safeParse(t).success).toBe(true);
+  });
+
+  it('requires times when not all-day', () => {
+    const t = { id: 't1', name: 'FK', categoryId: 'c1', allDay: false, defaultGroups: [] };
+    expect(EventTemplateSchema.safeParse(t).success).toBe(false);
+  });
+
+  it('rejects empty name', () => {
+    const t = { id: 't1', name: '', categoryId: 'c1', allDay: true, defaultGroups: [] };
+    expect(EventTemplateSchema.safeParse(t).success).toBe(false);
+  });
+});
+
+describe('migrate v2 → v3', () => {
+  it('adds templates: [] to a v2 doc', () => {
+    const v2 = { version: 2, ignoredConflicts: [] };
+    const out = migrate(v2);
+    expect(out.version).toBe(3);
+    expect(out.templates).toEqual([]);
+  });
+
+  it('chains v1 → v3 (ignoredConflicts AND templates added)', () => {
+    const v1 = { version: 1 };
+    const out = migrate(v1);
+    expect(out.version).toBe(3);
+    expect(out.ignoredConflicts).toEqual([]);
+    expect(out.templates).toEqual([]);
+  });
+
+  it('leaves an existing templates array untouched', () => {
+    const v3 = { version: 3, ignoredConflicts: [], templates: [{ id: 't1' }] };
+    const out = migrate(v3);
+    expect(out.templates).toEqual([{ id: 't1' }]);
   });
 });

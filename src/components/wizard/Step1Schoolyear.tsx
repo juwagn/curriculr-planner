@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import type { Step1Data } from './wizard-state';
 import type { Holiday } from '@/types';
 
-const DEFAULT_HOLIDAYS = (_year: number): Holiday[] => [
+const DEFAULT_HOLIDAYS = (): Holiday[] => [
   { id: crypto.randomUUID(), label: 'Herbstferien', start: '', end: '' },
   { id: crypto.randomUUID(), label: 'Weihnachtsferien', start: '', end: '' },
   { id: crypto.randomUUID(), label: 'Osterferien', start: '', end: '' },

@@ -20,6 +20,7 @@ export function NotePopover({ schoolweek, week, onClose }: Props) {
   useEffect(() => {
     if (schoolweek === null || !doc) return;
     const a = doc.annotations.find((x) => x.schoolweek === schoolweek);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: reset local draft to stored annotation when the selected school week changes
     setText(a?.text ?? '');
   }, [schoolweek, doc]);
 

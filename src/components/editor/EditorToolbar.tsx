@@ -1,15 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { Undo2, Redo2, LayoutTemplate } from 'lucide-react';
 
 export function EditorToolbar() {
   const doc = usePlannerStore((s) => s.doc);
   const currentQuarter = useUiStore((s) => s.currentQuarter);
   const setQuarter = useUiStore((s) => s.setQuarter);
   const toggleNotes = useUiStore((s) => s.toggleNotesSidebar);
+  const toggleTemplates = useUiStore((s) => s.toggleTemplatesSidebar);
   const openCreate = useUiStore((s) => s.openCreateEvent);
+  const { undo, redo, canUndo, canRedo } = useUndoRedo();
 
   if (!doc) return null;
 
@@ -53,6 +57,16 @@ export function EditorToolbar() {
       ))}
       <span className="ml-3 text-sm text-[var(--color-ink-500)] tabular-nums">{fmtRange(currentQuarter - 1)}</span>
       <div className="ml-auto flex items-center gap-2">
+        <Button variant="ghost" size="icon-sm" disabled={!canUndo} onClick={undo} aria-label="Rückgängig" title="Rückgängig (Strg+Z)">
+          <Undo2 />
+        </Button>
+        <Button variant="ghost" size="icon-sm" disabled={!canRedo} onClick={redo} aria-label="Wiederholen" title="Wiederholen (Strg+Umschalt+Z)">
+          <Redo2 />
+        </Button>
+        <Button variant="outline" size="sm" onClick={toggleTemplates} aria-label="Vorlagen anzeigen" title="Vorlagen">
+          <LayoutTemplate />
+          Vorlagen
+        </Button>
         <Button variant="outline" size="sm" onClick={toggleNotes}>
           📝 Notizen
         </Button>

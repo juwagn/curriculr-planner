@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear } from './schoolweeks';
+import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear, computeWeekRows } from './schoolweeks';
 import type { Schoolyear } from '@/types';
 
 const sy: Schoolyear = {
@@ -83,5 +83,30 @@ describe('isWithinSchoolyear', () => {
   it('false outside', () => {
     expect(isWithinSchoolyear('2025-08-10', sy2)).toBe(false);
     expect(isWithinSchoolyear('2026-06-27', sy2)).toBe(false);
+  });
+});
+
+describe('single feiertag does not collapse a school week', () => {
+  const sy: Schoolyear = {
+    id: 's', label: '2026/27',
+    firstSchoolDay: '2026-08-10',
+    firstTeachingDay: '2026-08-10',
+    lastSchoolDay: '2026-08-14',
+    quarterBoundaries: ['2026-08-14', '2026-08-14', '2026-08-14'],
+    createdAt: '', updatedAt: '',
+    holidays: [
+      { id: 'f', label: 'Tag der Deutschen Einheit', start: '2026-08-12', end: '2026-08-12', type: 'feiertag', source: 'api' }
+    ]
+  };
+
+  it('keeps the week as a schoolweek row', () => {
+    const rows = computeWeekRows(sy);
+    expect(rows.some((r) => r.kind === 'holiday')).toBe(false);
+    expect(rows.some((r) => r.kind === 'schoolweek')).toBe(true);
+  });
+
+  it('isHoliday surfaces the feiertag type on that day', () => {
+    const h = isHoliday('2026-08-12', sy.holidays);
+    expect(h?.type).toBe('feiertag');
   });
 });

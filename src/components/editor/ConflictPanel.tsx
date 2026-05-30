@@ -50,7 +50,6 @@ export function ConflictPanel({ open, onClose }: Props) {
               key={c.key}
               className="rounded-[var(--radius-block)] p-2.5"
               style={{
-                borderLeft: `3px solid ${accent}`,
                 background: isError
                   ? 'color-mix(in srgb, var(--color-danger) 8%, var(--color-paper-card))'
                   : 'var(--color-gelb-100)'

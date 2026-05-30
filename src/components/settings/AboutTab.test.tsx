@@ -5,7 +5,8 @@ import { AboutTab } from './AboutTab';
 describe('AboutTab', () => {
   it('shows the current version and developer credit', () => {
     render(<AboutTab />);
-    expect(screen.getByText('1.2.0')).toBeInTheDocument();
+    // 1.2.0 appears in both the header and the changelog list
+    expect(screen.getAllByText('1.2.0').length).toBeGreaterThan(0);
     expect(screen.getByText(/Julian Wagner/)).toBeInTheDocument();
     expect(screen.getByText(/Curricular/)).toBeInTheDocument();
   });

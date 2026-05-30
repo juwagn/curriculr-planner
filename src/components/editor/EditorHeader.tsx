@@ -33,7 +33,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   return (
     <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
       <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
-        <img src="/curriculr-logo.svg" alt="Curriculr" className="h-6" />
+        <img src={`${import.meta.env.BASE_URL}curriculr-logo.svg`} alt="Curriculr" className="h-6" />
         <button
           onClick={onSwitchPlan}
           className="text-[15px] font-semibold hover:opacity-80 flex items-center gap-1 transition-opacity"

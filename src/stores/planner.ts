@@ -28,7 +28,7 @@ export function createEmptyDoc(
 ): PlannerDocument {
   const now = new Date().toISOString();
   return {
-    version: 3,
+    version: 4,
     schoolyear: {
       id: uid(),
       label,

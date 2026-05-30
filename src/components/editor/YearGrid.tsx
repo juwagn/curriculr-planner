@@ -71,17 +71,24 @@ function GridCell({ iso, events, holiday, bg, title }: GridCellProps) {
       ref={setNodeRef}
       aria-label={iso}
       data-has-event={events.length > 0 ? 'true' : 'false'}
+      data-event-count={events.length}
       title={title}
       onClick={handleClick}
       className={
-        'h-6 w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
+        'relative h-6 w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +
         (isOver ? 'ring-2 ring-inset ring-[var(--color-marine-500)] ' : '') +
         (holiday && events.length === 0
           ? 'bg-[repeating-linear-gradient(45deg,#f1f5f9,#f1f5f9_3px,#e2e8f0_3px,#e2e8f0_6px)]'
           : '')
       }
       style={bg ? { backgroundColor: bg } : undefined}
-    />
+    >
+      {events.length > 1 && (
+        <span className="pointer-events-none absolute right-0 top-0 rounded-bl bg-[var(--color-marine-800)] px-[2px] text-[8px] font-semibold leading-none text-white">
+          {events.length}
+        </span>
+      )}
+    </td>
   );
 }
 

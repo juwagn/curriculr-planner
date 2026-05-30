@@ -61,6 +61,7 @@ interface PlannerState {
   saveDoc(): Promise<void>;
 
   addEvent(e: PlanEvent): void;
+  addEvents(list: PlanEvent[]): void;
   updateEvent(id: UUID, patch: Partial<PlanEvent>): void;
   deleteEvent(id: UUID): void;
 
@@ -134,6 +135,15 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     snapshot(get);
     lastAnnoWeek = null;
     set({ doc: { ...doc, events: [...doc.events, e] } });
+    debouncedSave(get);
+  },
+
+  addEvents(list) {
+    const doc = get().doc;
+    if (!doc || list.length === 0) return;
+    snapshot(get);
+    lastAnnoWeek = null;
+    set({ doc: { ...doc, events: [...doc.events, ...list] } });
     debouncedSave(get);
   },
 

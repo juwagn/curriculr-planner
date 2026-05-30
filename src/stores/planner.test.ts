@@ -180,4 +180,27 @@ describe('undo/redo integration', () => {
     usePlannerStore.getState().addTemplate({ id: 't1', name: 'X', categoryId: doc.categories[0].id, allDay: true, defaultGroups: [] });
     expect(useHistoryStore.getState().canUndo()).toBe(false);
   });
+
+  it('addEvents appends all events and pushes a single undo snapshot', () => {
+    const doc = createEmptyDoc('T', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    useHistoryStore.getState().reset();
+    usePlannerStore.getState().addEvents([
+      { id: 'a', title: 'A', start: '2026-09-01', end: '2026-09-01', allDay: true, categoryId: doc.categories[0].id, groups: [] },
+      { id: 'b', title: 'B', start: '2026-09-02', end: '2026-09-02', allDay: true, categoryId: doc.categories[0].id, groups: [] }
+    ]);
+    expect(usePlannerStore.getState().doc?.events).toHaveLength(2);
+    expect(useHistoryStore.getState().depth()).toBe(1);
+  });
+
+  it('one undo after addEvents removes the whole batch', () => {
+    const doc = createEmptyDoc('T', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().addEvents([
+      { id: 'a', title: 'A', start: '2026-09-01', end: '2026-09-01', allDay: true, categoryId: doc.categories[0].id, groups: [] },
+      { id: 'b', title: 'B', start: '2026-09-02', end: '2026-09-02', allDay: true, categoryId: doc.categories[0].id, groups: [] }
+    ]);
+    usePlannerStore.getState().undo();
+    expect(usePlannerStore.getState().doc?.events).toHaveLength(0);
+  });
 });

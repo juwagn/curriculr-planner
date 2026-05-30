@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 export function ImportTab() {
   const doc = usePlannerStore((s) => s.doc);
-  const addEvent = usePlannerStore((s) => s.addEvent);
+  const addEvents = usePlannerStore((s) => s.addEvents);
   const updateSchoolyear = usePlannerStore((s) => s.updateSchoolyear);
   const fileRef = useRef<HTMLInputElement>(null);
   const xlsxRef = useRef<HTMLInputElement>(null);
@@ -41,7 +41,7 @@ export function ImportTab() {
       const fallbackId =
         current.categories.find((c) => c.slug === 'sondertag')?.id ?? current.categories[0].id;
       const events = mapToEvents(parsedEvents, current.categories, fallbackId);
-      events.forEach((ev) => addEvent(ev));
+      addEvents(events);
       if (importFerien && schoolyear?.holidays && schoolyear.holidays.length > 0) {
         updateSchoolyear({ holidays: [...current.schoolyear.holidays, ...schoolyear.holidays] });
       }
@@ -79,7 +79,7 @@ export function ImportTab() {
         targetSchoolyear={doc.schoolyear}
         onCancel={() => setParsed(null)}
         onConfirm={(events) => {
-          events.forEach((ev) => addEvent(ev));
+          addEvents(events);
           setParsed(null);
           toast.success(`${events.length} Termine importiert`);
         }}

@@ -44,6 +44,15 @@ describe('parseKonverterXlsx', () => {
     });
   });
 
+  it('parses time cells stored as numeric serials (Excel-resaved)', () => {
+    const buf = buildWorkbook(
+      [['Label', 'Start', 'Ende']],
+      [PLAN_HEADER, ['2026-09-16', 14 / 24, 16 / 24, 'nein', 'FK', 'Konferenz', '', 'Kollegium', '', 1, '']]
+    );
+    const { parsed } = parseKonverterXlsx(buf);
+    expect(parsed[0]).toMatchObject({ allDay: false, startTime: '14:00', endTime: '16:00' });
+  });
+
   it('parses a timed event row', () => {
     const buf = buildWorkbook(
       [['Label', 'Start', 'Ende']],

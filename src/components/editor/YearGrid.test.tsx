@@ -7,6 +7,7 @@ import { usePlannerStore, createEmptyDoc } from '@/stores/planner';
 beforeEach(() => {
   const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
   doc.events.push({ id: 'e1', title: 'Wandertag', start: '2026-09-15', end: '2026-09-15', allDay: true, categoryId: doc.categories[0].id, groups: [] });
+  doc.events.push({ id: 'e2', title: 'Konferenz', start: '2026-09-15', end: '2026-09-15', allDay: true, categoryId: doc.categories[0].id, groups: [] });
   usePlannerStore.setState({ doc });
 });
 
@@ -26,5 +27,12 @@ describe('YearGrid', () => {
   it('marks the day cell that holds an event', () => {
     render(<DndContext><YearGrid /></DndContext>);
     expect(screen.getByLabelText('2026-09-15')).toHaveAttribute('data-has-event', 'true');
+  });
+
+  it('shows a count indicator when a day holds multiple events', () => {
+    render(<DndContext><YearGrid /></DndContext>);
+    const cell = screen.getByLabelText('2026-09-15');
+    expect(cell).toHaveAttribute('data-event-count', '2');
+    expect(cell).toHaveTextContent('2');
   });
 });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DateInput } from '@/components/ui/date-input';
 import { Label } from '@/components/ui/label';
 import type { Step1Data } from './wizard-state';
 import type { Holiday } from '@/types';
@@ -94,21 +95,19 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
               </span>
             )}
           </Label>
-          <Input
-            type="date"
+          <DateInput
             className="min-w-[180px]"
             aria-required
             data-invalid={!data.firstSchoolDay || undefined}
             style={!data.firstSchoolDay ? { borderColor: 'var(--color-status-red)' } : undefined}
             value={data.firstSchoolDay}
-            onChange={(e) => update('firstSchoolDay', e.target.value)}
+            onValueChange={(v) => update('firstSchoolDay', v)}
           />
           <Label>Erster Unterrichtstag (SW 01)</Label>
-          <Input
-            type="date"
+          <DateInput
             className="min-w-[180px]"
             value={data.firstTeachingDay}
-            onChange={(e) => update('firstTeachingDay', e.target.value)}
+            onValueChange={(v) => update('firstTeachingDay', v)}
           />
           <Label>
             Letzter Schultag{' '}
@@ -118,14 +117,13 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
               </span>
             )}
           </Label>
-          <Input
-            type="date"
+          <DateInput
             className="min-w-[180px]"
             aria-required
             data-invalid={!data.lastSchoolDay || undefined}
             style={!data.lastSchoolDay ? { borderColor: 'var(--color-status-red)' } : undefined}
             value={data.lastSchoolDay}
-            onChange={(e) => update('lastSchoolDay', e.target.value)}
+            onValueChange={(v) => update('lastSchoolDay', v)}
           />
         </div>
         {(!data.firstSchoolDay || !data.lastSchoolDay) && (
@@ -154,8 +152,8 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
               onChange={(e) => updateHoliday(h.id, { label: e.target.value })}
               placeholder="Label"
             />
-            <Input type="date" className="min-w-[170px]" value={h.start} onChange={(e) => updateHoliday(h.id, { start: e.target.value })} />
-            <Input type="date" className="min-w-[170px]" value={h.end} onChange={(e) => updateHoliday(h.id, { end: e.target.value })} />
+            <DateInput className="min-w-[170px]" value={h.start} onValueChange={(v) => updateHoliday(h.id, { start: v })} />
+            <DateInput className="min-w-[170px]" value={h.end} onValueChange={(v) => updateHoliday(h.id, { end: v })} />
             <Button variant="ghost" size="icon" onClick={() => removeHoliday(h.id)} title="Entfernen">
               ✕
             </Button>

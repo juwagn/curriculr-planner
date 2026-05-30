@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DateInput } from '@/components/ui/date-input';
 import { Label } from '@/components/ui/label';
 import type { Step2Data } from './wizard-state';
 import type { Category } from '@/types';
@@ -74,15 +75,15 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
         <div className="grid grid-cols-3 gap-3">
           <div>
             <Label>Q1-Ende</Label>
-            <Input type="date" value={data.quarterBoundaries[0]} onChange={(e) => updateQB(0, e.target.value)} />
+            <DateInput value={data.quarterBoundaries[0]} onValueChange={(v) => updateQB(0, v)} />
           </div>
           <div>
             <Label>Q2-Ende</Label>
-            <Input type="date" value={data.quarterBoundaries[1]} onChange={(e) => updateQB(1, e.target.value)} />
+            <DateInput value={data.quarterBoundaries[1]} onValueChange={(v) => updateQB(1, v)} />
           </div>
           <div>
             <Label>Q3-Ende</Label>
-            <Input type="date" value={data.quarterBoundaries[2]} onChange={(e) => updateQB(2, e.target.value)} />
+            <DateInput value={data.quarterBoundaries[2]} onValueChange={(v) => updateQB(2, v)} />
           </div>
         </div>
       </div>

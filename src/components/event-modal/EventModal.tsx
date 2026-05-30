@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DateInput } from '@/components/ui/date-input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
@@ -128,11 +129,11 @@ export function EventModal() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Startdatum</Label>
-              <Input type="date" value={form.start} onChange={(e) => update('start', e.target.value)} />
+              <DateInput value={form.start} onValueChange={(v) => update('start', v)} />
             </div>
             <div>
               <Label>Endedatum</Label>
-              <Input type="date" value={form.end} onChange={(e) => update('end', e.target.value)} />
+              <DateInput value={form.end} onValueChange={(v) => update('end', v)} />
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DateInput } from '@/components/ui/date-input';
 import { Label } from '@/components/ui/label';
 import { usePlannerStore } from '@/stores/planner';
 import type { Holiday } from '@/types';
@@ -37,15 +38,15 @@ export function SchoolyearTab() {
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
           <Label className="mb-1.5">Erster Schultag</Label>
-          <Input type="date" value={sy.firstSchoolDay} onChange={(e) => setSy({ ...sy, firstSchoolDay: e.target.value })} />
+          <DateInput value={sy.firstSchoolDay} onValueChange={(v) => setSy({ ...sy, firstSchoolDay: v })} />
         </div>
         <div>
           <Label className="mb-1.5">Erster Unterrichtstag</Label>
-          <Input type="date" value={sy.firstTeachingDay} onChange={(e) => setSy({ ...sy, firstTeachingDay: e.target.value })} />
+          <DateInput value={sy.firstTeachingDay} onValueChange={(v) => setSy({ ...sy, firstTeachingDay: v })} />
         </div>
         <div>
           <Label className="mb-1.5">Letzter Schultag</Label>
-          <Input type="date" value={sy.lastSchoolDay} onChange={(e) => setSy({ ...sy, lastSchoolDay: e.target.value })} />
+          <DateInput value={sy.lastSchoolDay} onValueChange={(v) => setSy({ ...sy, lastSchoolDay: v })} />
         </div>
       </div>
 
@@ -71,8 +72,8 @@ export function SchoolyearTab() {
               className="grid gap-2 grid-cols-1 sm:grid-cols-[1fr_minmax(140px,1fr)_minmax(140px,1fr)]"
             >
               <Input value={h.label} onChange={(e) => updateHol(h.id, { label: e.target.value })} />
-              <Input type="date" value={h.start} onChange={(e) => updateHol(h.id, { start: e.target.value })} />
-              <Input type="date" value={h.end} onChange={(e) => updateHol(h.id, { end: e.target.value })} />
+              <DateInput value={h.start} onValueChange={(v) => updateHol(h.id, { start: v })} />
+              <DateInput value={h.end} onValueChange={(v) => updateHol(h.id, { end: v })} />
             </div>
           ))}
         </div>

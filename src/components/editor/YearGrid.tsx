@@ -47,12 +47,13 @@ interface GridCellProps {
   iso: string;
   events: PlanEvent[];
   holiday: boolean;
+  feiertag?: boolean;
   /** Category color of the first event on this day, if any. */
   color?: string;
   title: string;
 }
 
-function GridCell({ iso, events, holiday, color, title }: GridCellProps) {
+function GridCell({ iso, events, holiday, feiertag, color, title }: GridCellProps) {
   const openCreateEvent = useUiStore((s) => s.openCreateEvent);
   const openEditEvent = useUiStore((s) => s.openEditEvent);
   const { isOver, setNodeRef } = useDroppable({ id: `cell:${iso}`, data: { type: 'cell', iso } });
@@ -90,11 +91,14 @@ function GridCell({ iso, events, holiday, color, title }: GridCellProps) {
 
   const hasEvent = events.length > 0;
   const showHatch = holiday && !hasEvent;
+  const showFeiertag = feiertag && !hasEvent;
   const cellStyle: React.CSSProperties = hasEvent && color
     ? { backgroundColor: pastelize(color) }
     : showHatch
       ? { backgroundImage: FERIEN_HATCH }
-      : {};
+      : showFeiertag
+        ? { backgroundColor: 'var(--color-feiertag-bg)' }
+        : {};
 
   return (
     <td
@@ -196,7 +200,8 @@ export function YearGrid() {
                       key={d}
                       iso={iso}
                       events={evs}
-                      holiday={!!holiday}
+                      holiday={!!holiday && holiday.type === 'ferien'}
+                      feiertag={!!holiday && holiday.type === 'feiertag'}
                       color={color}
                       title={evs.map((e) => e.title).join(', ') || holiday?.label || iso}
                     />

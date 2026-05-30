@@ -42,6 +42,7 @@ export function EventModal() {
 
   useEffect(() => {
     if (!state.open || !doc) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: clear the draft form when the modal closes or no doc is loaded
       setForm(null);
       return;
     }

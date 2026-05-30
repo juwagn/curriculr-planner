@@ -140,9 +140,11 @@ export function WeekTable() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoHeight, setAutoHeight] = useState<number>(110);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when the schoolyear slice changes, not the whole doc
   const rows = useMemo(() => (doc ? computeWeekRows(doc.schoolyear) : []), [doc?.schoolyear]);
   const qRange = useMemo(
     () => (doc ? getQuarterRange(currentQuarter, doc.schoolyear) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when the schoolyear slice changes
     [doc?.schoolyear, currentQuarter]
   );
 
@@ -155,6 +157,7 @@ export function WeekTable() {
     const m = new Map<string, Category>();
     if (doc) for (const c of doc.categories) m.set(c.id, c);
     return m;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when categories change
   }, [doc?.categories]);
 
   const eventsByDate = useMemo(() => {
@@ -170,6 +173,7 @@ export function WeekTable() {
       }
     }
     return m;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when events change
   }, [doc?.events]);
 
   const conflicts = useConflicts();

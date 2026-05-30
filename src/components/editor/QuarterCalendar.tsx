@@ -50,8 +50,10 @@ export function QuarterCalendar() {
     if (!s || !e) return { startIso: '', monthCount: 3 };
     const monthCount = Math.max(1, differenceInCalendarMonths(parseISO(e), parseISO(s)) + 1);
     return { startIso: s, monthCount };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when the schoolyear slice changes
   }, [doc?.schoolyear, currentQuarter]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when the schoolyear slice changes
   const weeks = useMemo(() => (doc ? computeSchoolweeks(doc.schoolyear) : []), [doc?.schoolyear]);
 
   useEffect(() => {

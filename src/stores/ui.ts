@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ViewMode = 'table' | 'calendar' | 'year';
+export type ViewMode = 'table' | 'year';
 export type Density = 'auto' | 'compact' | 'standard' | 'roomy';
 
 interface UiState {
@@ -60,7 +60,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   armedTemplateId: null,
   settingsModalOpen: false,
   eventModalState: { open: false },
-  viewMode: initial.viewMode ?? 'table',
+  // Coerce any stale persisted value (e.g. the removed 'calendar' view) to 'table'.
+  viewMode: initial.viewMode === 'year' ? 'year' : 'table',
   density: initial.density ?? 'auto',
 
   setQuarter(q) { set({ currentQuarter: q }); },

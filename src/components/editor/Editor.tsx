@@ -4,7 +4,6 @@ import type { DragStartEvent } from '@dnd-kit/core';
 import { usePlannerStore } from '@/stores/planner';
 import { EditorHeader } from './EditorHeader';
 import { EditorToolbar } from './EditorToolbar';
-import { QuarterCalendar } from './QuarterCalendar';
 import { WeekTable } from './WeekTable';
 import { YearGrid } from './YearGrid';
 import { TemplatesSidebar } from './TemplatesSidebar';
@@ -55,7 +54,7 @@ export function Editor({ onSwitchPlan }: Props) {
         <div className="flex-1 min-h-0 flex overflow-hidden">
           {templatesSidebarOpen && <TemplatesSidebar />}
           <div className="flex-1 min-h-0 p-6 overflow-auto">
-            {viewMode === 'table' ? <WeekTable /> : viewMode === 'year' ? <YearGrid /> : <QuarterCalendar />}
+            {viewMode === 'year' ? <YearGrid /> : <WeekTable />}
           </div>
         </div>
         <DragOverlay dropAnimation={null}>

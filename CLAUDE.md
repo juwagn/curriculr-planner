@@ -41,7 +41,7 @@ doc + sets active → editor.
   `updateSchoolyear`, ...) update the store **and** schedule `debouncedSave` at
   300ms. The store owns one doc at a time; switching plans calls `setDoc`.
 - `stores/ui.ts` — ephemeral view state (`currentQuarter`, modal open/close,
-  `viewMode: 'table' | 'calendar' | 'year'`, `density`, `templatesSidebarOpen`,
+  `viewMode: 'table' | 'year'`, `density`, `templatesSidebarOpen`,
   `armedTemplateId`). Persists only `viewMode` + `density` to `localStorage`
   under key `curriculr-planner:ui-prefs`.
 - `stores/history.ts` — ephemeral undo/redo snapshot stack (cap 50). Planner
@@ -73,16 +73,17 @@ Pure, framework-agnostic, TDD'd:
   breaking shape changes and migrate; `migrate` chains v1→v2→v3).
 
 ### Editor views
-`Editor.tsx` switches between three `viewMode`s: `WeekTable` (rows = school
-weeks, cols = Mo-Fr, notes column right — Konverter-style, default),
-`QuarterCalendar` (FullCalendar drag-drop), and `YearGrid` (months × days
-matrix, `viewMode === 'year'`). All write through the same `planner` mutators.
-Drag-end is shared via `useEditorDragEnd.ts` (`handleEditorDragEnd`) across
-`WeekTable` + `YearGrid` — handles event move, resize-end, and template drop.
+`Editor.tsx` switches between two `viewMode`s: `WeekTable` (rows = school
+weeks, cols = Mo-Fr, notes column right — Konverter-style, default) and
+`YearGrid` (months × days matrix, `viewMode === 'year'`). All write through the
+same `planner` mutators. Drag-end is shared via `useEditorDragEnd.ts`
+(`handleEditorDragEnd`) across `WeekTable` + `YearGrid` — handles event move,
+resize-end, and template drop.
 
-**v1.0.2 note:** `WeekTable` is the active replacement for FullCalendar.
-FullCalendar deps still installed because `QuarterCalendar` view stays as an
-alternative. Do not remove FullCalendar without explicit instruction.
+**v1.2.1 note:** the `QuarterCalendar` (FullCalendar) view was removed; its
+deps (`@fullcalendar/*`) are uninstalled. `WeekTable` is the quarter-level
+surface, `YearGrid` the year overview. A stale persisted `viewMode: 'calendar'`
+is coerced to `'table'` on load (`stores/ui.ts`).
 
 **v1.2 (Komfort):** Termin-Vorlagen (`TemplatesSidebar` drag/click-to-place +
 `TemplatesTab` management in Settings), Excel-Import, `YearGrid` year view, and

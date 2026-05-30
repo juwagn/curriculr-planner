@@ -30,7 +30,7 @@ v1.0 covers wizard, quarter editor, drag-drop, ICS export, LocalStorage. Roadmap
 
 - Vite + React 19 + TypeScript (strict)
 - Tailwind v4 + shadcn/ui
-- FullCalendar (drag-drop)
+- @dnd-kit (drag-drop)
 - Zustand (state) + react-hook-form + Zod (validation)
 - Vitest + Testing-Library
 

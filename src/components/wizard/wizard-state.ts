@@ -7,6 +7,7 @@ export interface Step1Data {
   firstTeachingDay: string;
   lastSchoolDay: string;
   holidays: Holiday[];
+  stateCode?: string;
 }
 
 export interface Step2Data {

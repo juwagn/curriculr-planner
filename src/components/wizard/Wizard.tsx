@@ -88,6 +88,7 @@ export function Wizard({ onCancel, onComplete }: Props) {
             step1.lastSchoolDay
           );
           previewDoc.schoolyear.holidays = step1.holidays;
+          previewDoc.schoolyear.stateCode = step1.stateCode;
           previewDoc.schoolyear.quarterBoundaries = [...step2.quarterBoundaries];
           previewDoc.categories = step2.categories;
           previewDoc.availableGroups = step2.availableGroups;

@@ -50,6 +50,23 @@ describe('mergeFetchedHolidays', () => {
     expect(merged.find((h) => h.id === 'a1')).toBeUndefined();
     expect(merged.find((h) => h.id === 'n1')).toBeTruthy();
   });
+
+  it('drops empty manual placeholder rows (no start and no end)', () => {
+    const existing: Holiday[] = [
+      { id: 'p1', label: 'Herbstferien', start: '', end: '', type: 'ferien' },
+      { id: 'p2', label: 'Sommerferien', start: '', end: '', type: 'ferien' },
+      { id: 'm1', label: 'Bewegliche Ferien', start: '2027-02-15', end: '2027-02-16', type: 'ferien' }
+    ];
+    const fetched: Holiday[] = [
+      { id: 'n1', label: 'Herbstferien', start: '2026-10-12', end: '2026-10-24', type: 'ferien', source: 'api' }
+    ];
+    const merged = mergeFetchedHolidays(existing, fetched);
+    expect(merged.find((h) => h.id === 'p1')).toBeUndefined();
+    expect(merged.find((h) => h.id === 'p2')).toBeUndefined();
+    expect(merged.find((h) => h.id === 'm1')).toBeTruthy();
+    expect(merged.find((h) => h.id === 'n1')).toBeTruthy();
+    expect(merged).toHaveLength(2);
+  });
 });
 
 describe('GERMAN_STATES', () => {

@@ -55,9 +55,12 @@ export function mapHoliday(item: OpenHolidayItem, type: Holiday['type']): Holida
   };
 }
 
-/** Manuelle Einträge bleiben, alte API-Einträge werden durch die neuen ersetzt. */
+/**
+ * Manuelle Einträge bleiben, alte API-Einträge werden durch die neuen ersetzt.
+ * Leere Platzhalter-Zeilen (ohne Start und Ende) werden verworfen.
+ */
 export function mergeFetchedHolidays(existing: Holiday[], fetched: Holiday[]): Holiday[] {
-  const manual = existing.filter((h) => h.source !== 'api');
+  const manual = existing.filter((h) => h.source !== 'api' && (h.start || h.end));
   return [...manual, ...fetched];
 }
 

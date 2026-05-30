@@ -86,10 +86,20 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
           Eckdaten
         </h3>
         <div className="grid grid-cols-[260px_200px] gap-3 items-center">
-          <Label>Erster Schultag (SW 00)</Label>
+          <Label>
+            Erster Schultag (SW 00){' '}
+            {!data.firstSchoolDay && (
+              <span className="text-[var(--color-status-red)]" aria-hidden>
+                *
+              </span>
+            )}
+          </Label>
           <Input
             type="date"
             className="min-w-[180px]"
+            aria-required
+            data-invalid={!data.firstSchoolDay || undefined}
+            style={!data.firstSchoolDay ? { borderColor: 'var(--color-status-red)' } : undefined}
             value={data.firstSchoolDay}
             onChange={(e) => update('firstSchoolDay', e.target.value)}
           />
@@ -100,14 +110,29 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
             value={data.firstTeachingDay}
             onChange={(e) => update('firstTeachingDay', e.target.value)}
           />
-          <Label>Letzter Schultag</Label>
+          <Label>
+            Letzter Schultag{' '}
+            {!data.lastSchoolDay && (
+              <span className="text-[var(--color-status-red)]" aria-hidden>
+                *
+              </span>
+            )}
+          </Label>
           <Input
             type="date"
             className="min-w-[180px]"
+            aria-required
+            data-invalid={!data.lastSchoolDay || undefined}
+            style={!data.lastSchoolDay ? { borderColor: 'var(--color-status-red)' } : undefined}
             value={data.lastSchoolDay}
             onChange={(e) => update('lastSchoolDay', e.target.value)}
           />
         </div>
+        {(!data.firstSchoolDay || !data.lastSchoolDay) && (
+          <p className="text-[13px] text-[var(--color-status-red)]">
+            * Pflichtfeld — Erster und Letzter Schultag werden für den Ferien-Abruf benötigt.
+          </p>
+        )}
       </div>
 
       <HolidayFetchControl

@@ -49,8 +49,15 @@ export function HolidayFetchControl({ stateCode, from, to, holidays, onApply }: 
         ferien: fetched.filter((h) => h.type === 'ferien').length,
         feiertage: fetched.filter((h) => h.type === 'feiertag').length
       });
-    } catch {
-      setError('Abruf fehlgeschlagen — bitte manuell eintragen.');
+    } catch (err) {
+      console.error('Ferien/Feiertage-Abruf fehlgeschlagen:', err);
+      const reason =
+        err instanceof TypeError
+          ? 'Keine Verbindung zu openholidaysapi.org (evtl. Firewall/Proxy im Schulnetz).'
+          : err instanceof Error
+            ? err.message
+            : String(err);
+      setError(`Abruf fehlgeschlagen: ${reason} — bitte manuell eintragen.`);
     } finally {
       setLoading(false);
     }

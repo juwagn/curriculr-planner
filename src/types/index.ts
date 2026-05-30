@@ -7,6 +7,9 @@ export interface Holiday {
   label: string;
   start: ISODate;
   end: ISODate;
+  type: 'ferien' | 'feiertag';
+  /** 'api' = aus OpenHolidays gezogen (wird bei Re-Fetch ersetzt); fehlt = manuell. */
+  source?: 'api' | 'manual';
 }
 
 export interface Schoolyear {
@@ -17,6 +20,8 @@ export interface Schoolyear {
   lastSchoolDay: ISODate;
   holidays: Holiday[];
   quarterBoundaries: ISODate[];
+  /** Bundesland-Code (z. B. 'DE-NW') für Re-Fetch der Ferien/Feiertage. */
+  stateCode?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -61,7 +66,7 @@ export interface EventTemplate {
 }
 
 export interface PlannerDocument {
-  version: 3;
+  version: 4;
   schoolyear: Schoolyear;
   categories: Category[];
   events: PlanEvent[];

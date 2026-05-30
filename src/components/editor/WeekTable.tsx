@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore, type Density } from '@/stores/ui';
-import { computeWeekRows, getQuarterRange, type WeekRow } from '@/lib/schoolweeks';
+import { computeWeekRows, getQuarterRange, isHoliday, type WeekRow } from '@/lib/schoolweeks';
 import type { Category, PlanEvent } from '@/types';
 import { useConflicts, conflictsByEvent } from '@/hooks/useConflicts';
 import type { Conflict } from '@/lib/conflicts';
@@ -35,9 +35,10 @@ interface DayCellProps {
   categoryById: Map<string, Category>;
   conflictMap: Map<string, Conflict[]>;
   rowHeight: number;
+  feiertag?: string | null;
 }
 
-function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeight }: DayCellProps) {
+function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeight, feiertag }: DayCellProps) {
   const iso = dayIso(mondayIso, dayIdx);
   const openCreate = useUiStore((s) => s.openCreateEvent);
   const openEdit = useUiStore((s) => s.openEditEvent);
@@ -66,9 +67,20 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeig
       className={`group align-top border-r border-b border-[var(--color-ink-200)] px-1.5 py-1.5 cursor-pointer relative transition-colors ${
         isOver ? 'bg-[var(--color-marine-100)]/60' : 'hover:bg-[var(--color-paper-bg)]/60'
       }`}
-      style={{ minHeight: rowHeight, height: rowHeight, transitionDuration: 'var(--dur-state)', transitionTimingFunction: 'var(--ease-state)' }}
+      style={{
+        minHeight: rowHeight,
+        height: rowHeight,
+        transitionDuration: 'var(--dur-state)',
+        transitionTimingFunction: 'var(--ease-state)',
+        ...(feiertag ? { backgroundColor: 'var(--color-feiertag-bg)' } : {})
+      }}
     >
       <div className="flex flex-col gap-1">
+        {feiertag && (
+          <span className="block truncate text-[11px] font-semibold text-[var(--color-ink-900)]" title={feiertag}>
+            {feiertag}
+          </span>
+        )}
         {events.map((ev) => {
           const cat = categoryById.get(ev.categoryId);
           if (!cat) return null;
@@ -287,6 +299,8 @@ export function WeekTable() {
                   {DAY_LABELS.map((_d, dayIdx) => {
                     const iso = dayIso(row.startDate, dayIdx);
                     const events = eventsByDate.get(iso) ?? [];
+                    const h = isHoliday(iso, doc.schoolyear.holidays);
+                    const feiertag = h && h.type === 'feiertag' ? h.label : null;
                     return (
                       <DayCell
                         key={dayIdx}
@@ -296,6 +310,7 @@ export function WeekTable() {
                         categoryById={categoryById}
                         conflictMap={conflictMap}
                         rowHeight={rowHeight}
+                        feiertag={feiertag}
                       />
                     );
                   })}

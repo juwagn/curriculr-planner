@@ -7,7 +7,9 @@ export const HolidaySchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   start: isoDate,
-  end: isoDate
+  end: isoDate,
+  type: z.enum(['ferien', 'feiertag']),
+  source: z.enum(['api', 'manual']).optional()
 });
 
 export const SchoolyearSchema = z.object({
@@ -18,6 +20,7 @@ export const SchoolyearSchema = z.object({
   lastSchoolDay: isoDate,
   holidays: z.array(HolidaySchema),
   quarterBoundaries: z.array(isoDate).min(3).max(3),
+  stateCode: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string()
 });
@@ -76,7 +79,7 @@ export const EventTemplateSchema = z
   });
 
 export const PlannerDocumentSchema = z.object({
-  version: z.literal(3),
+  version: z.literal(4),
   schoolyear: SchoolyearSchema,
   categories: z.array(CategorySchema),
   events: z.array(PlanEventSchema),
@@ -101,6 +104,15 @@ export function migrate(raw: unknown): Record<string, unknown> {
   if (doc.version === 2) {
     doc.version = 3;
     if (!Array.isArray(doc.templates)) doc.templates = [];
+  }
+  if (doc.version === 3) {
+    doc.version = 4;
+    const sy = doc.schoolyear as { holidays?: Array<Record<string, unknown>> } | undefined;
+    if (sy && Array.isArray(sy.holidays)) {
+      for (const h of sy.holidays) {
+        if (typeof h.type !== 'string') h.type = 'ferien';
+      }
+    }
   }
   return doc;
 }

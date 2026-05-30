@@ -66,7 +66,7 @@ describe('PlanEventSchema', () => {
 describe('PlannerDocumentSchema', () => {
   it('accepts complete document', () => {
     const doc = {
-      version: 3,
+      version: 4,
       schoolyear: {
         id: 'sy',
         label: '2026/27',
@@ -106,17 +106,17 @@ describe('migrate v1 -> v2 -> v3', () => {
     meta: { name: 'Test', lastSaved: '2025-01-01T00:00:00.000Z' }
   };
 
-  it('chains v1 all the way to v3 (adds ignoredConflicts + templates)', () => {
+  it('chains v1 all the way to v4 (adds ignoredConflicts + templates)', () => {
     const migrated = migrate(v1Doc);
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(4);
     expect(migrated.ignoredConflicts).toEqual([]);
     expect(migrated.templates).toEqual([]);
   });
 
-  it('migrates a v2 doc to v3', () => {
+  it('migrates a v2 doc to v4', () => {
     const v2 = { ...v1Doc, version: 2, ignoredConflicts: ['x'] };
     const migrated = migrate(v2);
-    expect(migrated.version).toBe(3);
+    expect(migrated.version).toBe(4);
     expect(migrated.ignoredConflicts).toEqual(['x']);
     expect(migrated.templates).toEqual([]);
   });
@@ -140,24 +140,62 @@ describe('EventTemplateSchema', () => {
 });
 
 describe('migrate v2 → v3', () => {
-  it('adds templates: [] to a v2 doc', () => {
+  it('adds templates: [] to a v2 doc and chains to v4', () => {
     const v2 = { version: 2, ignoredConflicts: [] };
     const out = migrate(v2);
-    expect(out.version).toBe(3);
+    expect(out.version).toBe(4);
     expect(out.templates).toEqual([]);
   });
 
-  it('chains v1 → v3 (ignoredConflicts AND templates added)', () => {
+  it('chains v1 → v4 (ignoredConflicts AND templates added)', () => {
     const v1 = { version: 1 };
     const out = migrate(v1);
-    expect(out.version).toBe(3);
+    expect(out.version).toBe(4);
     expect(out.ignoredConflicts).toEqual([]);
     expect(out.templates).toEqual([]);
   });
 
-  it('leaves an existing templates array untouched', () => {
+  it('leaves an existing templates array untouched when migrating v3 → v4', () => {
     const v3 = { version: 3, ignoredConflicts: [], templates: [{ id: 't1' }] };
     const out = migrate(v3);
+    expect(out.version).toBe(4);
     expect(out.templates).toEqual([{ id: 't1' }]);
+  });
+});
+
+describe('migrate v3 → v4', () => {
+  const v3Doc = {
+    version: 3,
+    schoolyear: {
+      id: 'sy1',
+      label: '2026/27',
+      firstSchoolDay: '2026-08-10',
+      firstTeachingDay: '2026-08-12',
+      lastSchoolDay: '2027-07-15',
+      holidays: [
+        { id: 'h1', label: 'Herbstferien', start: '2026-10-12', end: '2026-10-24' }
+      ],
+      quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-16'],
+      createdAt: '2026-05-01T00:00:00.000Z',
+      updatedAt: '2026-05-01T00:00:00.000Z'
+    },
+    categories: [],
+    events: [],
+    annotations: [],
+    availableGroups: [],
+    ignoredConflicts: [],
+    templates: [],
+    meta: { name: 'Plan', lastSaved: '2026-05-01T00:00:00.000Z' }
+  };
+
+  it('bumps version to 4 and defaults holiday.type to ferien', () => {
+    const out = migrate(v3Doc) as typeof v3Doc & { version: number };
+    expect(out.version).toBe(4);
+    expect((out.schoolyear.holidays[0] as { type: string }).type).toBe('ferien');
+  });
+
+  it('migrated doc passes the current schema', () => {
+    const out = migrate(v3Doc);
+    expect(() => PlannerDocumentSchema.parse(out)).not.toThrow();
   });
 });

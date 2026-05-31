@@ -165,7 +165,33 @@ export function YearGrid() {
   const cols = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
-    <div className="h-full w-full overflow-auto">
+    <div className="flex h-full w-full flex-col gap-3 overflow-hidden">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-[12px] text-[var(--color-ink-500)]">
+        {doc.categories.map((c) => (
+          <span key={c.id} className="inline-flex items-center gap-1.5">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
+              style={{ backgroundColor: c.color }}
+            />
+            {c.label}
+          </span>
+        ))}
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            className="inline-block h-2.5 w-3.5 rounded-[2px] ring-1 ring-black/10"
+            style={{ backgroundImage: FERIEN_HATCH }}
+          />
+          Ferien
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            className="inline-block h-2.5 w-3.5 rounded-[2px] ring-1 ring-black/10"
+            style={{ backgroundColor: 'var(--color-feiertag-bg)' }}
+          />
+          Feiertag
+        </span>
+      </div>
+      <div className="min-h-0 flex-1 overflow-auto">
       <table className="h-full w-full table-fixed border-collapse text-sm">
         <thead>
           <tr>
@@ -212,6 +238,7 @@ export function YearGrid() {
           })}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

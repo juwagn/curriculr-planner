@@ -10,6 +10,7 @@ export function EditorToolbar() {
   const doc = usePlannerStore((s) => s.doc);
   const currentQuarter = useUiStore((s) => s.currentQuarter);
   const setQuarter = useUiStore((s) => s.setQuarter);
+  const viewMode = useUiStore((s) => s.viewMode);
   const toggleNotes = useUiStore((s) => s.toggleNotesSidebar);
   const toggleTemplates = useUiStore((s) => s.toggleTemplatesSidebar);
   const openCreate = useUiStore((s) => s.openCreateEvent);
@@ -40,22 +41,28 @@ export function EditorToolbar() {
 
   return (
     <div className="bg-[var(--color-paper-card)] border-b border-[var(--color-ink-200)] px-6 py-2 flex items-center gap-2">
-      {[1, 2, 3, 4].map((q) => (
-        <button
-          key={q}
-          onClick={() => setQuarter(q as 1 | 2 | 3 | 4)}
-          className="px-4 py-1.5 rounded-[var(--radius-pill)] text-sm font-semibold transition-colors"
-          style={{
-            background: currentQuarter === q ? 'var(--color-marine-800)' : 'var(--color-paper-bg)',
-            color: currentQuarter === q ? 'var(--color-paper-card)' : 'var(--color-ink-500)',
-            transitionDuration: 'var(--dur-state)',
-            transitionTimingFunction: 'var(--ease-state)'
-          }}
-        >
-          Q{q}
-        </button>
-      ))}
-      <span className="ml-3 text-sm text-[var(--color-ink-500)] tabular-nums">{fmtRange(currentQuarter - 1)}</span>
+      {viewMode === 'table' ? (
+        <>
+          {[1, 2, 3, 4].map((q) => (
+            <button
+              key={q}
+              onClick={() => setQuarter(q as 1 | 2 | 3 | 4)}
+              className="px-4 py-1.5 rounded-[var(--radius-pill)] text-sm font-semibold transition-colors"
+              style={{
+                background: currentQuarter === q ? 'var(--color-marine-800)' : 'var(--color-paper-bg)',
+                color: currentQuarter === q ? 'var(--color-paper-card)' : 'var(--color-ink-500)',
+                transitionDuration: 'var(--dur-state)',
+                transitionTimingFunction: 'var(--ease-state)'
+              }}
+            >
+              Q{q}
+            </button>
+          ))}
+          <span className="ml-3 text-sm text-[var(--color-ink-500)] tabular-nums">{fmtRange(currentQuarter - 1)}</span>
+        </>
+      ) : (
+        <span className="text-sm font-semibold text-[var(--color-ink-900)]">Jahresübersicht</span>
+      )}
       <div className="ml-auto flex items-center gap-2">
         <Button variant="ghost" size="icon-sm" disabled={!canUndo} onClick={undo} aria-label="Rückgängig" title="Rückgängig (Strg+Z)">
           <Undo2 />

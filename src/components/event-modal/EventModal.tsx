@@ -50,7 +50,13 @@ export function EventModal() {
     if (state.mode === 'edit' && editing) {
       setForm({ ...editing });
     } else {
-      const presetDate = (state.mode === 'create' && state.presetDate) || new Date().toISOString().slice(0, 10);
+      // Fall back to a date inside the schoolyear being planned: today if it
+      // lies within the year, otherwise the first school day. Avoids defaulting
+      // a future year's plan to the current (out-of-range) date.
+      const today = new Date().toISOString().slice(0, 10);
+      const { firstSchoolDay, lastSchoolDay } = doc.schoolyear;
+      const inRange = today >= firstSchoolDay && today <= lastSchoolDay ? today : firstSchoolDay;
+      const presetDate = (state.mode === 'create' && state.presetDate) || inRange;
       setForm({
         id: newUuid(),
         title: '',
@@ -116,9 +122,13 @@ export function EventModal() {
         <DialogTitle>{state.mode === 'edit' ? 'Termin bearbeiten' : 'Neuer Termin'}</DialogTitle>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="title">Titel</Label>
+            <Label htmlFor="title">
+              Titel <span className="text-[var(--color-danger)]" aria-hidden="true">*</span>
+            </Label>
             <Input
               id="title"
+              required
+              aria-required="true"
               autoFocus
               value={form.title}
               onChange={(e) => handleTitle(e.target.value)}

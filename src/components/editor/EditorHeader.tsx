@@ -46,10 +46,11 @@ export function EditorHeader({ onSwitchPlan }: Props) {
           <div className="flex items-center bg-white/10 rounded-[var(--radius-pill)] overflow-hidden">
             <button
               onClick={() => setViewMode('table')}
+              aria-pressed={viewMode === 'table'}
               className="px-3 py-1 font-semibold transition-colors"
               style={{
-                background: viewMode === 'table' ? 'var(--color-gelb-500)' : 'transparent',
-                color: viewMode === 'table' ? 'var(--color-ink-900)' : undefined,
+                background: viewMode === 'table' ? 'var(--color-paper-card)' : 'transparent',
+                color: viewMode === 'table' ? 'var(--color-marine-800)' : 'rgba(255,255,255,0.7)',
                 transitionDuration: 'var(--dur-state)'
               }}
             >
@@ -57,10 +58,11 @@ export function EditorHeader({ onSwitchPlan }: Props) {
             </button>
             <button
               onClick={() => setViewMode('year')}
+              aria-pressed={viewMode === 'year'}
               className="px-3 py-1 font-semibold transition-colors"
               style={{
-                background: viewMode === 'year' ? 'var(--color-gelb-500)' : 'transparent',
-                color: viewMode === 'year' ? 'var(--color-ink-900)' : undefined,
+                background: viewMode === 'year' ? 'var(--color-paper-card)' : 'transparent',
+                color: viewMode === 'year' ? 'var(--color-marine-800)' : 'rgba(255,255,255,0.7)',
                 transitionDuration: 'var(--dur-state)'
               }}
             >

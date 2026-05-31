@@ -111,7 +111,7 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeig
         })}
       </div>
       {events.length === 0 && (
-        <span className="absolute bottom-1 left-2 text-[11px] text-[var(--color-ink-500)] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+        <span className="absolute bottom-1 left-2 text-[11px] text-[var(--color-ink-500)] opacity-30 group-hover:opacity-100 pointer-events-none transition-opacity">
           + Termin
         </span>
       )}
@@ -233,9 +233,19 @@ export function WeekTable() {
 
   return (
     <>
+      <div className="flex h-full flex-col gap-3">
+      {doc.events.length === 0 && (
+        <div className="flex items-center gap-2 rounded-[var(--radius-default)] border border-[var(--color-ink-200)] bg-[var(--color-gelb-100)] px-4 py-2.5 text-[13px] text-[var(--color-ink-900)]">
+          <span aria-hidden="true">📝</span>
+          <span>
+            Klicken Sie in eine Tageszelle, um einen Termin anzulegen, oder nutzen Sie
+            {' '}<span className="font-semibold">+ Termin</span> oben rechts.
+          </span>
+        </div>
+      )}
       <div
         ref={containerRef}
-        className="h-full bg-[var(--color-paper-card)] rounded-[var(--radius-default)] border border-[var(--color-ink-200)] overflow-auto"
+        className="min-h-0 flex-1 bg-[var(--color-paper-card)] rounded-[var(--radius-default)] border border-[var(--color-ink-200)] overflow-auto"
         style={{ boxShadow: 'var(--shadow-card)' }}
       >
         <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
@@ -385,6 +395,7 @@ export function WeekTable() {
             })}
           </tbody>
         </table>
+      </div>
       </div>
       <NotePopover
         schoolweek={notePopoverSw}

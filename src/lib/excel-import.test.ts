@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { utils, write } from 'xlsx';
 import { parseKonverterXlsx } from './excel-import';
 
-function buildWorkbook(ferien: (string | number)[][], plan: (string | number)[][]): ArrayBuffer {
+type Cell = string | number | null;
+
+function buildWorkbook(ferien: Cell[][], plan: Cell[][]): ArrayBuffer {
   const wb = utils.book_new();
   utils.book_append_sheet(wb, utils.aoa_to_sheet(ferien), 'Ferien');
   utils.book_append_sheet(wb, utils.aoa_to_sheet(plan), 'Terminplan');
@@ -73,6 +75,90 @@ describe('parseKonverterXlsx', () => {
     utils.book_append_sheet(wb, utils.aoa_to_sheet([['x']]), 'Sonstiges');
     const buf = write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer;
     expect(() => parseKonverterXlsx(buf)).toThrow(/Terminplan/);
+  });
+
+  describe('SW-Key format (real Konverter template)', () => {
+    const SW_HEADER = [
+      'SW-Key', 'Montag-ISO', 'SW', 'Schulwoche', 'Wochentag',
+      'Uhrzeit', 'Endzeit', 'Titel / Veranstaltung', 'Kategorie', 'Ganztaegig', 'Anmerkung'
+    ];
+
+    it('derives the event date from Montag-ISO + Wochentag offset', () => {
+      const buf = buildWorkbook(
+        [['Label', 'Start', 'Ende']],
+        [
+          SW_HEADER,
+          ['SW 00', '2026-08-24', 'SW 00', '24.08. - 28.08.2026', 'Mi', '09:00', '', 'Schulleitung', '', 'Nein', ''],
+          [null, '2026-08-24', 'SW 00', '', 'Do', '11:00', '', 'Übergabe', '', 'Nein', '']
+        ]
+      );
+      const { parsed } = parseKonverterXlsx(buf);
+      expect(parsed).toHaveLength(2);
+      // Mi = Monday + 2 days
+      expect(parsed[0]).toMatchObject({ summary: 'Schulleitung', start: '2026-08-26', allDay: false, startTime: '09:00' });
+      // Do = Monday + 3 days
+      expect(parsed[1]).toMatchObject({ summary: 'Übergabe', start: '2026-08-27' });
+    });
+
+    it('marks rows with Ganztaegig=Ja as all-day and reads the category', () => {
+      const buf = buildWorkbook(
+        [['Label', 'Start', 'Ende']],
+        [
+          SW_HEADER,
+          [null, '2026-08-24', '', '', 'Fr', '', '', 'Sommerfest', 'Jahrgang 5/6', 'Ja', 'Turnhalle']
+        ]
+      );
+      const { parsed } = parseKonverterXlsx(buf);
+      expect(parsed).toHaveLength(1);
+      expect(parsed[0]).toMatchObject({
+        summary: 'Sommerfest',
+        start: '2026-08-28', // Fr = Monday + 4
+        end: '2026-08-28',
+        allDay: true,
+        categories: ['Jahrgang 5/6'],
+        description: 'Turnhalle'
+      });
+    });
+
+    it('carries forward the Monday from SW-header rows when a data row lacks Montag-ISO', () => {
+      const buf = buildWorkbook(
+        [['Label', 'Start', 'Ende']],
+        [
+          SW_HEADER,
+          ['SW 01', '2026-08-31', 'SW 01', '', '', '', '', '', '', '', ''], // header divider, no title
+          [null, '', '', '', 'Mo', '', '', 'Erster Schultag', '', 'Ja', '']
+        ]
+      );
+      const { parsed } = parseKonverterXlsx(buf);
+      expect(parsed).toHaveLength(1);
+      expect(parsed[0]).toMatchObject({ summary: 'Erster Schultag', start: '2026-08-31', allDay: true });
+    });
+
+    it('treats an empty Wochentag as a whole-week event (Mon–Fri)', () => {
+      const buf = buildWorkbook(
+        [['Label', 'Start', 'Ende']],
+        [
+          SW_HEADER,
+          [null, '2026-08-24', '', '', '', '', '', 'Projektwoche', '', 'Ja', '']
+        ]
+      );
+      const { parsed } = parseKonverterXlsx(buf);
+      expect(parsed).toHaveLength(1);
+      expect(parsed[0]).toMatchObject({ summary: 'Projektwoche', start: '2026-08-24', end: '2026-08-28', allDay: true });
+    });
+
+    it('reads Montag-ISO stored as a numeric Excel serial', () => {
+      // 2026-08-24 → OLE serial 46258
+      const buf = buildWorkbook(
+        [['Label', 'Start', 'Ende']],
+        [
+          SW_HEADER,
+          [null, 46258, '', '', 'Mi', '09:00', '', 'Schulleitung', '', 'Nein', '']
+        ]
+      );
+      const { parsed } = parseKonverterXlsx(buf);
+      expect(parsed[0]).toMatchObject({ summary: 'Schulleitung', start: '2026-08-26' });
+    });
   });
 
   it('parses Excel-native date cells (OLE serial / Date objects) for Ferien and events', () => {

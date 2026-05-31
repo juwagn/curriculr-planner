@@ -1,11 +1,19 @@
+import { addDays, format, parseISO } from 'date-fns';
 import { read, utils, SSF } from 'xlsx';
 import type { Holiday, Schoolyear } from '@/types';
 import type { ParsedEvent } from './ics-import';
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+/** Mon–Fri → day offset from the school week's Monday (Konverter convention). */
+const WEEKDAY_OFFSET: Record<string, number> = { Mo: 0, Di: 1, Mi: 2, Do: 3, Fr: 4 };
+
 function uid(): string {
   return crypto.randomUUID();
+}
+
+function addDaysIso(iso: string, days: number): string {
+  return format(addDays(parseISO(iso), days), 'yyyy-MM-dd');
 }
 
 /**
@@ -92,6 +100,19 @@ export function parseKonverterXlsx(buffer: ArrayBuffer): KonverterParseResult {
   }
 
   const planRows = utils.sheet_to_json<(string | number)[]>(planSheet, { header: 1 });
+  const isSwFormat = String(planRows[0]?.[0] ?? '').trim() === 'SW-Key';
+  result.parsed = isSwFormat ? parseSwFormat(planRows) : parseExportFormat(planRows);
+
+  return result;
+}
+
+/**
+ * Parses this tool's own Excel export, where column A holds the per-event ISO
+ * date. Columns: Datum | Startzeit | Endzeit | Ganztägig | Titel | Kategorie |
+ * Standort | Gruppen | Bemerkung | SW | Anmerkung SW.
+ */
+function parseExportFormat(planRows: (string | number)[][]): ParsedEvent[] {
+  const parsed: ParsedEvent[] = [];
   for (const row of planRows.slice(1)) {
     const datum = toIsoDate(row[0]);
     if (!ISO_DATE.test(datum)) continue; // skip SW-divider + blank rows
@@ -101,7 +122,7 @@ export function parseKonverterXlsx(buffer: ArrayBuffer): KonverterParseResult {
     const location = String(row[6] ?? '').trim() || undefined;
     const description = String(row[8] ?? '').trim() || undefined;
     const category = String(row[5] ?? '').trim();
-    result.parsed.push({
+    parsed.push({
       uid: uid(),
       summary: String(row[4] ?? '').trim(),
       start: datum,
@@ -114,6 +135,63 @@ export function parseKonverterXlsx(buffer: ArrayBuffer): KonverterParseResult {
       categories: category ? [category] : []
     });
   }
+  return parsed;
+}
 
-  return result;
+/**
+ * Parses the real Konverter "Schulwochen-Vorlage" (header row starts with
+ * "SW-Key"). Each row carries the school week's Monday in column B (Montag-ISO)
+ * and a weekday abbreviation in column E; the event date is derived from the two.
+ * Columns: SW-Key | Montag-ISO | SW | Schulwoche | Wochentag | Uhrzeit | Endzeit
+ * | Titel | Kategorie | Ganztaegig | Anmerkung.
+ *
+ * SW-header rows (no title) only set the carry-forward Monday for following data
+ * rows whose Montag-ISO is blank. An empty/"Ganze Woche" weekday yields a Mon–Fri
+ * whole-week event.
+ */
+function parseSwFormat(planRows: (string | number)[][]): ParsedEvent[] {
+  const parsed: ParsedEvent[] = [];
+  let currentMonday = '';
+  for (const row of planRows.slice(1)) {
+    const title = String(row[7] ?? '').trim();
+    const mondayCell = toIsoDate(row[1]);
+    const rowMonday = ISO_DATE.test(mondayCell) ? mondayCell : '';
+
+    // Header/divider rows have no title; they just refresh the carry-forward Monday.
+    if (!title) {
+      if (rowMonday) currentMonday = rowMonday;
+      continue;
+    }
+
+    const monday = rowMonday || currentMonday;
+    if (!monday) continue; // no anchor date → cannot place the event
+    if (rowMonday) currentMonday = rowMonday;
+
+    const weekday = String(row[4] ?? '').trim();
+    const startTime = toTime(row[5]);
+    const endTime = toTime(row[6]);
+    const category = String(row[8] ?? '').trim();
+    const description = String(row[10] ?? '').trim() || undefined;
+    const allDay =
+      String(row[9] ?? '').trim().toLowerCase() === 'ja' || (!startTime && !endTime);
+
+    const offset = WEEKDAY_OFFSET[weekday];
+    const isWholeWeek = !weekday || weekday === 'Ganze Woche';
+    const start = offset !== undefined ? addDaysIso(monday, offset) : monday;
+    const end = isWholeWeek ? addDaysIso(monday, 4) : start;
+
+    parsed.push({
+      uid: uid(),
+      summary: title,
+      start,
+      end,
+      allDay,
+      startTime: allDay ? undefined : startTime,
+      endTime: allDay ? undefined : endTime,
+      location: undefined,
+      description,
+      categories: category ? [category] : []
+    });
+  }
+  return parsed;
 }

@@ -22,6 +22,7 @@ export function Editor({ onSwitchPlan }: Props) {
   const templatesSidebarOpen = useUiStore((s) => s.templatesSidebarOpen);
   const doc = usePlannerStore((s) => s.doc);
   const [draggedTemplateId, setDraggedTemplateId] = useState<string | null>(null);
+  const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
   // Require a small drag distance so plain clicks (open/edit, arm template)
   // are not swallowed by the pointer sensor.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -33,9 +34,23 @@ export function Editor({ onSwitchPlan }: Props) {
     ? doc?.categories.find((c) => c.id === draggedTemplate.categoryId)?.color
     : undefined;
 
+  const draggedEvent = draggedEventId
+    ? doc?.events.find((ev) => ev.id === draggedEventId) ?? null
+    : null;
+  const draggedEventColor = draggedEvent
+    ? doc?.categories.find((c) => c.id === draggedEvent.categoryId)?.color
+    : undefined;
+
+  const resetDrag = () => {
+    setDraggedTemplateId(null);
+    setDraggedEventId(null);
+  };
+
   const onDragStart = (e: DragStartEvent) => {
     const id = String(e.active.id);
     setDraggedTemplateId(id.startsWith('template:') ? id.slice('template:'.length) : null);
+    // Only event-move drags get a follow-cursor preview; resize handles do not.
+    setDraggedEventId(id.startsWith('event:') ? id.slice('event:'.length) : null);
   };
 
   return (
@@ -47,9 +62,9 @@ export function Editor({ onSwitchPlan }: Props) {
         onDragStart={onDragStart}
         onDragEnd={(e) => {
           handleEditorDragEnd(e);
-          setDraggedTemplateId(null);
+          resetDrag();
         }}
-        onDragCancel={() => setDraggedTemplateId(null)}
+        onDragCancel={resetDrag}
       >
         <div className="flex-1 min-h-0 flex overflow-hidden">
           {templatesSidebarOpen && <TemplatesSidebar />}
@@ -70,6 +85,19 @@ export function Editor({ onSwitchPlan }: Props) {
                   ? 'ganztägig'
                   : `${draggedTemplate.startTime ?? ''}–${draggedTemplate.endTime ?? ''}`}
               </span>
+            </div>
+          ) : draggedEvent ? (
+            <div className="flex max-w-[16rem] cursor-grabbing items-center gap-2.5 rounded-lg border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-3 py-2 shadow-[var(--shadow-modal)] ring-2 ring-[var(--color-gelb-400)]">
+              <span
+                className="inline-block h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-black/10"
+                style={{ backgroundColor: draggedEventColor }}
+              />
+              {!draggedEvent.allDay && draggedEvent.startTime && (
+                <span className="shrink-0 text-[11px] font-bold tabular-nums text-[var(--color-ink-500)]">
+                  {draggedEvent.startTime}
+                </span>
+              )}
+              <span className="truncate text-sm font-medium text-[var(--color-ink-900)]">{draggedEvent.title}</span>
             </div>
           ) : null}
         </DragOverlay>

@@ -36,9 +36,10 @@ interface DayCellProps {
   conflictMap: Map<string, Conflict[]>;
   rowHeight: number;
   feiertag?: string | null;
+  ferien?: boolean;
 }
 
-function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeight, feiertag }: DayCellProps) {
+function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeight, feiertag, ferien }: DayCellProps) {
   const iso = dayIso(mondayIso, dayIdx);
   const openCreate = useUiStore((s) => s.openCreateEvent);
   const openEdit = useUiStore((s) => s.openEditEvent);
@@ -72,7 +73,11 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeig
         height: rowHeight,
         transitionDuration: 'var(--dur-state)',
         transitionTimingFunction: 'var(--ease-state)',
-        ...(feiertag ? { backgroundColor: 'var(--color-feiertag-bg)' } : {})
+        ...(feiertag
+          ? { backgroundColor: 'var(--color-feiertag-bg)' }
+          : ferien
+            ? { backgroundColor: 'var(--color-ferien-b)' }
+            : {})
       }}
     >
       <div className="flex flex-col gap-1">
@@ -191,17 +196,21 @@ export function WeekTable() {
   const conflicts = useConflicts();
   const conflictMap = useMemo(() => conflictsByEvent(conflicts), [conflicts]);
 
-  const holidayCount = filteredRows.filter((r) => r.kind === 'holiday').length;
-  const schoolweekCount = filteredRows.length - holidayCount;
+  // Only EMPTY holiday weeks render as the compact banner; holiday weeks with
+  // events use a full-height day-cell row, so they count toward the tall rows.
+  const rowHasEvents = (row: WeekRow) =>
+    DAY_LABELS.some((_d, dayIdx) => (eventsByDate.get(dayIso(row.startDate, dayIdx)) ?? []).length > 0);
+  const bannerCount = filteredRows.filter((r) => r.kind === 'holiday' && !rowHasEvents(r)).length;
+  const tallRowCount = filteredRows.length - bannerCount;
 
   useLayoutEffect(() => {
     if (density !== 'auto') return;
     const update = () => {
       const el = containerRef.current;
-      if (!el || schoolweekCount === 0) return;
+      if (!el || tallRowCount === 0) return;
       const headerH = 40;
-      const available = el.clientHeight - headerH - holidayCount * HOLIDAY_ROW_HEIGHT;
-      const perRow = Math.floor(available / schoolweekCount);
+      const available = el.clientHeight - headerH - bannerCount * HOLIDAY_ROW_HEIGHT;
+      const perRow = Math.floor(available / tallRowCount);
       setAutoHeight(Math.max(80, Math.min(220, perRow)));
     };
     update();
@@ -212,7 +221,7 @@ export function WeekTable() {
       ro.disconnect();
       window.removeEventListener('resize', update);
     };
-  }, [density, schoolweekCount, holidayCount]);
+  }, [density, tallRowCount, bannerCount]);
 
   if (!doc) return null;
   const rowHeight = density === 'auto' ? autoHeight : ROW_MIN_HEIGHT_BY_DENSITY[density];
@@ -264,6 +273,58 @@ export function WeekTable() {
           <tbody>
             {filteredRows.map((row, i) => {
               if (row.kind === 'holiday') {
+                // A holiday week that contains events (e.g. Schulleitung/Lehrkräfte
+                // in den Ferien) is rendered with normal day cells + Ferien tint so
+                // those events stay visible and editable. Empty holiday weeks stay
+                // collapsed as the compact striped banner.
+                const hasEvents = DAY_LABELS.some(
+                  (_d, dayIdx) => (eventsByDate.get(dayIso(row.startDate, dayIdx)) ?? []).length > 0
+                );
+                if (hasEvents) {
+                  return (
+                    <tr key={`h-${i}-${row.startDate}`} className="transition-colors" style={{ height: rowHeight }}>
+                      <td
+                        className="border-r border-b border-[var(--color-ink-200)]"
+                        style={{
+                          backgroundImage:
+                            'repeating-linear-gradient(45deg, var(--color-ferien-a) 0 8px, var(--color-ferien-b) 8px 16px)'
+                        }}
+                      />
+                      <td
+                        className="border-r border-b border-[var(--color-ink-200)] px-2 align-middle text-[12.5px] tabular-nums whitespace-nowrap text-[var(--color-ink-900)]"
+                        style={{ width: 120, backgroundColor: 'var(--color-ferien-b)' }}
+                      >
+                        <span className="block font-semibold italic">{row.label}</span>
+                        <span className="block text-[11px] text-[var(--color-ink-500)]">
+                          {fmtDot(row.startDate)}–{fmtDot(row.endDate)}
+                        </span>
+                      </td>
+                      {DAY_LABELS.map((_d, dayIdx) => {
+                        const iso = dayIso(row.startDate, dayIdx);
+                        const events = eventsByDate.get(iso) ?? [];
+                        const h = isHoliday(iso, doc.schoolyear.holidays);
+                        const feiertag = h && h.type === 'feiertag' ? h.label : null;
+                        return (
+                          <DayCell
+                            key={dayIdx}
+                            mondayIso={row.startDate}
+                            dayIdx={dayIdx}
+                            events={events}
+                            categoryById={categoryById}
+                            conflictMap={conflictMap}
+                            rowHeight={rowHeight}
+                            feiertag={feiertag}
+                            ferien
+                          />
+                        );
+                      })}
+                      <td
+                        className="border-b border-[var(--color-ink-200)]"
+                        style={{ width: 180, backgroundColor: 'var(--color-ferien-b)' }}
+                      />
+                    </tr>
+                  );
+                }
                 return (
                   <tr key={`h-${i}-${row.startDate}`} style={{ height: HOLIDAY_ROW_HEIGHT }}>
                     <td className="bg-[var(--color-paper-bg)] border-r border-b border-[var(--color-ink-200)]" />

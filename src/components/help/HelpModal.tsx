@@ -65,7 +65,7 @@ export function HelpModal() {
               <button
                 onClick={handleStartTour}
                 className="w-full rounded-[var(--radius-default)] py-2 text-[12px] font-bold text-center"
-                style={{ background: 'var(--color-gelb-400)', color: 'var(--color-ink-900)' }}
+                style={{ background: 'var(--color-gelb-500)', color: 'var(--color-ink-900)' }}
               >
                 ▶ Geführte Tour starten
               </button>

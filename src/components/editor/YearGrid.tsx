@@ -111,7 +111,7 @@ function GridCell({ iso, events, holiday, feiertag, color, title, categories }: 
       aria-label={iso}
       data-has-event={hasEvent ? 'true' : 'false'}
       data-event-count={events.length}
-      title={title}
+      title={hasEvent ? undefined : title}
       onClick={handleClick}
       className={
         'group relative min-w-6 cursor-pointer border border-[var(--color-ink-200)] text-center ' +

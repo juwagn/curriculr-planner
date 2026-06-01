@@ -14,3 +14,13 @@ vite.config.js
 
 # Brainstorm visual companion
 .superpowers/
+
+# Windows thumbnail cache
+Thumbs.db
+
+# Playwright MCP session artifacts
+.playwright-mcp/
+
+# Local plan exports / scratch assets
+*.curriculr.json
+live-logo.png

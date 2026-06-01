@@ -5,6 +5,20 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.3.1] – 2026-06-01
+
+### Behoben
+- Datumsfelder lassen sich wieder direkt tippen (neue `DateInput`-Komponente
+  statt unbedienbarer nativer Felder).
+- Termine in Ferienwochen werden angezeigt (z. B. Lehrer-Termine in den Ferien).
+- Drag-&-Drop zeigt jetzt eine Vorschau beim Verschieben von Terminen.
+- Excel-Import liest das echte Konverter-`SW-Key`-Template korrekt ein.
+- Logos werden auf GitHub Pages korrekt geladen (Pfad mit `BASE_URL`).
+- Leere Platzhalterzeilen werden beim Ferien-Abruf entfernt; Pflichtfelder
+  werden markiert.
+- Dev-Server stürzt nicht mehr ab (`.claude/` wird nicht mehr beobachtet —
+  FSWatcher-Crash auf Netzlaufwerk).
+
 ## [1.3.0] – 2026-05-30 — „Ferien-Import"
 
 ### Hinzugefügt
@@ -68,6 +82,7 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
   Wochentabelle, Kategorien/Gruppen, Notizen, Export als ICS / JSON / Excel.
 - MIT-Lizenz.
 
+[1.3.1]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.1
 [1.3.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.0
 [1.2.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.2.0
 [1.0.3]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.0.3

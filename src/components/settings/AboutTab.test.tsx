@@ -26,6 +26,6 @@ describe('AboutTab', () => {
       screen.getByRole('heading', { name: 'Änderungsverlauf' }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Termin-Vorlagen/)).toBeInTheDocument();
-    expect(screen.getByText(/Schuljahr-Grid/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Schuljahr-Grid/).length).toBeGreaterThan(0);
   });
 });

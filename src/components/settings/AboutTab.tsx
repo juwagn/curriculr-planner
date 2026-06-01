@@ -1,5 +1,5 @@
 const REPO_URL = 'https://github.com/juwagn/curriculr-planner';
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.5.0';
 
 type ChangelogEntry = {
   version: string;
@@ -9,6 +9,33 @@ type ChangelogEntry = {
 
 /** Wichtigste Feature-Updates und Bugfixes je Version (neueste zuerst). */
 const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.5.0',
+    date: '01.06.2026',
+    highlights: [
+      'Eigene Kategorien anlegen und löschen (Einstellungen → Kategorien)',
+      'Sicheres Löschen: genutzte Kategorien werden vor dem Entfernen umgehängt',
+      'Neuer Farbwähler mit abgestimmter Palette plus freier Farbwahl',
+      'Hover-Vorschau im Schuljahr-Grid (Titel + Kategorie-Badge)',
+    ],
+  },
+  {
+    version: '1.4.0',
+    date: '01.06.2026',
+    highlights: [
+      'Geführte Tour (8 Schritte) durch die wichtigsten Editor-Funktionen',
+      'Hilfe-Modal über den ?-Button mit 5 Referenz-Sektionen',
+    ],
+  },
+  {
+    version: '1.3.0',
+    date: '30.05.2026',
+    highlights: [
+      'Ferien & Feiertage automatisch per Bundesland-Auswahl vorbefüllen',
+      'Feiertage in Wochentabelle und Schuljahr-Grid markiert',
+      'Datumsfelder wieder direkt eintippbar; Termine in Ferienwochen sichtbar',
+    ],
+  },
   {
     version: '1.2.0',
     date: '30.05.2026',

@@ -42,7 +42,7 @@ export function EditorToolbar() {
   return (
     <div className="bg-[var(--color-paper-card)] border-b border-[var(--color-ink-200)] px-6 py-2 flex items-center gap-2">
       {viewMode === 'table' ? (
-        <>
+        <div data-tour="quarter-tabs" className="flex items-center gap-2">
           {[1, 2, 3, 4].map((q) => (
             <button
               key={q}
@@ -59,7 +59,7 @@ export function EditorToolbar() {
             </button>
           ))}
           <span className="ml-3 text-sm text-[var(--color-ink-500)] tabular-nums">{fmtRange(currentQuarter - 1)}</span>
-        </>
+        </div>
       ) : (
         <span className="text-sm font-semibold text-[var(--color-ink-900)]">Jahresübersicht</span>
       )}
@@ -70,14 +70,14 @@ export function EditorToolbar() {
         <Button variant="ghost" size="icon-sm" disabled={!canRedo} onClick={redo} aria-label="Wiederholen" title="Wiederholen (Strg+Umschalt+Z)">
           <Redo2 />
         </Button>
-        <Button variant="outline" size="sm" onClick={toggleTemplates} aria-label="Vorlagen anzeigen" title="Vorlagen">
+        <Button data-tour="templates-btn" variant="outline" size="sm" onClick={toggleTemplates} aria-label="Vorlagen anzeigen" title="Vorlagen">
           <LayoutTemplate />
           Vorlagen
         </Button>
         <Button variant="outline" size="sm" onClick={toggleNotes}>
           📝 Notizen
         </Button>
-        <Button size="sm" onClick={() => openCreate()}>
+        <Button data-tour="add-event-btn" size="sm" onClick={() => openCreate()}>
           + Termin
         </Button>
       </div>

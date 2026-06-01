@@ -35,6 +35,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
       <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
         <img src={`${import.meta.env.BASE_URL}curriculr-logo.svg`} alt="Curriculr" className="h-6" />
         <button
+          data-tour="plan-name"
           onClick={onSwitchPlan}
           className="text-[15px] font-semibold hover:opacity-80 flex items-center gap-1 transition-opacity"
           style={{ transitionDuration: 'var(--dur-state)' }}
@@ -43,7 +44,10 @@ export function EditorHeader({ onSwitchPlan }: Props) {
         </button>
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 tabular-nums">{stateLabel}</span>
-          <div className="flex items-center bg-white/10 rounded-[var(--radius-pill)] overflow-hidden">
+          <div
+            data-tour="view-toggle"
+            className="flex items-center bg-white/10 rounded-[var(--radius-pill)] overflow-hidden"
+          >
             <button
               onClick={() => setViewMode('table')}
               aria-pressed={viewMode === 'table'}
@@ -81,7 +85,13 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
             </button>
           )}
-          <Button variant="ghost" size="icon" onClick={openSettings} className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]">
+          <Button
+            data-tour="settings-btn"
+            variant="ghost"
+            size="icon"
+            onClick={openSettings}
+            className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
+          >
             <SettingsIcon className="w-4 h-4" />
           </Button>
           <ExportDropdown />

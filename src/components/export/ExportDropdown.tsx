@@ -43,7 +43,7 @@ export function ExportDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button>
+        <Button data-tour="export-btn">
           Export ↓
         </Button>
       </DropdownMenuTrigger>

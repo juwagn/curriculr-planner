@@ -1,11 +1,12 @@
 import { useMemo, type MouseEvent } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
+import { Tooltip as TooltipPrimitive } from 'radix-ui';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { isHoliday } from '@/lib/schoolweeks';
 import { pastelize } from '@/lib/colors';
-import type { PlanEvent } from '@/types';
+import type { PlanEvent, Category } from '@/types';
 
 const FERIEN_HATCH =
   'repeating-linear-gradient(45deg, var(--color-ferien-a) 0 3px, var(--color-ferien-b) 3px 6px)';
@@ -20,6 +21,11 @@ interface MonthRow {
 
 function pad(n: number): string {
   return n.toString().padStart(2, '0');
+}
+
+function formatIsoDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d}. ${MONTHS_DE[m - 1]} ${y}`;
 }
 
 function monthRows(firstISO: string, lastISO: string): MonthRow[] {
@@ -51,9 +57,10 @@ interface GridCellProps {
   /** Category color of the first event on this day, if any. */
   color?: string;
   title: string;
+  categories: Category[];
 }
 
-function GridCell({ iso, events, holiday, feiertag, color, title }: GridCellProps) {
+function GridCell({ iso, events, holiday, feiertag, color, title, categories }: GridCellProps) {
   const openCreateEvent = useUiStore((s) => s.openCreateEvent);
   const openEditEvent = useUiStore((s) => s.openEditEvent);
   const { isOver, setNodeRef } = useDroppable({ id: `cell:${iso}`, data: { type: 'cell', iso } });
@@ -73,8 +80,6 @@ function GridCell({ iso, events, holiday, feiertag, color, title }: GridCellProp
     else openCreateEvent(iso);
   };
 
-  // Add a further event to a day that already holds one, without opening the
-  // existing event. Honors an armed template, otherwise opens the create modal.
   const handleAdd = (e: MouseEvent) => {
     e.stopPropagation();
     const armed = useUiStore.getState().armedTemplateId;
@@ -100,7 +105,7 @@ function GridCell({ iso, events, holiday, feiertag, color, title }: GridCellProp
         ? { backgroundColor: 'var(--color-feiertag-bg)' }
         : {};
 
-  return (
+  const cell = (
     <td
       ref={setNodeRef}
       aria-label={iso}
@@ -139,6 +144,51 @@ function GridCell({ iso, events, holiday, feiertag, color, title }: GridCellProp
       )}
     </td>
   );
+
+  if (!hasEvent) return cell;
+
+  return (
+    <TooltipPrimitive.Root>
+      <TooltipPrimitive.Trigger asChild>{cell}</TooltipPrimitive.Trigger>
+      <TooltipPrimitive.Portal>
+        <TooltipPrimitive.Content
+          side="top"
+          sideOffset={4}
+          className="z-50 rounded-lg px-3 py-2 text-xs text-white shadow-lg"
+          style={{ background: 'var(--color-marine-900)', maxWidth: 240 }}
+        >
+          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-gelb-500)]">
+            {formatIsoDate(iso)}
+          </p>
+          {events.map((ev, i) => {
+            const cat = categories.find((c) => c.id === ev.categoryId);
+            return (
+              <div key={ev.id} className={i > 0 ? 'mt-1.5 border-t border-white/10 pt-1.5' : ''}>
+                <div className="flex items-center gap-1.5">
+                  {cat && (
+                    <span
+                      className="h-2 w-2 shrink-0 rounded-full ring-1 ring-black/10"
+                      style={{ backgroundColor: cat.color }}
+                    />
+                  )}
+                  <span className="font-semibold leading-tight">{ev.title}</span>
+                </div>
+                {cat && (
+                  <span
+                    className="ml-3.5 mt-0.5 inline-block rounded px-1 py-px text-[9px] font-semibold"
+                    style={{ background: pastelize(cat.color), color: cat.color }}
+                  >
+                    {cat.label}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          <TooltipPrimitive.Arrow className="fill-[var(--color-marine-900)]" />
+        </TooltipPrimitive.Content>
+      </TooltipPrimitive.Portal>
+    </TooltipPrimitive.Root>
+  );
 }
 
 export function YearGrid() {
@@ -165,6 +215,7 @@ export function YearGrid() {
   const cols = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
+    <TooltipPrimitive.Provider delayDuration={400}>
     <div className="flex h-full w-full flex-col gap-3 overflow-hidden">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-[12px] text-[var(--color-ink-500)]">
         {doc.categories.map((c) => (
@@ -230,6 +281,7 @@ export function YearGrid() {
                       feiertag={!!holiday && holiday.type === 'feiertag'}
                       color={color}
                       title={evs.map((e) => e.title).join(', ') || holiday?.label || iso}
+                      categories={doc.categories}
                     />
                   );
                 })}
@@ -240,5 +292,6 @@ export function YearGrid() {
       </table>
       </div>
     </div>
+    </TooltipPrimitive.Provider>
   );
 }

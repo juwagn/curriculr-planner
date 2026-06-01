@@ -22,6 +22,7 @@ export function HelpModal() {
   // HelpModal stays mounted (returns null when closed), so useState persists —
   // useEffect is the correct reset mechanism here.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (helpOpen) setActiveSection('start');
   }, [helpOpen]);
 

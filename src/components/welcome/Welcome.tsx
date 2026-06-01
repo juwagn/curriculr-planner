@@ -14,9 +14,10 @@ interface Props {
   onCreateNew(): void;
   onOpenDoc(id: string): void;
   onImportJson(doc: PlannerDocument): void;
+  onStartTour(): void;
 }
 
-export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
+export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: Props) {
   const [docs, setDocs] = useState<DocSummary[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const icsInputRef = useRef<HTMLInputElement>(null);
@@ -176,6 +177,9 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson }: Props) {
           />
           <Button variant="ghost" onClick={() => onImportJson(createDemoDoc())}>
             Demo ausprobieren
+          </Button>
+          <Button variant="ghost" onClick={onStartTour}>
+            ▶ Geführte Tour starten
           </Button>
         </div>
       </Card>

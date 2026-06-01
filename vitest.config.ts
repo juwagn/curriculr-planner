@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: { alias: { '@': resolve(__dirname, 'src') } },
   test: {
     environment: 'jsdom',
+    environmentOptions: {
+      jsdom: { url: 'http://localhost' }
+    },
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
     passWithNoTests: true

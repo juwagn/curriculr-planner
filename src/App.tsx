@@ -6,6 +6,8 @@ import { Editor } from '@/components/editor/Editor';
 import { PlanSwitcherDialog } from '@/components/welcome/PlanSwitcherDialog';
 import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
+import { useUiStore } from '@/stores/ui';
+import { createDemoDoc } from '@/lib/demo';
 import { toast } from 'sonner';
 import type { PlannerDocument, UUID } from '@/types';
 
@@ -15,6 +17,7 @@ export default function App() {
   const [route, setRoute] = useState<Route>('loading');
   const [planSwitcherOpen, setPlanSwitcherOpen] = useState(false);
   const setDoc = usePlannerStore((s) => s.setDoc);
+  const setTourPending = useUiStore((s) => s.setTourPending);
 
   useEffect(() => {
     storage.getActiveDoc().then(async (id) => {
@@ -37,6 +40,15 @@ export default function App() {
     const doc = await storage.loadDoc(id);
     setDoc(doc);
     await storage.setActiveDoc(id);
+    setRoute('editor');
+  };
+
+  const startTour = async () => {
+    const doc = createDemoDoc();
+    await storage.saveDoc(doc);
+    await storage.setActiveDoc(doc.schoolyear.id);
+    setDoc(doc);
+    setTourPending(true);
     setRoute('editor');
   };
 
@@ -64,6 +76,7 @@ export default function App() {
           onCreateNew={() => setRoute('wizard')}
           onOpenDoc={openDoc}
           onImportJson={importDoc}
+          onStartTour={startTour}
         />
       )}
       {route === 'wizard' && (

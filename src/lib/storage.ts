@@ -33,7 +33,9 @@ export class LocalStorageAdapter implements StorageAdapter {
         const raw = localStorage.getItem(keyDoc(id));
         if (!raw) return null;
         try {
-          const doc = JSON.parse(raw) as PlannerDocument;
+          const result = PlannerDocumentSchema.safeParse(migrate(JSON.parse(raw)));
+          if (!result.success) return null;
+          const doc = result.data;
           return {
             id,
             name: doc.meta.name,

@@ -5,6 +5,12 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.3.2] – 2026-06-01
+
+### Behoben
+- Datums-Parameter im Ferien-Abruf werden korrekt URL-kodiert (verhindert Query-Parameter-Injektion).
+- `listDocs` validiert gespeicherte Dokumente jetzt vollständig über das Zod-Schema inkl. Migration (gleiche Vertrauensgrenze wie `loadDoc`).
+
 ## [1.3.1] – 2026-06-01
 
 ### Behoben
@@ -82,6 +88,7 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
   Wochentabelle, Kategorien/Gruppen, Notizen, Export als ICS / JSON / Excel.
 - MIT-Lizenz.
 
+[1.3.2]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.2
 [1.3.1]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.1
 [1.3.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.0
 [1.2.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.2.0

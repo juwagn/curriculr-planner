@@ -77,7 +77,7 @@ export async function fetchHolidays(
 ): Promise<Holiday[]> {
   const query =
     `countryIsoCode=DE&subdivisionCode=${encodeURIComponent(stateCode)}` +
-    `&languageIsoCode=DE&validFrom=${from}&validTo=${to}`;
+    `&languageIsoCode=DE&validFrom=${encodeURIComponent(from)}&validTo=${encodeURIComponent(to)}`;
   const [school, pub] = await Promise.all([
     fetchJson(`${BASE_URL}/SchoolHolidays?${query}`),
     fetchJson(`${BASE_URL}/PublicHolidays?${query}`)

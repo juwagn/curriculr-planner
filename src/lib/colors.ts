@@ -1,3 +1,22 @@
+/**
+ * Saturated base colors offered in the category color picker. Muted mid-tones
+ * (~Tailwind 400/500) aligned with the marine/gelb brand language. Event blocks
+ * render these through `pastelize()` for the background and use the raw color as
+ * the 3px left accent — so presets stay saturated, never pre-pastelled.
+ */
+export const CATEGORY_PALETTE = [
+  '#0058A0', // Marine (Brand)
+  '#3E8EA8', // Sky/Petrol
+  '#2F9E8F', // Teal
+  '#4FA373', // Salbeigrün
+  '#D9A23B', // Bernstein/Gelb
+  '#D98B5F', // Terrakotta/Apricot
+  '#D46A6A', // Dusty Coral
+  '#B66A9E', // Mauve/Beere
+  '#7C72C4', // Gedämpftes Violett
+  '#647488'  // Schiefer-Grau
+] as const;
+
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '');
   return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];

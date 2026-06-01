@@ -100,7 +100,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
             data-tour="settings-btn"
             variant="ghost"
             size="icon"
-            onClick={openSettings}
+            onClick={() => openSettings()}
             className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
           >
             <SettingsIcon className="w-4 h-4" />

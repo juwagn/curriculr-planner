@@ -13,6 +13,8 @@ import { AboutTab } from './AboutTab';
 export function SettingsModal() {
   const open = useUiStore((s) => s.settingsModalOpen);
   const close = useUiStore((s) => s.closeSettings);
+  const tab = useUiStore((s) => s.settingsTab);
+  const setTab = useUiStore((s) => s.setSettingsTab);
   if (!open) return null;
   return (
     <Dialog open onOpenChange={(o) => !o && close()}>
@@ -20,7 +22,7 @@ export function SettingsModal() {
         className="!max-w-[min(960px,calc(100vw-2rem))] !w-[min(960px,calc(100vw-2rem))] max-h-[90vh] overflow-auto"
       >
         <DialogTitle>Einstellungen</DialogTitle>
-        <Tabs defaultValue="schoolyear" className="mt-4">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="mt-4">
           <TabsList className="flex flex-wrap h-auto w-full justify-start gap-1">
             <TabsTrigger value="schoolyear">Schuljahr</TabsTrigger>
             <TabsTrigger value="categories">Kategorien</TabsTrigger>

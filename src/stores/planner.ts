@@ -5,12 +5,12 @@ import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID, ISODate
 
 const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: ['konferenz', 'fk'] },
-  { label: 'Elternabend', color: '#0E9F6E', slug: 'elternabend', keywords: ['elternabend', 'eltern'] },
-  { label: 'Wandertag', color: '#FFC857', slug: 'wandertag', keywords: ['wandertag', 'ausflug'] },
-  { label: 'Prüfung', color: '#E02424', slug: 'pruefung', keywords: ['prüfung', 'klausur', 'abitur'] },
-  { label: 'Sonderveranstaltung', color: '#7C3AED', slug: 'sonder', keywords: ['fest', 'feier'] },
-  { label: 'Schließtag', color: '#6B7280', slug: 'schliesstag', keywords: ['schließ', 'frei'] },
-  { label: 'Sondertag', color: '#FFC857', slug: 'sondertag', keywords: [] }
+  { label: 'Elternabend', color: '#2F9E8F', slug: 'elternabend', keywords: ['elternabend', 'eltern'] },
+  { label: 'Wandertag', color: '#D9A23B', slug: 'wandertag', keywords: ['wandertag', 'ausflug'] },
+  { label: 'Prüfung', color: '#D46A6A', slug: 'pruefung', keywords: ['prüfung', 'klausur', 'abitur'] },
+  { label: 'Sonderveranstaltung', color: '#7C72C4', slug: 'sonder', keywords: ['fest', 'feier'] },
+  { label: 'Schließtag', color: '#647488', slug: 'schliesstag', keywords: ['schließ', 'frei'] },
+  { label: 'Sondertag', color: '#D98B5F', slug: 'sondertag', keywords: [] }
 ];
 
 const DEFAULT_GROUPS = ['Kollegium', 'Eltern', 'Klassen 5-7', 'Klassen 8-10', 'Sek I', 'Sek II'];
@@ -71,6 +71,7 @@ interface PlannerState {
   updateSchoolyear(patch: Partial<PlannerDocument['schoolyear']>): void;
   updateCategories(cats: Category[]): void;
   updateGroups(groups: string[]): void;
+  reassignCategory(fromId: UUID, toId: UUID): void;
   updateMeta(patch: Partial<PlannerDocument['meta']>): void;
 
   ignoreConflict(key: string): void;
@@ -220,6 +221,23 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc) return;
     set({ doc: { ...doc, availableGroups } });
+    debouncedSave(get);
+  },
+
+  reassignCategory(fromId, toId) {
+    const doc = get().doc;
+    if (!doc || fromId === toId) return;
+    set({
+      doc: {
+        ...doc,
+        events: doc.events.map((e) =>
+          e.categoryId === fromId ? { ...e, categoryId: toId } : e
+        ),
+        templates: doc.templates.map((t) =>
+          t.categoryId === fromId ? { ...t, categoryId: toId } : t
+        )
+      }
+    });
     debouncedSave(get);
   },
 

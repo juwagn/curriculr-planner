@@ -34,6 +34,7 @@ export function EventModal() {
   const deleteEvent = usePlannerStore((s) => s.deleteEvent);
   const state = useUiStore((s) => s.eventModalState);
   const close = useUiStore((s) => s.closeEventModal);
+  const openSettings = useUiStore((s) => s.openSettings);
 
   const editing = state.open && state.mode === 'edit'
     ? doc?.events.find((e) => e.id === state.eventId) ?? null
@@ -188,6 +189,13 @@ export function EventModal() {
                 ))}
               </SelectContent>
             </Select>
+            <button
+              type="button"
+              onClick={() => { close(); openSettings('categories'); }}
+              className="mt-1 text-[12px] text-[var(--color-marine-700)] hover:underline"
+            >
+              ⚙ Kategorien verwalten
+            </button>
           </div>
 
           <div>

@@ -34,6 +34,43 @@ describe('usePlannerStore', () => {
     expect(usePlannerStore.getState().doc?.events).toHaveLength(1);
   });
 
+  it('reassigns a category across events and templates', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    const from = doc.categories[0].id;
+    const to = doc.categories[1].id;
+    doc.events.push({
+      id: 'e1',
+      title: 'Konferenz',
+      start: '2026-09-15',
+      end: '2026-09-15',
+      allDay: true,
+      categoryId: from,
+      groups: []
+    });
+    doc.events.push({
+      id: 'e2',
+      title: 'Anderer',
+      start: '2026-09-16',
+      end: '2026-09-16',
+      allDay: true,
+      categoryId: to,
+      groups: []
+    });
+    doc.templates.push({
+      id: 't1',
+      name: 'Vorlage',
+      categoryId: from,
+      allDay: true,
+      defaultGroups: []
+    });
+    usePlannerStore.getState().setDoc(doc);
+    usePlannerStore.getState().reassignCategory(from, to);
+    const next = usePlannerStore.getState().doc!;
+    expect(next.events.find((e) => e.id === 'e1')!.categoryId).toBe(to);
+    expect(next.events.find((e) => e.id === 'e2')!.categoryId).toBe(to);
+    expect(next.templates[0].categoryId).toBe(to);
+  });
+
   it('updates an event', () => {
     const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
     doc.events.push({

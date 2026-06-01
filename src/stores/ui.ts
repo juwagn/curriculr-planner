@@ -12,6 +12,8 @@ interface UiState {
   eventModalState: { open: false } | { open: true; mode: 'create' | 'edit'; eventId?: string; presetDate?: string };
   viewMode: ViewMode;
   density: Density;
+  helpOpen: boolean;
+  tourPending: boolean;
 
   setQuarter(q: 1 | 2 | 3 | 4): void;
   toggleNotesSidebar(): void;
@@ -24,6 +26,9 @@ interface UiState {
   closeEventModal(): void;
   setViewMode(v: ViewMode): void;
   setDensity(d: Density): void;
+  openHelp(): void;
+  closeHelp(): void;
+  setTourPending(v: boolean): void;
 }
 
 const PREFS_KEY = 'curriculr-planner:ui-prefs';
@@ -63,6 +68,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   // Coerce any stale persisted value (e.g. the removed 'calendar' view) to 'table'.
   viewMode: initial.viewMode === 'year' ? 'year' : 'table',
   density: initial.density ?? 'auto',
+  helpOpen: false,
+  tourPending: false,
 
   setQuarter(q) { set({ currentQuarter: q }); },
   toggleNotesSidebar() { set((s) => ({ notesSidebarOpen: !s.notesSidebarOpen })); },
@@ -84,5 +91,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   setDensity(density) {
     set({ density });
     savePrefs({ viewMode: get().viewMode, density });
-  }
+  },
+  openHelp() { set({ helpOpen: true }); },
+  closeHelp() { set({ helpOpen: false }); },
+  setTourPending(v) { set({ tourPending: v }); },
 }));

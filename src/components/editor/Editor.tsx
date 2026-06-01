@@ -12,6 +12,8 @@ import { SettingsModal } from '@/components/settings/SettingsModal';
 import { NotesSidebar } from './NotesSidebar';
 import { useUiStore } from '@/stores/ui';
 import { handleEditorDragEnd } from './useEditorDragEnd';
+import { TourManager } from '@/components/tour/TourManager';
+import { HelpModal } from '@/components/help/HelpModal';
 
 interface Props {
   onSwitchPlan(): void;
@@ -105,6 +107,8 @@ export function Editor({ onSwitchPlan }: Props) {
       <EventModal />
       <SettingsModal />
       <NotesSidebar />
+      <TourManager />
+      <HelpModal />
     </div>
   );
 }

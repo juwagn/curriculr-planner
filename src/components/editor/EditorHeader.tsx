@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, HelpCircle } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { useConflicts } from '@/hooks/useConflicts';
@@ -15,6 +15,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
   const savingState = usePlannerStore((s) => s.savingState);
   const openSettings = useUiStore((s) => s.openSettings);
+  const openHelp = useUiStore((s) => s.openHelp);
   const viewMode = useUiStore((s) => s.viewMode);
   const setViewMode = useUiStore((s) => s.setViewMode);
   const conflicts = useConflicts();
@@ -85,6 +86,16 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
             </button>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openHelp}
+            aria-label="Hilfe"
+            title="Hilfe"
+            className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </Button>
           <Button
             data-tour="settings-btn"
             variant="ghost"

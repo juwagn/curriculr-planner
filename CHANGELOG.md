@@ -5,6 +5,26 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.5.0] – 2026-06-01 — „Eigene Kategorien"
+
+### Hinzugefügt
+- **Kategorien anlegen & löschen** in Einstellungen → Kategorien (zuvor nur
+  Bearbeiten möglich). Mindestens eine Kategorie bleibt erhalten.
+- **Sicheres Löschen mit Umhängen:** Wird eine Kategorie noch von Terminen oder
+  Vorlagen genutzt, fragt ein Dialog nach der Ziel-Kategorie und hängt alle
+  Verweise um (`reassignCategory`), bevor sie entfernt wird.
+- **Farbwähler** (`ColorPicker`): abgestimmte Paletten-Swatches (`CATEGORY_PALETTE`,
+  gedämpfte markennahe Töne) plus freie Farbwahl.
+- **Deep-Link in Einstellungen:** `openSettings(tab)` öffnet direkt den passenden
+  Reiter; im Termin-Dialog führt „⚙ Kategorien verwalten" dorthin.
+- **Hover-Vorschau im Schuljahr-Grid:** Titel und Kategorie-Badge erscheinen beim
+  Überfahren einer Termin-Zelle (nativer Tooltip unterdrückt).
+
+### Geändert
+- Standard-Kategorien nutzen die neue, gedämpfte Farbpalette (nur neue Pläne;
+  bestehende Dokumente bleiben unverändert). Schema bleibt v4, keine Migration.
+- Slugs werden beim Speichern aus dem Label abgeleitet (`slugify`).
+
 ## [1.4.0] – 2026-06-01 — „Onboarding & Hilfe"
 
 ### Hinzugefügt
@@ -95,6 +115,8 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
   Wochentabelle, Kategorien/Gruppen, Notizen, Export als ICS / JSON / Excel.
 - MIT-Lizenz.
 
+[1.5.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.5.0
+[1.4.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.4.0
 [1.3.2]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.2
 [1.3.1]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.1
 [1.3.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.0

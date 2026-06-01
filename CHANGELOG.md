@@ -5,6 +5,15 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.5.1] – 2026-06-01
+
+### Hinzugefügt
+- **Gruppen-Vorschläge** in Einstellungen → Gruppen: vorgefertigte Chips
+  (Lehrkräfte, Eltern, Schülerinnen und Schüler, Schulleitung, Sekretariat,
+  Hausmeister, Kollegium, Förderverein, Klassenlehrkräfte, Fachschaften) zum
+  Hinzufügen per Klick. Bereits angelegte Gruppen werden ausgeblendet; eigene
+  Gruppen bleiben frei eingebbar.
+
 ## [1.5.0] – 2026-06-01 — „Eigene Kategorien"
 
 ### Hinzugefügt

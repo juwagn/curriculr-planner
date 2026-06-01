@@ -5,6 +5,13 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.4.0] – 2026-06-01 — „Onboarding & Hilfe"
+
+### Hinzugefügt
+- **Geführte Tour** (driver.js, 8 Schritte, opt-in): Spotlight-Tour durch die wichtigsten Editor-Funktionen. Auslöser auf dem Welcome-Screen sowie im Hilfe-Modal.
+- **Hilfe-Modal** (`?`-Button im Editor-Header): Zweigeteiltes Referenz-Modal mit 5 Sektionen (Erste Schritte, Termine & Kategorien, Ansichten, Vorlagen, Export & Backup) und CTA zum Starten der geführten Tour.
+- Tour lädt automatisch ein Demo-Dokument, sodass alle UI-Elemente beim ersten Aufruf sichtbar sind.
+
 ## [1.3.2] – 2026-06-01
 
 ### Behoben

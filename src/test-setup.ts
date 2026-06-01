@@ -1,10 +1,8 @@
 import '@testing-library/jest-dom';
 
-// Node.js v26 defines `localStorage` on globalThis as `undefined` (without
-// --localstorage-file), which prevents vitest from forwarding jsdom's
-// localStorage onto the global. Re-establish it from the jsdom instance that
-// vitest exposes as `globalThis.jsdom`.
-// See: https://github.com/vitest-dev/vitest/issues/xxxx
+// Node.js v26 defines `localStorage` on globalThis as `undefined`, which
+// prevents vitest from forwarding jsdom's localStorage onto the test global.
+// Re-establish it from the jsdom instance vitest exposes as `globalThis.jsdom`.
 {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dom: { window: Window } | undefined = (globalThis as any).jsdom;

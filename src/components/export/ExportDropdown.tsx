@@ -1,6 +1,7 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { usePlannerStore } from '@/stores/planner';
+import { useUiStore } from '@/stores/ui';
 import { storage } from '@/lib/storage';
 import { buildIcs, slugify } from '@/lib/ics-export';
 import { buildExcel } from '@/lib/excel-export';
@@ -17,6 +18,7 @@ function downloadBlob(filename: string, blob: Blob) {
 
 export function ExportDropdown() {
   const doc = usePlannerStore((s) => s.doc);
+  const openPrintDialog = useUiStore((s) => s.openPrintDialog);
   if (!doc) return null;
 
   const slug = slugify(doc.meta.name);
@@ -51,6 +53,7 @@ export function ExportDropdown() {
         <DropdownMenuItem onClick={exportIcs}>ICS-Datei (.ics)</DropdownMenuItem>
         <DropdownMenuItem onClick={exportJson}>JSON-Backup (.json)</DropdownMenuItem>
         <DropdownMenuItem onClick={exportExcel}>Excel-Konverter-Format (.xlsx)</DropdownMenuItem>
+        <DropdownMenuItem onClick={openPrintDialog}>PDF / Druck</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

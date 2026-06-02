@@ -12,6 +12,7 @@ export function SchoolTab() {
   const [schoolInfo, setSchoolInfo] = useState(doc?.meta.schoolInfo ?? '');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSchoolName(doc?.meta.schoolName ?? '');
     setSchoolInfo(doc?.meta.schoolInfo ?? '');
   }, [doc?.meta.schoolName, doc?.meta.schoolInfo]);

@@ -11,6 +11,7 @@ export function SchoolTab() {
   const [schoolName, setSchoolName] = useState(doc?.meta.schoolName ?? '');
   const [schoolInfo, setSchoolInfo] = useState(doc?.meta.schoolInfo ?? '');
 
+  // sync local state when doc changes externally (undo/doc-switch)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSchoolName(doc?.meta.schoolName ?? '');

@@ -89,7 +89,9 @@ export const PlannerDocumentSchema = z.object({
   templates: z.array(EventTemplateSchema),
   meta: z.object({
     name: z.string().min(1),
-    lastSaved: z.string()
+    lastSaved: z.string(),
+    schoolName: z.string().optional(),
+    schoolInfo: z.string().optional()
   })
 });
 

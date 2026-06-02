@@ -77,5 +77,7 @@ export interface PlannerDocument {
   meta: {
     name: string;
     lastSaved: string;
+    schoolName?: string;
+    schoolInfo?: string;
   };
 }

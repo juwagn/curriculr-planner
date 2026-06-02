@@ -1,5 +1,8 @@
 import type { PrintModel, PrintWeekRow, PrintHolidayRow } from '@/lib/print-model';
 
+const DAY_COLS = 5; // matches PrintWeekRow cells 5-tuple
+const TABLE_COLS = 2 + DAY_COLS + 1; // #, Datum, [5 days], Anmerkungen
+
 interface Props {
   model: PrintModel | null;
 }
@@ -84,7 +87,7 @@ export function PrintDocument({ model }: Props) {
             {/* Legend */}
             {model.legend.length > 0 && (
               <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: '4px 12px', fontSize: '7.5pt' }}>
-                <span style={{ fontWeight: 700, color: '#41505f', marginRight: 4 }}>Legende</span>
+                <span style={{ fontWeight: 700, color: 'var(--color-ink-500)', marginRight: 4 }}>Legende</span>
                 {model.legend.map((item) => (
                   <span key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     <span
@@ -130,7 +133,7 @@ function WeekTableRow({ row }: { row: PrintWeekRow }) {
       <td style={{ ...cellStyle, background: '#f7f9fb', fontWeight: 700, color: 'var(--color-marine-800)', textAlign: 'center' }}>
         {row.swIndex}
       </td>
-      <td style={{ ...cellStyle, background: '#f7f9fb', color: '#41505f', whiteSpace: 'nowrap', fontSize: '7.5pt' }}>
+      <td style={{ ...cellStyle, background: '#f7f9fb', color: 'var(--color-ink-500)', whiteSpace: 'nowrap', fontSize: '7.5pt' }}>
         {row.dateRange}
       </td>
       {row.cells.map((cell, ci) => (
@@ -159,7 +162,7 @@ function WeekTableRow({ row }: { row: PrintWeekRow }) {
           ))}
         </td>
       ))}
-      <td style={{ ...cellStyle, fontSize: '7.5pt', color: '#41505f' }}>
+      <td style={{ ...cellStyle, fontSize: '7.5pt', color: 'var(--color-ink-500)' }}>
         {row.annotation}
       </td>
     </tr>
@@ -170,7 +173,7 @@ function HolidayTableRow({ row }: { row: PrintHolidayRow }) {
   return (
     <tr>
       <td
-        colSpan={8}
+        colSpan={TABLE_COLS}
         style={{
           border: '0.5px solid #e3e7eb',
           padding: '5px 8px',

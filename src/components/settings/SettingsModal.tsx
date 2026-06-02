@@ -9,6 +9,7 @@ import { ExportTab } from './ExportTab';
 import { ImportTab } from './ImportTab';
 import { AppearanceTab } from './AppearanceTab';
 import { AboutTab } from './AboutTab';
+import { SchoolTab } from './SchoolTab';
 
 export function SettingsModal() {
   const open = useUiStore((s) => s.settingsModalOpen);
@@ -28,6 +29,7 @@ export function SettingsModal() {
             <TabsTrigger value="categories">Kategorien</TabsTrigger>
             <TabsTrigger value="groups">Gruppen</TabsTrigger>
             <TabsTrigger value="templates">Vorlagen</TabsTrigger>
+            <TabsTrigger value="school">Schule &amp; Druck</TabsTrigger>
             <TabsTrigger value="appearance">Ansicht</TabsTrigger>
             <TabsTrigger value="export">Export</TabsTrigger>
             <TabsTrigger value="import">Import</TabsTrigger>
@@ -37,6 +39,7 @@ export function SettingsModal() {
           <TabsContent value="categories"><CategoriesTab /></TabsContent>
           <TabsContent value="groups"><GroupsTab /></TabsContent>
           <TabsContent value="templates"><TemplatesTab /></TabsContent>
+          <TabsContent value="school"><SchoolTab /></TabsContent>
           <TabsContent value="appearance"><AppearanceTab /></TabsContent>
           <TabsContent value="export"><ExportTab /></TabsContent>
           <TabsContent value="import"><ImportTab /></TabsContent>

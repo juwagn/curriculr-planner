@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { PrintScope } from '@/lib/print-model';
 
 export type ViewMode = 'table' | 'year';
 export type Density = 'auto' | 'compact' | 'standard' | 'roomy';
@@ -10,6 +11,7 @@ export type SettingsTab =
   | 'appearance'
   | 'export'
   | 'import'
+  | 'school'
   | 'about';
 
 interface UiState {
@@ -24,6 +26,9 @@ interface UiState {
   density: Density;
   helpOpen: boolean;
   tourPending: boolean;
+  printDialogOpen: boolean;
+  printScope: PrintScope;
+  printOrientation: 'portrait' | 'landscape';
 
   setQuarter(q: 1 | 2 | 3 | 4): void;
   toggleNotesSidebar(): void;
@@ -40,6 +45,10 @@ interface UiState {
   openHelp(): void;
   closeHelp(): void;
   setTourPending(v: boolean): void;
+  openPrintDialog(): void;
+  closePrintDialog(): void;
+  setPrintScope(scope: PrintScope): void;
+  setPrintOrientation(orientation: 'portrait' | 'landscape'): void;
 }
 
 const PREFS_KEY = 'curriculr-planner:ui-prefs';
@@ -82,6 +91,9 @@ export const useUiStore = create<UiState>((set, get) => ({
   density: initial.density ?? 'auto',
   helpOpen: false,
   tourPending: false,
+  printDialogOpen: false,
+  printScope: 'currentQuarter',
+  printOrientation: 'portrait',
 
   setQuarter(q) { set({ currentQuarter: q }); },
   toggleNotesSidebar() { set((s) => ({ notesSidebarOpen: !s.notesSidebarOpen })); },
@@ -108,4 +120,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   openHelp() { set({ helpOpen: true }); },
   closeHelp() { set({ helpOpen: false }); },
   setTourPending(v) { set({ tourPending: v }); },
+  openPrintDialog() { set({ printDialogOpen: true }); },
+  closePrintDialog() { set({ printDialogOpen: false }); },
+  setPrintScope(printScope) { set({ printScope }); },
+  setPrintOrientation(printOrientation) { set({ printOrientation }); },
 }));

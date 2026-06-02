@@ -6,6 +6,8 @@
 
 @import "shadcn/tailwind.css";
 
+@import './print.css';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {

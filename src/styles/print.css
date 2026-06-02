@@ -1,0 +1,57 @@
+/* ============================================================
+   Print styles — @media print only
+   App shell hidden; .print-document shown.
+   ============================================================ */
+
+.print-document {
+  display: none;
+}
+
+@media print {
+  /* Hide entire app shell */
+  body > #root > *:not(.print-root) {
+    display: none !important;
+  }
+
+  .print-root {
+    display: block !important;
+  }
+
+  .print-document {
+    display: block;
+    font-family: Inter, sans-serif;
+    font-size: 9pt;
+    color: #1c2733;
+    line-height: 1.35;
+  }
+
+  /* Each section = one page (except the first) */
+  .print-section + .print-section {
+    break-before: page;
+  }
+
+  /* Prevent rows from splitting across pages */
+  tr {
+    break-inside: avoid;
+  }
+
+  /* Repeat thead on every page */
+  thead {
+    display: table-header-group;
+  }
+
+  /* Force background colors and images to print */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Page counter via CSS */
+  @page {
+    counter-increment: page;
+  }
+
+  .print-page-number::after {
+    content: counter(page);
+  }
+}

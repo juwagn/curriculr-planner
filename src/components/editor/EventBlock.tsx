@@ -42,7 +42,7 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
   const showLeftBorder = pos === 'start' || pos === 'single';
   const showContent = pos === 'start' || pos === 'single';
 
-  const baseBg = hexToRgba(category.color, 0.1);
+  const baseBg = hexToRgba(category.color, 0.25);
   const bg = pastelize(category.color);
   const timeLabel = event.startTime
     ? event.endTime

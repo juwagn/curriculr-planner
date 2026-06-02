@@ -38,6 +38,6 @@ export function contrastColor(bgHex: string): '#000000' | '#FFFFFF' {
 
 export function pastelize(hex: string): string {
   const [r, g, b] = hexToRgb(hex);
-  const mix = (c: number) => Math.round(c * 0.12 + 255 * 0.88);
+  const mix = (c: number) => Math.round(c * 0.25 + 255 * 0.75);
   return rgbToHex(mix(r), mix(g), mix(b));
 }

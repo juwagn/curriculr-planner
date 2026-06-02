@@ -1,4 +1,4 @@
-import { addDays, format, parseISO } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { computeWeekRows, getQuarterRange } from './schoolweeks';
 import { pastelize } from './colors';
@@ -72,9 +72,7 @@ function buildSection(
   // Expand multi-day events to date → events map (same logic as WeekTable)
   const eventsByDate = new Map<string, PlannerDocument['events']>();
   for (const ev of doc.events) {
-    const startMs = parseISO(ev.start).getTime();
-    const endMs = parseISO(ev.end).getTime();
-    const spanDays = Math.max(0, Math.round((endMs - startMs) / 86400000));
+    const spanDays = Math.max(0, differenceInCalendarDays(parseISO(ev.end), parseISO(ev.start)));
     for (let i = 0; i <= spanDays; i++) {
       const iso = format(addDays(parseISO(ev.start), i), 'yyyy-MM-dd');
       const arr = eventsByDate.get(iso) ?? [];
@@ -140,7 +138,13 @@ export function buildPrintModel(
 
   const sections = quarters.map((q) => buildSection(doc, q, allWeekRows));
 
-  const usedCatIds = new Set(doc.events.map((e) => e.categoryId));
+  // Build legend only from events whose start date falls within the printed sections
+  const printedRanges = sections.map((s) => getQuarterRange(s.quarterIndex, doc.schoolyear));
+  const usedCatIds = new Set(
+    doc.events
+      .filter((e) => printedRanges.some((r) => e.start >= r.startDate && e.start <= r.endDate))
+      .map((e) => e.categoryId)
+  );
   const legend: PrintLegendItem[] = doc.categories
     .filter((c) => usedCatIds.has(c.id))
     .map((c) => ({ label: c.label, color: c.color }));

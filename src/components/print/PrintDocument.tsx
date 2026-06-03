@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import type { PrintModel, PrintWeekRow, PrintHolidayRow } from '@/lib/print-model';
 
 const DAY_COLS = 5; // matches PrintWeekRow cells 5-tuple
@@ -10,7 +11,7 @@ interface Props {
 export function PrintDocument({ model }: Props) {
   if (!model) return null;
 
-  return (
+  return createPortal(
     <div className="print-root">
       <div className="print-document">
         {model.sections.map((section) => (
@@ -117,7 +118,8 @@ export function PrintDocument({ model }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

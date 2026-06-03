@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Welcome } from './Welcome';
 
@@ -23,7 +23,7 @@ describe('Welcome', () => {
     expect(onCreateNew).toHaveBeenCalled();
   });
 
-  it('renders Tour starten button', () => {
+  it('renders Tour starten button', async () => {
     render(
       <Welcome
         onCreateNew={() => {}}
@@ -32,10 +32,10 @@ describe('Welcome', () => {
         onStartTour={() => {}}
       />
     );
-    expect(screen.getByRole('button', { name: /Tour starten/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /Tour starten/i })).toBeInTheDocument();
   });
 
-  it('calls onStartTour when Tour starten is clicked', () => {
+  it('calls onStartTour when Tour starten is clicked', async () => {
     const onStartTour = vi.fn();
     render(
       <Welcome
@@ -45,7 +45,7 @@ describe('Welcome', () => {
         onStartTour={onStartTour}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: /Tour starten/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /Tour starten/i }));
     expect(onStartTour).toHaveBeenCalledOnce();
   });
 

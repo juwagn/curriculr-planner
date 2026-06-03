@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { useUiStore } from '@/stores/ui';
 
 type Section = 'start' | 'events' | 'views' | 'templates' | 'export';
@@ -36,6 +36,9 @@ export function HelpModal() {
   return (
     <Dialog open onOpenChange={(o) => !o && closeHelp()}>
       <DialogContent className="!max-w-[min(960px,calc(100vw-2rem))] !w-[min(960px,calc(100vw-2rem))] max-h-[80vh] overflow-hidden p-0">
+        <DialogDescription className="sr-only">
+          Hilfe mit Navigation zu Erste Schritte, Termine, Ansichten, Vorlagen sowie Export und Backup.
+        </DialogDescription>
         <div className="flex h-full" style={{ minHeight: 480 }}>
           {/* Left navigation */}
           <div

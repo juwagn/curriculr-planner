@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useConflicts } from './useConflicts';
 import { usePlannerStore, createEmptyDoc } from '@/stores/planner';
@@ -21,7 +21,9 @@ describe('useConflicts', () => {
   it('filters out ignored keys', () => {
     const { result, rerender } = renderHook(() => useConflicts());
     const key = result.current.find((c) => c.type === 'weekend')!.key;
-    usePlannerStore.getState().ignoreConflict(key);
+    act(() => {
+      usePlannerStore.getState().ignoreConflict(key);
+    });
     rerender();
     expect(result.current.some((c) => c.key === key)).toBe(false);
   });

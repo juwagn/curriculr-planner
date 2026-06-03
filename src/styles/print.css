@@ -3,17 +3,17 @@
    App shell hidden; .print-document shown.
    ============================================================ */
 
-.print-document {
+.print-root {
   display: none;
 }
 
 @media print {
-  /* Hide entire app shell */
-  body > #root > *:not(.print-root) {
+  /* Hide entire app shell — .print-root is portaled to body, not inside #root */
+  body > #root {
     display: none !important;
   }
 
-  .print-root {
+  body > .print-root {
     display: block !important;
   }
 

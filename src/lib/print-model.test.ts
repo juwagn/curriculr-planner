@@ -95,23 +95,6 @@ describe('buildPrintModel', () => {
     expect(sw0.annotation).toBe('Begrüßungswoche');
   });
 
-  it('legend contains only categories with events', () => {
-    const model = buildPrintModel(DOC, 'currentQuarter', 1);
-    const labels = model.legend.map((l) => l.label);
-    expect(labels).toContain('Konferenz');
-    expect(labels).toContain('Elternabend');
-  });
-
-  it('legend excludes unused categories', () => {
-    const docNoEltern = {
-      ...DOC,
-      events: DOC.events.filter((e) => e.categoryId !== 'cat2')
-    };
-    const model = buildPrintModel(docNoEltern, 'currentQuarter', 1);
-    const labels = model.legend.map((l) => l.label);
-    expect(labels).not.toContain('Elternabend');
-  });
-
   it('uses schoolName from meta', () => {
     const model = buildPrintModel(DOC, 'currentQuarter', 1);
     expect(model.schoolName).toBe('Testschule');

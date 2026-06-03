@@ -18,7 +18,7 @@ const MODEL: PrintModel = {
           swIndex: '00',
           dateRange: '01.09.–05.09.',
           cells: [
-            { events: [{ title: 'Einschulung', color: '#0058A0', bgColor: '#bfcfe8' }] },
+            { events: [{ title: 'Einschulung', time: undefined }] },
             { events: [] },
             { events: [] },
             { events: [] },
@@ -34,7 +34,6 @@ const MODEL: PrintModel = {
       ]
     }
   ],
-  legend: [{ label: 'Konferenz', color: '#0058A0' }],
   printedAt: '2026-06-02'
 };
 
@@ -54,7 +53,7 @@ describe('PrintDocument', () => {
     expect(screen.getByText('00')).toBeInTheDocument();
   });
 
-  it('renders event chip title', () => {
+  it('renders event title', () => {
     render(<PrintDocument model={MODEL} />);
     expect(screen.getByText('Einschulung')).toBeInTheDocument();
   });
@@ -67,11 +66,6 @@ describe('PrintDocument', () => {
   it('renders annotation text', () => {
     render(<PrintDocument model={MODEL} />);
     expect(screen.getByText('Begrüßungswoche')).toBeInTheDocument();
-  });
-
-  it('renders legend item', () => {
-    render(<PrintDocument model={MODEL} />);
-    expect(screen.getByText('Konferenz')).toBeInTheDocument();
   });
 
   it('renders nothing when model is null', () => {

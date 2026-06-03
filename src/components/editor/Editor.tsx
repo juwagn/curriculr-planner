@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragStartEvent } from '@dnd-kit/core';
 import { usePlannerStore } from '@/stores/planner';
@@ -14,8 +14,6 @@ import { useUiStore } from '@/stores/ui';
 import { handleEditorDragEnd } from './useEditorDragEnd';
 import { TourManager } from '@/components/tour/TourManager';
 import { HelpModal } from '@/components/help/HelpModal';
-import { buildPrintModel } from '@/lib/print-model';
-import { PrintDocument } from '@/components/print/PrintDocument';
 import { PrintDialog } from '@/components/print/PrintDialog';
 
 interface Props {
@@ -25,8 +23,6 @@ interface Props {
 export function Editor({ onSwitchPlan }: Props) {
   const viewMode = useUiStore((s) => s.viewMode);
   const templatesSidebarOpen = useUiStore((s) => s.templatesSidebarOpen);
-  const printScope = useUiStore((s) => s.printScope);
-  const currentQuarter = useUiStore((s) => s.currentQuarter);
   const doc = usePlannerStore((s) => s.doc);
   const [draggedTemplateId, setDraggedTemplateId] = useState<string | null>(null);
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
@@ -47,11 +43,6 @@ export function Editor({ onSwitchPlan }: Props) {
   const draggedEventColor = draggedEvent
     ? doc?.categories.find((c) => c.id === draggedEvent.categoryId)?.color
     : undefined;
-
-  const printModel = useMemo(
-    () => (doc ? buildPrintModel(doc, printScope, currentQuarter) : null),
-    [doc, printScope, currentQuarter]
-  );
 
   const resetDrag = () => {
     setDraggedTemplateId(null);
@@ -119,7 +110,6 @@ export function Editor({ onSwitchPlan }: Props) {
       <NotesSidebar />
       <TourManager />
       <HelpModal />
-      <PrintDocument model={printModel} />
       <PrintDialog />
     </div>
   );

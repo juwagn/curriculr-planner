@@ -72,10 +72,10 @@ export function generatePrintHtml(
     col.col-num { width: 24pt; }
     col.col-date { width: 22mm; }
     col.col-ann { width: 90pt; }
-    thead th { background: #2d2d2d; color: #fff; padding: 3pt; font-size: 6.5pt; border: 0.1pt solid #222; text-align: center; font-weight: 600; letter-spacing: 0.05em; }
+    thead th { background: #00345C; color: #fff; padding: 3pt; font-size: 6.5pt; border: 0.1pt solid #002a4a; text-align: center; font-weight: 600; letter-spacing: 0.05em; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tbody td { border: 0.1pt solid #ddd; padding: 2pt 3pt; vertical-align: top; overflow: hidden; }
-    td.td-num { background: #f5f5f5; text-align: center; vertical-align: middle; font-size: 7pt; font-weight: 700; color: #666; }
-    td.td-date { background: #f5f5f5; vertical-align: middle; }
+    td.td-num { background: #dce8f2; text-align: center; vertical-align: middle; font-size: 7pt; font-weight: 700; color: #00345C; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    td.td-date { background: #dce8f2; vertical-align: middle; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .date-label { display: block; font-size: 8pt; font-weight: 700; color: #222; margin-bottom: 1pt; }
     .date-range { font-size: 7pt; color: #555; }
     td.td-ann { background: #fafafa; word-break: break-word; white-space: normal; font-size: 7.5pt; color: #555; }

@@ -26,7 +26,8 @@ Ablauf bisher: Planner → ICS-Datei exportieren → manuell in IServ importiere
 | **IServ-Anbindung** | IServ abonniert WP-ICS-Feed (Pull) | IServ kann externe iCal abonnieren (bestätigt) → kein manueller Re-Import mehr. |
 | **Feed-Privatsphäre** | Token in der Feed-URL | Unrätbar, analog zum bestehenden Kiosk-Token-Muster des Plugins. |
 | **Auth** | WP Application Passwords | WP-Core (≥5.6), pro Gerät widerrufbar, kein eigener Auth-Code. |
-| **WP-Codeorganisation** | Neues, gekapseltes Modul im bestehenden `curriculr-terminplan`-Plugin — **kein** neues Repo | Renderer lebt schon dort (Adapter→Renderer in-process); 1 Plugin für den Schul-Admin; geteilte Settings/Auth/CORS/Token. |
+| **WP-Codeorganisation** | Neue require'd Datei `plugin/curriculr-data-layer.php` (prozedural, `gsh_tp_curriculr_*`) im bestehenden `curriculr-terminplan`-Plugin — **kein** neues Repo, **keine** Klassen | Renderer lebt schon dort; 1 Plugin für den Schul-Admin; folgt Plugin-Konvention (Single-Procedural, kein Build); hält Monolith klein. |
+| **WP-Anzeige-Datenpfad** | Feed-Reuse: Profil-`ical_url` = Feed-URL, bestehender Fetch/Parse/Cache 1:1, `gsh_tp_do_refresh` bei PUT — **kein** in-process Adapter | Null Renderer-/Parser-Änderung (max. „Design erhalten"); WP-Anzeige + IServ teilen denselben Feed; sofort-aktuell via vorhandene Refresh-Funktion. |
 
 ## 3. Gesamtarchitektur
 
@@ -38,20 +39,23 @@ Einbahn-Fluss, eine Quelle der Wahrheit:
    - Sync-Client (neu) = schiebt Doc nach WP, Status-Anzeige, Konflikt-Check
         │  HTTPS · REST · WP Application Password
         ▼
-② WordPress — „Curriculr Data Layer" (neues Modul im Plugin)
+② WordPress — „Curriculr Data Layer" (neue require'd Datei, prozedural)
    - Tabelle wp_curriculr_docs          = Quelle der Wahrheit (1 Zeile / Schuljahr)
    - Tabelle wp_curriculr_doc_revisions = Historie (v1.1)
    - REST GET/PUT /doc + /health        = laden/speichern, Versions-Check
-   - Adapter doc → internes Event-Modell
-   - ICS-Feed-Endpoint /feed/{sj}/{token}.ics
+   - ICS-Feed-Endpoint /feed/{sj}/{token}.ics = EINZIGE Quelle für ③a UND ③b
+   - bei PUT: Feed neu generieren + bestehendes gsh_tp_do_refresh($pid)
    - wp-cron Nacht-Backup (v1.1)
-        │ Adapter (kein HTTP)                    │ ICS-Abo
+        │ Profil.ical_url = Feed-URL              │ ICS-Abo
+        │ bestehender Fetch/Parse/Cache 1:1       │
         ▼                                        ▼
 ③a WP-Quartalsansicht + Druck/PDF        ③b IServ-Kalender → Endgeräte
-   [Renderer UNVERÄNDERT → Kollegium]            [zieht Feed automatisch]
+   [Renderer + Parser UNVERÄNDERT]               [zieht Feed automatisch]
 ```
 
-**Ablauf neu:** im Planner ändern → Save → `wp_curriculr_docs` aktuell → Druckansicht **sofort** aktuell (Adapter, kein IServ-Umweg) · IServ zieht den Feed → Endgeräte. Kein ICS-Datei-Upload mehr.
+**Feed-Reuse statt Adapter (grounding-Erkenntnis):** WP-Anzeige und IServ konsumieren **denselben** Feed. Die `ical_url` des WP-Profils zeigt auf unsere Feed-URL; der komplette bestehende Fetch/Parse/Cache/Renderer-Pfad (`gsh_tp_fetch_ical` → `gsh_tp_parse_events` → Tabellen-Rendering) bleibt **1:1 unverändert**. Kein neuer Code am Renderer-Eingang. Bei `PUT` wird der Feed neu erzeugt und das bestehende `gsh_tp_do_refresh($pid)` aufgerufen → Anzeige sofort frisch (statt erst nach Cache-Ablauf).
+
+**Ablauf neu:** im Planner ändern → Save → `wp_curriculr_docs` aktuell → Feed neu + `do_refresh` → Druckansicht **sofort** aktuell · IServ zieht den Feed → Endgeräte. Kein ICS-Datei-Upload mehr.
 
 ## 4. Datensicherheit — „Die Arbeit geht nicht verloren"
 
@@ -108,6 +112,8 @@ Beide Repos bauen gegen diesen Contract. REST-Namespace `curriculr/v1`.
 
 Schuljahr-Schlüssel orientiert sich am bestehenden Plugin-Profilschema (z.B. `sj_2026_27`). Ein Doc + ein Feed-Token pro Schuljahr.
 
+**Mapping zu bestehenden Profilen:** Das Plugin hält Profile in der Option `gsh_tp_profiles` (serialisiert, autoload, max 5), jedes mit `id` (pid) + `ical_url`. Ein Curriculr-Doc (schoolyear) ↔ ein Profil. Beim Aktivieren setzt das Data Layer `profile['ical_url']` auf die Feed-URL des Docs (`feed_token` aus `wp_curriculr_docs`). Damit greift der bestehende Fetch/Refresh-Mechanismus pro Profil unverändert.
+
 ## 8. Schema-Entkopplung (Resilienz & Wartbarkeit)
 
 `PlannerDocument` hat eine Schema-`version` (aktuell `4`, siehe [src/lib/schemas.ts](../../../src/lib/schemas.ts)) mit Migrationskette.
@@ -118,27 +124,29 @@ Schuljahr-Schlüssel orientiert sich am bestehenden Plugin-Profilschema (z.B. `s
 
 Damit sind Planner- und WP-Releases entkoppelt; ein Planner-Update zwingt nicht zum sofortigen WP-Update.
 
-## 9. WP-Modul-Struktur (kein Monolith-Zuwachs)
+## 9. WP-Code-Organisation (an Plugin-Konventionen angepasst)
 
-Das Data Layer entsteht als gekapseltes Modul, nicht als weitere Logik in `gsh-terminplan.php`:
+Das Plugin ist **prozedural, eine Datei** (`plugin/gsh-terminplan.php`, ~7900 Zeilen, `gsh_tp_*`-Funktionen), **kein Build-System, kein Composer, kein Autoload, keine Klassen** (AGENTS.md: „Simplicity First / Minimal Impact"). Das Data Layer folgt dieser Konvention:
 
-```
-includes/data-layer/
-  class-curriculr-repository.php     # Tabellen-Zugriff (docs, revisions)
-  class-curriculr-rest-controller.php# REST-Routen, Auth-Check, CORS
-  class-curriculr-feed.php           # ICS-Feed-Generator (spiegelt ics-export.ts)
-  class-curriculr-adapter.php        # Doc → internes Event-Modell für den Renderer
-  class-curriculr-backup.php         # (v1.1) wp-cron Export + Revision-Prune
-```
+- Neue Datei `plugin/curriculr-data-layer.php`, geladen via einem `require_once` aus `gsh-terminplan.php`. Hält den Monolithen klein, ohne Build/Autoloader.
+- Prozedurale Funktionen mit Präfix `gsh_tp_curriculr_*`:
+  - `gsh_tp_curriculr_install()` — `dbDelta` für `wp_curriculr_docs` (+ `_doc_revisions` v1.1).
+  - `gsh_tp_curriculr_repo_get($sj)` / `gsh_tp_curriculr_repo_put($sj, $doc, $base_version)` — Tabellen-Zugriff + Versions-Check.
+  - `gsh_tp_curriculr_register_rest()` (Hook `rest_api_init`) — Routen, Auth-/Capability-Check, CORS.
+  - `gsh_tp_curriculr_feed($sj, $token)` — ICS-Generator, spiegelt die VEVENT-Form aus `ics-export.ts`.
+  - `gsh_tp_curriculr_after_put($sj, $pid)` — Feed-Cache invalidieren + `gsh_tp_do_refresh($pid)`.
+  - `gsh_tp_curriculr_backup_cron()` (v1.1) — Export + Revision-Prune.
 
-Der bestehende Renderer (③a) konsumiert das interne Event-Modell über den Adapter — Renderer-Code, CSS, Tabs, Druck/PDF bleiben unverändert.
+**Renderer/Parser unverändert:** Es wird **kein** Adapter am Renderer-Eingang gebaut. Stattdessen zeigt die `ical_url` des zugehörigen Profils auf die Feed-URL (Feed-Reuse, §3). Renderer-Code, CSS, Tabs, Druck/PDF, iCal-Parser bleiben unangetastet.
+
+**Plugin-Konventionen einhalten:** nach jeder Änderung `php -l`; Versionsnummer an allen 4 Stellen synchron (Header, `GSH_TP_VERSION`, `gsh_tp_changelog()`, Header-Changelog); Bezeichner Englisch, Kommentare Deutsch; CSS nur in `gsh-terminplan.css`.
 
 ## 10. Zerlegung & Baureihenfolge
 
 Jedes Teil-Projekt: eigener Spec→Plan→Bau-Zyklus. Kritischer Pfad SP0 → SP1 → SP2 → SP3.
 
 - **SP0 · Contract** (dieses Dokument): API + Doc/ICS-Form als Wahrheit für beide Repos. Gate.
-- **SP1 · WP-Backend (Data-Layer-Modul)** — Repo `curriculr-terminplan`: Tabellen, REST GET/PUT/health, Application-PW-Auth + Capability, CORS, Versions-Check + 409, ICS-Feed (Token), Adapter doc→Events in den unveränderten Renderer. Standalone testbar (curl + Sample-Doc). **Fundament — wird zuerst gebaut.** *Voraussetzung: Repo lokal klonen (liegt aktuell nur auf GitHub).*
+- **SP1 · WP-Backend (Data Layer)** — Repo `curriculr-terminplan`, neue Datei `plugin/curriculr-data-layer.php`: Tabellen, REST GET/PUT/health, Application-PW-Auth + Capability, CORS, Versions-Check + 409, ICS-Feed (Token), Feed-Reuse-Verdrahtung (Profil-`ical_url` + `do_refresh` bei PUT). Standalone testbar (curl + Sample-Doc). **Fundament — wird zuerst gebaut.** *Repo ist lokal geklont nach `../curriculr-terminplan`.*
 - **SP2 · Planner-Sync-Client** — dieses Repo: `RemoteAdapter`-Tier, Settings-UI (WP-URL + App-PW + Verbindungstest), debounced Sync nach Settle, Offline-Queue + Retry, baseVersion/Konflikt-UI, Tri-State-Header, Laden vom Server beim Start. Baut gegen SP1 (oder Mock des Contracts).
 - **SP3 · Integration + Cutover** — Ops/Config: IServ abonniert WP-Token-Feed pro Schuljahr; aktuelles Schuljahr einmalig nach WP migrieren; End-to-End-Test (Planner → Gerät + Druck); alter Manual-Export-Pfad bleibt als Fallback bis stabil; Runbook.
 - **SP4 · Härtung (v1.1)** — `curriculr-terminplan`: Revisions-Tabelle + Restore-UI (⑦); Nacht-Backup wp-cron JSON+ICS (⑧); Retention-Prune.

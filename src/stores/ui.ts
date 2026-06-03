@@ -93,7 +93,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   tourPending: false,
   printDialogOpen: false,
   printScope: 'currentQuarter',
-  printOrientation: 'portrait',
+  printOrientation: 'landscape',
 
   setQuarter(q) { set({ currentQuarter: q }); },
   toggleNotesSidebar() { set((s) => ({ notesSidebarOpen: !s.notesSidebarOpen })); },

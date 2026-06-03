@@ -1,6 +1,6 @@
 /* ============================================================
    Print styles — @media print only
-   App shell hidden; .print-document shown.
+   App shell hidden; .print-document shown via portal to body.
    ============================================================ */
 
 .print-root {
@@ -44,14 +44,5 @@
   * {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
-  }
-
-  /* Page counter via CSS */
-  @page {
-    counter-increment: page;
-  }
-
-  .print-page-number::after {
-    content: counter(page);
   }
 }

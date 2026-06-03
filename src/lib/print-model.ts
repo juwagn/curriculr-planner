@@ -1,7 +1,6 @@
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { computeWeekRows, getQuarterRange } from './schoolweeks';
-import { pastelize } from './colors';
 import type { PlannerDocument } from '@/types';
 import type { WeekRow } from './schoolweeks';
 
@@ -10,8 +9,6 @@ export type PrintScope = 'currentQuarter' | 'allQuarters';
 export interface PrintEvent {
   title: string;
   time?: string;
-  color: string;
-  bgColor: string;
 }
 
 export interface PrintCell {
@@ -38,18 +35,12 @@ export interface PrintSection {
   rows: (PrintWeekRow | PrintHolidayRow)[];
 }
 
-export interface PrintLegendItem {
-  label: string;
-  color: string;
-}
-
 export interface PrintModel {
   schoolName: string;
   schoolInfo?: string;
   docName: string;
   schoolyearLabel: string;
   sections: PrintSection[];
-  legend: PrintLegendItem[];
   printedAt: string;
 }
 
@@ -69,7 +60,6 @@ function buildSection(
     (r) => r.startDate <= range.endDate && r.endDate >= range.startDate
   );
 
-  // Expand multi-day events to date → events map (same logic as WeekTable)
   const eventsByDate = new Map<string, PlannerDocument['events']>();
   for (const ev of doc.events) {
     const spanDays = Math.max(0, differenceInCalendarDays(parseISO(ev.end), parseISO(ev.start)));
@@ -97,16 +87,10 @@ function buildSection(
     for (let dayIdx = 0; dayIdx < 5; dayIdx++) {
       const iso = format(addDays(parseISO(row.startDate), dayIdx), 'yyyy-MM-dd');
       const dayEvents = eventsByDate.get(iso) ?? [];
-      cells[dayIdx].events = dayEvents.map((ev) => {
-        const cat = doc.categories.find((c) => c.id === ev.categoryId);
-        const color = cat?.color ?? '#888888';
-        return {
-          title: ev.title,
-          time: ev.allDay ? undefined : ev.startTime,
-          color,
-          bgColor: pastelize(color)
-        };
-      });
+      cells[dayIdx].events = dayEvents.map((ev) => ({
+        title: ev.title,
+        time: ev.allDay ? undefined : ev.startTime
+      }));
     }
 
     const annotation = doc.annotations.find((a) => a.schoolweek === row.index);
@@ -138,24 +122,12 @@ export function buildPrintModel(
 
   const sections = quarters.map((q) => buildSection(doc, q, allWeekRows));
 
-  // Build legend only from events whose start date falls within the printed sections
-  const printedRanges = sections.map((s) => getQuarterRange(s.quarterIndex, doc.schoolyear));
-  const usedCatIds = new Set(
-    doc.events
-      .filter((e) => printedRanges.some((r) => e.start >= r.startDate && e.start <= r.endDate))
-      .map((e) => e.categoryId)
-  );
-  const legend: PrintLegendItem[] = doc.categories
-    .filter((c) => usedCatIds.has(c.id))
-    .map((c) => ({ label: c.label, color: c.color }));
-
   return {
     schoolName: doc.meta.schoolName ?? doc.meta.name,
     schoolInfo: doc.meta.schoolInfo,
     docName: doc.meta.name,
     schoolyearLabel: doc.schoolyear.label,
     sections,
-    legend,
     printedAt: new Date().toISOString().slice(0, 10)
   };
 }

@@ -5,6 +5,28 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.6.0] – 2026-06-03 — „PDF-Export"
+
+### Hinzugefügt
+- **PDF-Export** über neuen Menüpunkt „Als PDF drucken" (Export-Dropdown):
+  Öffnet einen Dialog zur Wahl von Umfang (aktuelles Quartal / ganzes Schuljahr)
+  und Format (Hoch-/Querformat). Standard: Querformat A4.
+- **Professionelles Drucklayout** – iframe-basierte Generierung (kein
+  Popup-Blocker-Problem, Fallback auf `window.open`). Vollständiges HTML-Dokument
+  mit eigenem CSS; keine Abhängigkeit von App-Shell oder CSS-Variablen.
+- **Kategorie-Farbbalken** pro Termin: schmaler linker Balken in der Kategoriefarbe
+  (druckt in S/W als Grauton – bleibt lesbar).
+- **Fester Footer** auf jeder PDF-Seite: Stand-Datum + Schulinfo.
+- **Schulname & Schulinformation** in Einstellungen → Schule & Druck konfigurierbar;
+  erscheinen im PDF-Header.
+- Layout nach professionellem Vorbild: feine Tabellenlinien (0,1 pt), dedizierte
+  Schreiblinien in leeren Tageszellen für handschriftliche Notizen.
+
+### Behoben
+- Seitennummer zeigte „0" (CSS-Counter funktioniert nicht zuverlässig cross-browser) →
+  Footer zeigt jetzt statisch das Quartal-Label.
+- Anmerkungen-Spalte lief über den Zellenrand → `word-break: break-word` + feste Breite.
+
 ## [1.5.1] – 2026-06-01
 
 ### Hinzugefügt

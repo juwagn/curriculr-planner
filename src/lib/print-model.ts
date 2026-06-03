@@ -9,6 +9,7 @@ export type PrintScope = 'currentQuarter' | 'allQuarters';
 export interface PrintEvent {
   title: string;
   time?: string;
+  color: string;
 }
 
 export interface PrintCell {
@@ -87,10 +88,14 @@ function buildSection(
     for (let dayIdx = 0; dayIdx < 5; dayIdx++) {
       const iso = format(addDays(parseISO(row.startDate), dayIdx), 'yyyy-MM-dd');
       const dayEvents = eventsByDate.get(iso) ?? [];
-      cells[dayIdx].events = dayEvents.map((ev) => ({
-        title: ev.title,
-        time: ev.allDay ? undefined : ev.startTime
-      }));
+      cells[dayIdx].events = dayEvents.map((ev) => {
+        const cat = doc.categories.find((c) => c.id === ev.categoryId);
+        return {
+          title: ev.title,
+          time: ev.allDay ? undefined : ev.startTime,
+          color: cat?.color ?? '#888888'
+        };
+      });
     }
 
     const annotation = doc.annotations.find((a) => a.schoolweek === row.index);

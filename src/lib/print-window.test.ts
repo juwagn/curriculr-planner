@@ -17,7 +17,7 @@ const MODEL: PrintModel = {
           swIndex: '00',
           dateRange: '01.09.–05.09.',
           cells: [
-            { events: [{ title: 'Einschulung', time: '09:00' }] },
+            { events: [{ title: 'Einschulung', time: '09:00', color: '#0058A0' }] },
             { events: [] },
             { events: [] },
             { events: [] },
@@ -77,12 +77,9 @@ describe('generatePrintHtml', () => {
     expect(html).toContain('Begrüßungswoche');
   });
 
-  it('event div has no inline color or background style', () => {
+  it('event div uses border-left-color for category color', () => {
     const html = generatePrintHtml(MODEL, 'landscape');
-    const match = html.match(/<div class="event"[^>]*>/);
-    expect(match).not.toBeNull();
-    expect(match![0]).not.toContain('color:');
-    expect(match![0]).not.toContain('background');
+    expect(html).toContain('border-left-color:#0058A0');
   });
 
   it('escapes HTML special characters in school name', () => {

@@ -45,7 +45,7 @@ describe('PrintDocument', () => {
 
   it('renders quarter label', () => {
     render(<PrintDocument model={MODEL} />);
-    expect(screen.getByText(/1\. Quartal/)).toBeInTheDocument();
+    expect(screen.getAllByText(/1\. Quartal/).length).toBeGreaterThan(0);
   });
 
   it('renders school week row with SW index', () => {

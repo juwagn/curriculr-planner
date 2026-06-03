@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useUiStore } from '@/stores/ui';
-import { applyPrintOrientation } from '@/lib/print-orientation';
+import { usePlannerStore } from '@/stores/planner';
+import { openPrintWindow } from '@/lib/print-window';
 
 export function PrintDialog() {
   const open = useUiStore((s) => s.printDialogOpen);
@@ -10,12 +11,13 @@ export function PrintDialog() {
   const setScope = useUiStore((s) => s.setPrintScope);
   const orientation = useUiStore((s) => s.printOrientation);
   const setOrientation = useUiStore((s) => s.setPrintOrientation);
+  const currentQuarter = useUiStore((s) => s.currentQuarter);
 
   const handlePrint = () => {
-    applyPrintOrientation(orientation);
+    const doc = usePlannerStore.getState().doc;
+    if (!doc) return;
+    openPrintWindow(doc, scope, currentQuarter, orientation);
     close();
-    // Brief delay so dialog unmounts before print dialog opens
-    setTimeout(() => window.print(), 50);
   };
 
   if (!open) return null;

@@ -23,4 +23,5 @@ Thumbs.db
 
 # Local plan exports / scratch assets
 *.curriculr.json
+Terminplan_*.xlsx
 live-logo.png

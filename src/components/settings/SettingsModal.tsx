@@ -10,6 +10,7 @@ import { ImportTab } from './ImportTab';
 import { AppearanceTab } from './AppearanceTab';
 import { AboutTab } from './AboutTab';
 import { SchoolTab } from './SchoolTab';
+import { WordpressTab } from './WordpressTab';
 
 export function SettingsModal() {
   const open = useUiStore((s) => s.settingsModalOpen);
@@ -34,6 +35,7 @@ export function SettingsModal() {
             <TabsTrigger value="export">Export</TabsTrigger>
             <TabsTrigger value="import">Import</TabsTrigger>
             <TabsTrigger value="about">Über</TabsTrigger>
+            <TabsTrigger value="wordpress">WordPress</TabsTrigger>
           </TabsList>
           <TabsContent value="schoolyear"><SchoolyearTab /></TabsContent>
           <TabsContent value="categories"><CategoriesTab /></TabsContent>
@@ -44,6 +46,7 @@ export function SettingsModal() {
           <TabsContent value="export"><ExportTab /></TabsContent>
           <TabsContent value="import"><ImportTab /></TabsContent>
           <TabsContent value="about"><AboutTab /></TabsContent>
+          <TabsContent value="wordpress"><WordpressTab /></TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>

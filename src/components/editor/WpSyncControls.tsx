@@ -52,6 +52,7 @@ export function WpSyncControls() {
           key={a}
           size="sm"
           variant="outline"
+          className="border-white/40 bg-transparent text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
           disabled={syncState === 'sending'}
           onClick={() => {
             if (confirmPublic(a)) send(doc, a);

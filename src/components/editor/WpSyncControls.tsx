@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlannerStore } from '@/stores/planner';
 import { useWpSyncStore } from '@/stores/wpSync';
@@ -86,12 +87,12 @@ export function WpSyncControls() {
           <button
             type="button"
             aria-label={`Veröffentlichen — Stufe ${STAGE_LABELS[stage]}`}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--radius-pill)] bg-white/10 hover:bg-white/20 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 hover:bg-white/20 transition-colors"
             style={{ transitionDuration: 'var(--dur-state)' }}
           >
             <StageDot stage={stage} />
             <span className="font-medium">{STAGE_LABELS[stage]}</span>
-            <span className="opacity-60 text-[10px]">▾</span>
+            <ChevronDown className="w-3 h-3 opacity-60" />
           </button>
         </PopoverTrigger>
 

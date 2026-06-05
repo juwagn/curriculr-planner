@@ -3,6 +3,7 @@ import { useWpSyncStore } from '@/stores/wpSync';
 import { usePlannerStore } from '@/stores/planner';
 import { testConnection } from '@/lib/wp-sync';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
+import type { WpPlanLink } from '@/lib/wp-sync-config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,18 +13,21 @@ export function WordpressTab() {
   const config = useWpSyncStore((s) => s.config);
   const setConfig = useWpSyncStore((s) => s.setConfig);
   const doc = usePlannerStore((s) => s.doc);
-  const [testMsg, setTestMsg] = useState('');
-  const [testing, setTesting] = useState(false);
+  const [testState, setTestState] = useState({ msg: '', busy: false });
 
   const docId = doc?.schoolyear.id;
   const link = docId ? config.links[docId] : undefined;
 
   async function onTest() {
-    setTesting(true);
-    setTestMsg('Teste…');
+    setTestState({ msg: 'Teste…', busy: true });
     const r = await testConnection(config);
-    setTestMsg(r.message);
-    setTesting(false);
+    setTestState({ msg: r.message, busy: false });
+  }
+
+  function patchLink(patch: Partial<WpPlanLink>) {
+    if (!docId) return;
+    const base: WpPlanLink = link ?? { schoolyearKey: '', wpProfileId: '', stage: 'entwurf', knownVersion: 0 };
+    setConfig({ ...config, links: { ...config.links, [docId]: { ...base, ...patch } } });
   }
 
   return (
@@ -55,8 +59,8 @@ export function WordpressTab() {
             In WordPress unter Benutzer → Profil → „Application Passwords" erzeugen. Wird nur in diesem Browser gespeichert; jederzeit in WordPress widerrufbar.
           </p>
         </div>
-        <Button variant="outline" onClick={onTest} disabled={testing}>Verbindung testen</Button>
-        {testMsg && <p className="text-[13px]">{testMsg}</p>}
+        <Button variant="outline" onClick={onTest} disabled={testState.busy}>Verbindung testen</Button>
+        {testState.msg && <p className="text-[13px]">{testState.msg}</p>}
       </div>
 
       {doc && (
@@ -65,16 +69,12 @@ export function WordpressTab() {
           <div>
             <Label>Schuljahr-Schlüssel (WordPress)</Label>
             <Input value={link?.schoolyearKey ?? ''} placeholder="sj_2026_27"
-              onChange={(e) => docId && setConfig({ ...config, links: { ...config.links,
-                [docId]: { schoolyearKey: e.target.value, wpProfileId: link?.wpProfileId ?? '',
-                  stage: link?.stage ?? 'entwurf', knownVersion: link?.knownVersion ?? 0 } } })} />
+              onChange={(e) => patchLink({ schoolyearKey: e.target.value })} />
           </div>
           <div>
             <Label>WordPress-Profil-ID (NICHT das Live-Profil)</Label>
             <Input value={link?.wpProfileId ?? ''} placeholder="z.B. curriculr_test"
-              onChange={(e) => docId && setConfig({ ...config, links: { ...config.links,
-                [docId]: { schoolyearKey: link?.schoolyearKey ?? '', wpProfileId: e.target.value,
-                  stage: link?.stage ?? 'entwurf', knownVersion: link?.knownVersion ?? 0 } } })} />
+              onChange={(e) => patchLink({ wpProfileId: e.target.value })} />
             <p className="text-[11px] text-[var(--color-ink-500)] mt-1">
               Lege in WordPress ein eigenes Profil für Curriculr an. So wird euer laufender Kalender nie überschrieben.
             </p>

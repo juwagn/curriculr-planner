@@ -13,16 +13,19 @@ export const STAGE_ACTION_LABELS: Record<StageAction, string> = {
   'oeffentlich-schalten': 'Öffentlich schalten',
 };
 
+// Single source of truth for the stage machine — both nextStage and
+// availableActions derive from this table.
+const TRANSITIONS: Partial<Record<WpStage, Partial<Record<StageAction, WpStage>>>> = {
+  entwurf:   { 'freigeben': 'genehmigt' },
+  genehmigt: { 'oeffentlich-schalten': 'oeffentlich' },
+};
+
 /** Target stage for an action, or null if the action is invalid for this stage. */
 export function nextStage(stage: WpStage, action: StageAction): WpStage | null {
-  if (action === 'freigeben' && stage === 'entwurf') return 'genehmigt';
-  if (action === 'oeffentlich-schalten' && stage === 'genehmigt') return 'oeffentlich';
-  return null;
+  return TRANSITIONS[stage]?.[action] ?? null;
 }
 
 /** Stage-advancing actions offered for the current stage (no backward moves — YAGNI). */
 export function availableActions(stage: WpStage): StageAction[] {
-  if (stage === 'entwurf') return ['freigeben'];
-  if (stage === 'genehmigt') return ['oeffentlich-schalten'];
-  return [];
+  return Object.keys(TRANSITIONS[stage] ?? {}) as StageAction[];
 }

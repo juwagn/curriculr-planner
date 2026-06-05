@@ -17,10 +17,10 @@ interface WpSyncStore {
 
   setConfig(cfg: WpSyncConfig): void;
   linkFor(docId: UUID): WpPlanLink | undefined;
-  /** Push the doc; if action given, advance the stage on success. */
-  send(doc: PlannerDocument, action?: StageAction): Promise<void>;
+  /** Push the doc; if action given, advance the stage on success. Returns the final syncState. */
+  send(doc: PlannerDocument, action?: StageAction): Promise<WpSyncState>;
   /** Resolve a 409 by keeping local: re-push at server version. */
-  keepLocal(doc: PlannerDocument): Promise<void>;
+  keepLocal(doc: PlannerDocument): Promise<WpSyncState>;
   clearConflict(): void;
 }
 
@@ -40,33 +40,35 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     const link = config.links[docId];
     if (!config.enabled || !link) {
       set({ syncState: 'error', message: 'Dieser Plan ist nicht mit WordPress verknüpft (Einstellungen → WordPress).' });
-      return;
+      return 'error';
     }
     const targetStage: WpStage = action ? (nextStage(link.stage, action) ?? link.stage) : link.stage;
     set({ syncState: 'sending', message: 'Sende an WordPress…' });
     const res: PushResult = await pushDoc(config, link.schoolyearKey, doc, link.knownVersion, targetStage);
     if (res.status === 'ok') {
-      const links = { ...config.links, [docId]: { ...link, stage: res.stage ?? targetStage, knownVersion: res.version ?? link.knownVersion, ...(res.feedUrl ? { feedUrl: res.feedUrl } : {}) } };
-      const newCfg = { ...config, links };
-      saveWpConfig(newCfg);
-      set({ config: newCfg, syncState: 'synced', message: '✓ An WordPress gesendet', conflict: null });
+      const newLink: WpPlanLink = { ...link, stage: res.stage ?? targetStage, knownVersion: res.version ?? link.knownVersion, feedUrl: res.feedUrl ?? link.feedUrl };
+      get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
+      set({ syncState: 'synced', message: '✓ An WordPress gesendet', conflict: null });
+      return 'synced';
     } else if (res.status === 'conflict') {
       set({ syncState: 'conflict', message: 'WordPress hat eine neuere Version.',
         conflict: { docId, serverVersion: res.serverVersion ?? 0, serverDoc: res.serverDoc as PlannerDocument } });
+      return 'conflict';
     } else {
       set({ syncState: 'error', message: res.message ?? 'Senden fehlgeschlagen.' });
+      return 'error';
     }
   },
 
   async keepLocal(doc) {
     const { conflict, config } = get();
-    if (!conflict) return;
+    if (!conflict) return 'error';
     const link = config.links[conflict.docId];
-    if (!link) return;
+    if (!link) return 'error';
     // Adopt the server version as the new base, then re-push local unchanged.
-    const links = { ...config.links, [conflict.docId]: { ...link, knownVersion: conflict.serverVersion } };
-    set({ config: { ...config, links }, conflict: null });
-    await get().send(doc);
+    get().setConfig({ ...config, links: { ...config.links, [conflict.docId]: { ...link, knownVersion: conflict.serverVersion } } });
+    set({ conflict: null });
+    return get().send(doc);
   },
 
   clearConflict() { set({ conflict: null, syncState: 'idle', message: '' }); },

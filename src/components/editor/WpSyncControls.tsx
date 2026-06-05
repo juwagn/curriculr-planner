@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlannerStore } from '@/stores/planner';
@@ -21,6 +22,12 @@ const STAGE_COLOR: Record<WpStage, string> = {
   oeffentlich: 'var(--color-status-green)',
 };
 
+const STAGE_HINT: Record<WpStage, string> = {
+  entwurf: 'Nur die Leitung sieht den Entwurf (geschützter Link).',
+  genehmigt: 'Genehmigt — noch nicht öffentlich. „Öffentlich schalten" macht ihn fürs Kollegium sichtbar.',
+  oeffentlich: 'Öffentlich — das ganze Kollegium sieht diesen Plan.',
+};
+
 function StageDot({ stage }: { stage: WpStage }) {
   return (
     <span
@@ -31,15 +38,18 @@ function StageDot({ stage }: { stage: WpStage }) {
   );
 }
 
+function showSyncToast(syncState: string, message: string, successMsg: string) {
+  if (syncState === 'synced') toast.success(successMsg);
+  else if (syncState === 'error') toast.error(message || 'Senden fehlgeschlagen.');
+}
+
 export function WpSyncControls() {
   const doc = usePlannerStore((s) => s.doc);
   const setDoc = usePlannerStore((s) => s.setDoc);
-  const config = useWpSyncStore((s) => s.config);
-  const syncState = useWpSyncStore((s) => s.syncState);
-  const conflict = useWpSyncStore((s) => s.conflict);
-  const send = useWpSyncStore((s) => s.send);
-  const keepLocal = useWpSyncStore((s) => s.keepLocal);
-  const clearConflict = useWpSyncStore((s) => s.clearConflict);
+  const { config, syncState, conflict, send, keepLocal, clearConflict } = useWpSyncStore(
+    useShallow((s) => ({ config: s.config, syncState: s.syncState, conflict: s.conflict,
+      send: s.send, keepLocal: s.keepLocal, clearConflict: s.clearConflict }))
+  );
 
   const [open, setOpen] = useState(false);
   const [confirmPublic, setConfirmPublic] = useState(false);
@@ -52,23 +62,17 @@ export function WpSyncControls() {
   const actions = availableActions(stage);
   const sending = syncState === 'sending';
 
-  // Sendet, schließt das Panel und meldet das Ergebnis als Toast.
   async function run(action?: StageAction) {
     if (!doc) return;
     setOpen(false);
-    await send(doc, action);
-    const st = useWpSyncStore.getState();
-    if (st.syncState === 'synced') toast.success('An WordPress gesendet.');
-    else if (st.syncState === 'error') toast.error(st.message || 'Senden fehlgeschlagen.');
-    // 'conflict' wird durch den Konflikt-Dialog behandelt.
+    const result = await send(doc, action);
+    showSyncToast(result, useWpSyncStore.getState().message, 'An WordPress gesendet.');
   }
 
   async function onKeepLocal() {
     if (!doc) return;
-    await keepLocal(doc);
-    const st = useWpSyncStore.getState();
-    if (st.syncState === 'synced') toast.success('Dein Stand wurde gesendet.');
-    else if (st.syncState === 'error') toast.error(st.message || 'Senden fehlgeschlagen.');
+    const result = await keepLocal(doc);
+    showSyncToast(result, useWpSyncStore.getState().message, 'Dein Stand wurde gesendet.');
   }
 
   function onAction(action: StageAction) {
@@ -114,40 +118,29 @@ export function WpSyncControls() {
             </Button>
 
             {actions.map((a) => (
-              <Button
-                key={a}
-                variant="outline"
-                className="w-full justify-center"
-                disabled={sending}
-                onClick={() => onAction(a)}
-              >
+              <Button key={a} variant="outline" className="w-full justify-center"
+                disabled={sending} onClick={() => onAction(a)}>
                 {STAGE_ACTION_LABELS[a]}
               </Button>
             ))}
 
-            <p className="text-[11px] text-[var(--color-text-muted)] pt-1">
-              {stage === 'entwurf' && 'Nur die Leitung sieht den Entwurf (geschützter Link).'}
-              {stage === 'genehmigt' && 'Genehmigt — noch nicht öffentlich. „Öffentlich schalten“ macht ihn fürs Kollegium sichtbar.'}
-              {stage === 'oeffentlich' && 'Öffentlich — das ganze Kollegium sieht diesen Plan.'}
-            </p>
+            <p className="text-[11px] text-[var(--color-text-muted)] pt-1">{STAGE_HINT[stage]}</p>
           </div>
         </PopoverContent>
       </Popover>
 
-      {/* Bestätigung: Öffentlich schalten (statt window.confirm) */}
+      {/* Bestätigung: Öffentlich schalten */}
       <Dialog open={confirmPublic} onOpenChange={setConfirmPublic}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Für das ganze Kollegium sichtbar machen?</DialogTitle>
           </DialogHeader>
           <p className="text-[14px] text-[var(--color-text-muted)]">
-            Der Plan „{doc.meta.name}“ wird damit öffentlich und für alle im Kollegium sichtbar.
+            Der Plan „{doc.meta.name}" wird damit öffentlich und für alle im Kollegium sichtbar.
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setConfirmPublic(false)}>Abbrechen</Button>
-            <Button
-              onClick={() => { setConfirmPublic(false); void run('oeffentlich-schalten'); }}
-            >
+            <Button onClick={() => { setConfirmPublic(false); void run('oeffentlich-schalten'); }}>
               Öffentlich schalten
             </Button>
           </DialogFooter>
@@ -164,10 +157,8 @@ export function WpSyncControls() {
             Auf WordPress liegt bereits eine neuere Fassung (Version {conflict?.serverVersion}). Was möchtest du tun?
           </p>
           <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => { if (conflict) { setDoc(conflict.serverDoc); clearConflict(); toast.success('Server-Stand geladen.'); } }}
-            >
+            <Button variant="outline"
+              onClick={() => { if (conflict) { setDoc(conflict.serverDoc); clearConflict(); toast.success('Server-Stand geladen.'); } }}>
               Server-Stand laden
             </Button>
             <Button onClick={() => void onKeepLocal()}>Meinen Stand behalten</Button>

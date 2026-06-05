@@ -79,7 +79,19 @@ export function WordpressTab() {
               Lege in WordPress ein eigenes Profil für Curriculr an. So wird euer laufender Kalender nie überschrieben.
             </p>
           </div>
-          {link && <p className="text-[12px]">Aktuelle Stufe: <strong>{STAGE_LABELS[link.stage as WpStage]}</strong></p>}
+          {link && (
+            <div className="text-[12px] space-y-1">
+              <p>Aktuelle Stufe: <strong>{STAGE_LABELS[link.stage as WpStage]}</strong></p>
+              {link.feedUrl && (
+                <p>Feed-URL (für IServ-Abo):{' '}
+                  <a href={link.feedUrl} target="_blank" rel="noopener noreferrer"
+                     className="underline break-all" style={{ color: 'var(--color-marine-500)' }}>
+                    {link.feedUrl}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

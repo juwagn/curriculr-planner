@@ -8,6 +8,7 @@ export interface WpPlanLink {
   wpProfileId: string;     // explicit WP profile id (never the live profile by default)
   stage: WpStage;
   knownVersion: number;    // last server version this client has seen (optimistic concurrency)
+  feedUrl?: string;        // public ICS feed URL returned by WP on first PUT
 }
 
 export interface WpSyncConfig {

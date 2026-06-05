@@ -46,7 +46,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     set({ syncState: 'sending', message: 'Sende an WordPress…' });
     const res: PushResult = await pushDoc(config, link.schoolyearKey, doc, link.knownVersion, targetStage);
     if (res.status === 'ok') {
-      const links = { ...config.links, [docId]: { ...link, stage: res.stage ?? targetStage, knownVersion: res.version ?? link.knownVersion } };
+      const links = { ...config.links, [docId]: { ...link, stage: res.stage ?? targetStage, knownVersion: res.version ?? link.knownVersion, ...(res.feedUrl ? { feedUrl: res.feedUrl } : {}) } };
       const newCfg = { ...config, links };
       saveWpConfig(newCfg);
       set({ config: newCfg, syncState: 'synced', message: '✓ An WordPress gesendet', conflict: null });

@@ -36,13 +36,21 @@ describe('wp-sync client', () => {
     const r = await pushDoc(cfg, 'sj_2026_27', { a: 1 } as any, 2, 'oeffentlich', f);
     expect(r).toEqual({ status: 'ok', version: 3, stage: 'oeffentlich', feedUrl: 'https://s.example/feed.ics' });
   });
-  it('pushDoc 409 returns conflict with server data', async () => {
-    const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: { b: 2 } })) as unknown as typeof fetch;
+  it('pushDoc 409 returns conflict with valid server doc', async () => {
+    const sy = { id: 'sy1', label: 'Test', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15', holidays: [], quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' };
+    const serverDoc = { version: 4, schoolyear: sy, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Test', lastSaved: '2026-01-01T00:00:00Z' } };
+    const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: serverDoc })) as unknown as typeof fetch;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', f);
     expect(r.status).toBe('conflict');
     expect(r.serverVersion).toBe(5);
-    expect(r.serverDoc).toEqual({ b: 2 });
+    expect(r.serverDoc).toMatchObject({ version: 4 });
+  });
+  it('pushDoc 409 with invalid server doc returns error', async () => {
+    const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: { b: 2 } })) as unknown as typeof fetch;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', f);
+    expect(r.status).toBe('error');
   });
   it('fetchDoc 404 -> not exists', async () => {
     const f = (async () => fakeRes(404, {})) as unknown as typeof fetch;

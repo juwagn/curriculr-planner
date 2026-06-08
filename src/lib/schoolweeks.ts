@@ -45,7 +45,7 @@ export function computeSchoolweeks(sy: Schoolyear): SchoolweekRange[] {
     for (let i = 0; i < 5; i++) {
       if (isHoliday(fmt(addDays(cursor, i)), sy.holidays)) holidayDays++;
     }
-    if (holidayDays < 3) {
+    if (holidayDays < 5) {
       weeks.push({ index, startDate: fmt(monday), endDate: fmt(friday) });
       index++;
     }
@@ -119,7 +119,7 @@ export function computeWeekRows(sy: Schoolyear): WeekRow[] {
         if (!holidayLabel) holidayLabel = h.label;
       }
     }
-    if (holidayDays >= 3) {
+    if (holidayDays === 5) {
       rows.push({ kind: 'holiday', label: holidayLabel ?? 'Ferien', startDate: fmt(monday), endDate: fmt(friday) });
     } else {
       rows.push({ kind: 'schoolweek', index, startDate: fmt(monday), endDate: fmt(friday) });

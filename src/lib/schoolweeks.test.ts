@@ -165,3 +165,25 @@ describe('suggestQuarterBoundaries', () => {
     expect(out).toEqual([null, null, null]);
   });
 });
+
+describe('computeWeekRows holiday threshold (5/5)', () => {
+  it('renders a half-holiday week (3 ferien days, Weihnachten starting Wed) as a schoolweek', () => {
+    const rows = computeWeekRows(sy);
+    // Week starting 2026-12-21 has Mon+Tue school, Wed-Fri Weihnachten (3 holiday days)
+    const wk = rows.find((r) => r.startDate === '2026-12-21');
+    expect(wk?.kind).toBe('schoolweek');
+  });
+  it('renders a fully-holiday week (5/5) as a banner', () => {
+    const rows = computeWeekRows(sy);
+    // Week starting 2026-12-28 is fully Weihnachten (Mon-Fri all holiday)
+    const wk = rows.find((r) => r.startDate === '2026-12-28');
+    expect(wk?.kind).toBe('holiday');
+  });
+  it('keeps school week numbering continuous — no gaps across half-holiday weeks', () => {
+    const rows = computeWeekRows(sy);
+    const indices = rows
+      .filter((r): r is { kind: 'schoolweek'; index: number; startDate: string; endDate: string } => r.kind === 'schoolweek')
+      .map((r) => r.index);
+    expect(indices).toEqual(indices.map((_v, i) => indices[0] + i));
+  });
+});

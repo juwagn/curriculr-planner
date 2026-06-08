@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear, computeWeekRows, snapToFriday, getQuarterForDate, getQuarterRange, suggestQuarterBoundaries } from './schoolweeks';
+import type { WeekRow } from './schoolweeks';
 import type { Schoolyear, PlannerDocument } from '@/types';
 
 const sy: Schoolyear = {
@@ -182,7 +183,7 @@ describe('computeWeekRows holiday threshold (5/5)', () => {
   it('keeps school week numbering continuous — no gaps across half-holiday weeks', () => {
     const rows = computeWeekRows(sy);
     const indices = rows
-      .filter((r): r is { kind: 'schoolweek'; index: number; startDate: string; endDate: string } => r.kind === 'schoolweek')
+      .filter((r): r is Extract<WeekRow, { kind: 'schoolweek' }> => r.kind === 'schoolweek')
       .map((r) => r.index);
     expect(indices).toEqual(indices.map((_v, i) => indices[0] + i));
   });

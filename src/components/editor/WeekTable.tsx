@@ -367,6 +367,7 @@ export function WeekTable() {
                     const events = eventsByDate.get(iso) ?? [];
                     const h = isHoliday(iso, doc.schoolyear.holidays);
                     const feiertag = h && h.type === 'feiertag' ? h.label : null;
+                    const ferien = h?.type === 'ferien';
                     return (
                       <DayCell
                         key={dayIdx}
@@ -377,6 +378,7 @@ export function WeekTable() {
                         conflictMap={conflictMap}
                         rowHeight={rowHeight}
                         feiertag={feiertag}
+                        ferien={ferien}
                       />
                     );
                   })}

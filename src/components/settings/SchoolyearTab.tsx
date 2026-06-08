@@ -16,7 +16,7 @@ export function SchoolyearTab() {
 
   if (!doc || !sy) return null;
 
-  const qb = (sy.quarterBoundaries.length === 3 ? sy.quarterBoundaries : ['', '', '']) as string[];
+  const qb: string[] = sy.quarterBoundaries.length === 3 ? [...sy.quarterBoundaries] : ['', '', ''];
   const setQB = (i: number, v: string) => {
     const next = [...qb];
     next[i] = v;

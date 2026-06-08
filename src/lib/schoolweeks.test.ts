@@ -134,4 +134,6 @@ describe('getQuarterRange uses snapped end', () => {
     expect(getQuarterRange(1, syMid).endDate).toBe('2026-11-27'));
   it('Q2 startDate is day after snapped Q1 end', () =>
     expect(getQuarterRange(2, syMid).startDate).toBe('2026-11-28'));
+  it('Q4 endDate is lastSchoolDay (not snapped)', () =>
+    expect(getQuarterRange(4, sy).endDate).toBe(sy.lastSchoolDay));
 });

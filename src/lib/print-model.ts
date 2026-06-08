@@ -1,6 +1,6 @@
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { computeWeekRows, getQuarterRange } from './schoolweeks';
+import { computeWeekRows, getQuarterRange, getQuarterForDate } from './schoolweeks';
 import type { PlannerDocument } from '@/types';
 import type { WeekRow } from './schoolweeks';
 
@@ -58,7 +58,7 @@ function buildSection(
   const range = getQuarterRange(quarter, doc.schoolyear);
 
   const quarterRows = allWeekRows.filter(
-    (r) => r.startDate <= range.endDate && r.endDate >= range.startDate
+    (r) => getQuarterForDate(r.startDate, doc.schoolyear) === quarter
   );
 
   const eventsByDate = new Map<string, PlannerDocument['events']>();

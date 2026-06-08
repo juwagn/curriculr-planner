@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore, type Density } from '@/stores/ui';
-import { computeWeekRows, getQuarterRange, isHoliday, type WeekRow } from '@/lib/schoolweeks';
+import { computeWeekRows, getQuarterForDate, isHoliday, type WeekRow } from '@/lib/schoolweeks';
 import type { Category, PlanEvent } from '@/types';
 import { useConflicts, conflictsByEvent } from '@/hooks/useConflicts';
 import type { Conflict } from '@/lib/conflicts';
@@ -159,16 +159,11 @@ export function WeekTable() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when the schoolyear slice changes, not the whole doc
   const rows = useMemo(() => (doc ? computeWeekRows(doc.schoolyear) : []), [doc?.schoolyear]);
-  const qRange = useMemo(
-    () => (doc ? getQuarterRange(currentQuarter, doc.schoolyear) : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when the schoolyear slice changes
-    [doc?.schoolyear, currentQuarter]
-  );
-
   const filteredRows = useMemo(() => {
-    if (!qRange) return [] as WeekRow[];
-    return rows.filter((r) => r.startDate <= qRange.endDate && r.endDate >= qRange.startDate);
-  }, [rows, qRange]);
+    if (!doc) return [] as WeekRow[];
+    return rows.filter((r) => getQuarterForDate(r.startDate, doc.schoolyear) === currentQuarter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: re-memo only when schoolyear / quarter changes
+  }, [rows, doc?.schoolyear, currentQuarter]);
 
   const categoryById = useMemo(() => {
     const m = new Map<string, Category>();

@@ -114,4 +114,15 @@ describe('buildPrintModel', () => {
     const elternabend = sw0.cells[3].events.find((e) => e.title === 'Elternabend');
     expect(elternabend?.time).toBe('19:00');
   });
+
+  it('assigns a boundary week to exactly one quarter (no overlap)', () => {
+    const d = structuredClone(DOC);
+    d.schoolyear.quarterBoundaries = ['2025-11-26', '2025-12-31', '2026-03-31']; // Mi 26.11 → snaps to Fr 28.11
+    const model = buildPrintModel(d, 'allQuarters', 1);
+    const weekDates = model.sections.flatMap((s) =>
+      s.rows.filter((r) => r.type === 'week').map((r) => (r as { dateRange: string }).dateRange)
+    );
+    const dupes = weekDates.filter((v, i) => weekDates.indexOf(v) !== i);
+    expect(dupes).toEqual([]);
+  });
 });

@@ -5,6 +5,7 @@ import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Undo2, Redo2, LayoutTemplate } from 'lucide-react';
+import { getQuarterRange } from '@/lib/schoolweeks';
 
 export function EditorToolbar() {
   const doc = usePlannerStore((s) => s.doc);
@@ -19,24 +20,10 @@ export function EditorToolbar() {
   if (!doc) return null;
 
   const sy = doc.schoolyear;
-  const qStarts: string[] = [
-    sy.firstSchoolDay,
-    sy.quarterBoundaries[0],
-    sy.quarterBoundaries[1],
-    sy.quarterBoundaries[2]
-  ];
-  const qEnds: string[] = [
-    sy.quarterBoundaries[0],
-    sy.quarterBoundaries[1],
-    sy.quarterBoundaries[2],
-    sy.lastSchoolDay
-  ];
 
   const fmtRange = (i: number) => {
-    if (!qStarts[i] || !qEnds[i]) return '';
-    const s = parseISO(qStarts[i]);
-    const e = parseISO(qEnds[i]);
-    return `${format(s, 'MMM yyyy', { locale: de })} – ${format(e, 'MMM yyyy', { locale: de })}`;
+    const r = getQuarterRange((i + 1) as 1 | 2 | 3 | 4, sy);
+    return `${format(parseISO(r.startDate), 'MMM yyyy', { locale: de })} – ${format(parseISO(r.endDate), 'MMM yyyy', { locale: de })}`;
   };
 
   return (

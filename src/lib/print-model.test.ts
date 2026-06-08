@@ -126,3 +126,24 @@ describe('buildPrintModel', () => {
     expect(dupes).toEqual([]);
   });
 });
+
+describe('PrintCell ferien flag', () => {
+  it('flags individual ferien days in a half-holiday school week', () => {
+    const d = structuredClone(DOC);
+    d.schoolyear.holidays = [
+      { id: 'x', label: 'Weihnachten', start: '2025-12-24', end: '2026-01-06', type: 'ferien' }
+    ];
+    // Week 2025-12-22 (Mon=22, Tue=23 school; Wed=24 start of Ferien)
+    const model = buildPrintModel(d, 'allQuarters', 1);
+    const allRows = model.sections.flatMap((s) => s.rows);
+    const wk = allRows.find(
+      (r) => r.type === 'week' && (r as { dateRange: string }).dateRange === '22.12.–26.12.'
+    ) as { type: 'week'; cells: { ferien?: boolean }[] } | undefined;
+    expect(wk).toBeDefined();
+    expect(wk!.cells[0].ferien ?? false).toBe(false); // Mon 22.12 = school
+    expect(wk!.cells[1].ferien ?? false).toBe(false); // Tue 23.12 = school
+    expect(wk!.cells[2].ferien).toBe(true);           // Wed 24.12 = Ferien
+    expect(wk!.cells[3].ferien).toBe(true);           // Thu 25.12 = Ferien
+    expect(wk!.cells[4].ferien).toBe(true);           // Fri 26.12 = Ferien
+  });
+});

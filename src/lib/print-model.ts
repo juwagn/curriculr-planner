@@ -1,6 +1,6 @@
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { computeWeekRows, getQuarterRange, getQuarterForDate } from './schoolweeks';
+import { computeWeekRows, getQuarterRange, getQuarterForDate, isHoliday } from './schoolweeks';
 import type { PlannerDocument } from '@/types';
 import type { WeekRow } from './schoolweeks';
 
@@ -14,6 +14,7 @@ export interface PrintEvent {
 
 export interface PrintCell {
   events: PrintEvent[];
+  ferien?: boolean;
 }
 
 export interface PrintWeekRow {
@@ -96,6 +97,8 @@ function buildSection(
           color: cat?.color ?? '#888888'
         };
       });
+      const hol = isHoliday(iso, doc.schoolyear.holidays);
+      cells[dayIdx].ferien = hol?.type === 'ferien';
     }
 
     const annotation = doc.annotations.find((a) => a.schoolweek === row.index);

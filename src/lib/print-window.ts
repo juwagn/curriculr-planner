@@ -88,6 +88,9 @@ export function generatePrintHtml(
     /* ── Ferien ── */
     .holiday-row td { background-image: repeating-linear-gradient(45deg, #f0f0f0 0 4pt, #f9f9f9 4pt 8pt); text-align: center; font-style: italic; font-weight: 600; font-size: 8pt; color: #666; padding: 5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
+    /* ── Ferientag in Mischwoche ── */
+    td.td-ferien { background-image: repeating-linear-gradient(45deg, #f0f0f0 0 4pt, #f9f9f9 4pt 8pt); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
     /* ── Fußzeile (jede Seite) ── */
     .pdf-ft { position: fixed; bottom: 0; left: 0; right: 0; border-top: 0.1pt solid #ddd; padding: 1.5pt 10mm; font-size: 5.5pt; color: #aaa; text-align: center; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
@@ -152,14 +155,17 @@ ${sections}
 
 function renderWeekRow(row: PrintWeekRow): string {
   const dayCells = row.cells.map((cell) => {
+    const cls = cell.ferien ? ' class="td-ferien"' : '';
     if (cell.events.length > 0) {
       const events = cell.events.map((ev) => {
         const time = ev.time ? `<span class="event-time">${escHtml(ev.time)}</span>` : '';
         return `<div class="event" style="border-left-color:${escHtml(ev.color)}">${time}${escHtml(ev.title)}</div>`;
       }).join('');
-      return `<td>${events}</td>`;
+      return `<td${cls}>${events}</td>`;
     }
-    return `<td><span class="writeline"></span><span class="writeline"></span></td>`;
+    return cell.ferien
+      ? `<td${cls}></td>`
+      : `<td><span class="writeline"></span><span class="writeline"></span></td>`;
   }).join('');
 
   return `<tr>

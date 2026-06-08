@@ -43,7 +43,7 @@ export function createDemoDoc(): PlannerDocument {
   ];
 
   return {
-    version: 4,
+    version: 5,
     schoolyear: {
       id: 'demo-2026-27',
       label: '2026/27',

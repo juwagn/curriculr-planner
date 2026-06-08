@@ -3,7 +3,7 @@ import { LocalStorageAdapter } from './storage';
 import type { PlannerDocument } from '@/types';
 
 const sampleDoc: PlannerDocument = {
-  version: 4,
+  version: 5,
   schoolyear: {
     id: 'sy1',
     label: '2026/27',
@@ -67,7 +67,7 @@ describe('LocalStorageAdapter', () => {
   it('exports JSON backup string', () => {
     const json = adapter.exportJson(sampleDoc);
     const parsed = JSON.parse(json);
-    expect(parsed.version).toBe(4);
+    expect(parsed.version).toBe(5);
     expect(parsed.meta.name).toBe('Plan');
   });
 
@@ -98,7 +98,7 @@ describe('LocalStorageAdapter', () => {
     localStorage.setItem('curriculr-planner:docs', JSON.stringify(['sy-mig']));
 
     const loaded = await adapter.loadDoc('sy-mig');
-    expect(loaded.version).toBe(4);
+    expect(loaded.version).toBe(5);
     expect(loaded.ignoredConflicts).toEqual([]);
   });
 
@@ -116,7 +116,7 @@ describe('LocalStorageAdapter', () => {
       meta: { name: 'Alt', lastSaved: '2025-01-01T00:00:00.000Z' }
     });
     const doc = await adapter.importJson(v1Json);
-    expect(doc.version).toBe(4);
+    expect(doc.version).toBe(5);
     expect(doc.ignoredConflicts).toEqual([]);
   });
 });

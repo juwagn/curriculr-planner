@@ -66,7 +66,7 @@ export interface EventTemplate {
 }
 
 export interface PlannerDocument {
-  version: 4;
+  version: 5;
   schoolyear: Schoolyear;
   categories: Category[];
   events: PlanEvent[];

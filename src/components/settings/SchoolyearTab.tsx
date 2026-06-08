@@ -7,7 +7,7 @@ import { usePlannerStore } from '@/stores/planner';
 import type { Holiday } from '@/types';
 import { toast } from 'sonner';
 import { HolidayFetchControl } from './HolidayFetchControl';
-import { getQuarterRange, suggestQuarterBoundaries } from '@/lib/schoolweeks';
+import { getQuarterRange, snapToFriday, suggestQuarterBoundaries } from '@/lib/schoolweeks';
 
 export function SchoolyearTab() {
   const doc = usePlannerStore((s) => s.doc);
@@ -23,7 +23,7 @@ export function SchoolyearTab() {
     setSy({ ...sy, quarterBoundaries: next });
   };
   const applySuggestion = () => {
-    const sug = suggestQuarterBoundaries(doc);
+    const sug = suggestQuarterBoundaries({ ...doc, schoolyear: sy });
     if (sug.every((s) => s === null)) {
       toast.error('Keine "Ende N. Quartal"-Anmerkungen im Plan gefunden');
       return;
@@ -35,7 +35,7 @@ export function SchoolyearTab() {
   const qbValid =
     qb.every(Boolean) &&
     qb[0] < qb[1] && qb[1] < qb[2] &&
-    qb[0] > sy.firstSchoolDay && qb[2] < sy.lastSchoolDay;
+    qb[0] > sy.firstSchoolDay && snapToFriday(qb[2]) < sy.lastSchoolDay;
 
   const save = () => {
     if (!qbValid) {

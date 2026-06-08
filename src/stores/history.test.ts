@@ -3,7 +3,7 @@ import { useHistoryStore } from './history';
 import type { PlannerDocument } from '@/types';
 
 function docWithName(name: string): PlannerDocument {
-  return { version: 4, schoolyear: { id: 's', label: '', firstSchoolDay: '2026-08-24', firstTeachingDay: '2026-08-31', lastSchoolDay: '2027-07-16', holidays: [], quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-09'], createdAt: '', updatedAt: '' }, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name, lastSaved: '' } };
+  return { version: 5, schoolyear: { id: 's', label: '', firstSchoolDay: '2026-08-24', firstTeachingDay: '2026-08-31', lastSchoolDay: '2027-07-16', holidays: [], quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-09'], createdAt: '', updatedAt: '' }, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name, lastSaved: '' } };
 }
 
 describe('useHistoryStore', () => {

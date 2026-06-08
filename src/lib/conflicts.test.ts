@@ -4,7 +4,7 @@ import type { PlannerDocument, PlanEvent } from '@/types';
 
 function baseDoc(events: PlanEvent[]): PlannerDocument {
   return {
-    version: 4,
+    version: 5,
     schoolyear: {
       id: 's', label: '25/26',
       firstSchoolDay: '2025-08-11', firstTeachingDay: '2025-08-11', lastSchoolDay: '2026-06-26',

@@ -4,10 +4,10 @@ import { PlannerDocumentSchema } from './schemas';
 import { detectConflicts } from './conflicts';
 
 describe('createDemoDoc', () => {
-  it('produces a schema-valid v4 document', () => {
+  it('produces a schema-valid v5 document', () => {
     const doc = createDemoDoc();
     expect(PlannerDocumentSchema.safeParse(doc).success).toBe(true);
-    expect(doc.version).toBe(4);
+    expect(doc.version).toBe(5);
   });
 
   it('is populated and contains demonstrable conflicts', () => {

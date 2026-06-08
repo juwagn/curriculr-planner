@@ -4,7 +4,7 @@ import type { PlannerDocument } from '@/types';
 
 // Minimal fixture document covering two school weeks + one holiday week
 const DOC: PlannerDocument = {
-  version: 4,
+  version: 5,
   schoolyear: {
     id: 'sy1',
     label: '2025/26',

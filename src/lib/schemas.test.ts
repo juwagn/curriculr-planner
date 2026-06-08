@@ -66,7 +66,7 @@ describe('PlanEventSchema', () => {
 describe('PlannerDocumentSchema', () => {
   it('accepts complete document', () => {
     const doc = {
-      version: 4,
+      version: 5,
       schoolyear: {
         id: 'sy',
         label: '2026/27',
@@ -108,7 +108,7 @@ describe('migrate v1 -> v2 -> v3', () => {
 
   it('chains v1 all the way to v4 (adds ignoredConflicts + templates)', () => {
     const migrated = migrate(v1Doc);
-    expect(migrated.version).toBe(4);
+    expect(migrated.version).toBe(5);
     expect(migrated.ignoredConflicts).toEqual([]);
     expect(migrated.templates).toEqual([]);
   });
@@ -116,7 +116,7 @@ describe('migrate v1 -> v2 -> v3', () => {
   it('migrates a v2 doc to v4', () => {
     const v2 = { ...v1Doc, version: 2, ignoredConflicts: ['x'] };
     const migrated = migrate(v2);
-    expect(migrated.version).toBe(4);
+    expect(migrated.version).toBe(5);
     expect(migrated.ignoredConflicts).toEqual(['x']);
     expect(migrated.templates).toEqual([]);
   });
@@ -143,14 +143,14 @@ describe('migrate v2 → v3', () => {
   it('adds templates: [] to a v2 doc and chains to v4', () => {
     const v2 = { version: 2, ignoredConflicts: [] };
     const out = migrate(v2);
-    expect(out.version).toBe(4);
+    expect(out.version).toBe(5);
     expect(out.templates).toEqual([]);
   });
 
   it('chains v1 → v4 (ignoredConflicts AND templates added)', () => {
     const v1 = { version: 1 };
     const out = migrate(v1);
-    expect(out.version).toBe(4);
+    expect(out.version).toBe(5);
     expect(out.ignoredConflicts).toEqual([]);
     expect(out.templates).toEqual([]);
   });
@@ -158,7 +158,7 @@ describe('migrate v2 → v3', () => {
   it('leaves an existing templates array untouched when migrating v3 → v4', () => {
     const v3 = { version: 3, ignoredConflicts: [], templates: [{ id: 't1' }] };
     const out = migrate(v3);
-    expect(out.version).toBe(4);
+    expect(out.version).toBe(5);
     expect(out.templates).toEqual([{ id: 't1' }]);
   });
 });
@@ -190,7 +190,7 @@ describe('migrate v3 → v4', () => {
 
   it('bumps version to 4 and defaults holiday.type to ferien', () => {
     const out = migrate(v3Doc) as typeof v3Doc & { version: number };
-    expect(out.version).toBe(4);
+    expect(out.version).toBe(5);
     expect((out.schoolyear.holidays[0] as unknown as { type: string }).type).toBe('ferien');
   });
 

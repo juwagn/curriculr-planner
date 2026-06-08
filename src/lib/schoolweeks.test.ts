@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear, computeWeekRows } from './schoolweeks';
+import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear, computeWeekRows, snapToFriday, getQuarterForDate, getQuarterRange } from './schoolweeks';
 import type { Schoolyear } from '@/types';
 
 const sy: Schoolyear = {
@@ -109,4 +109,29 @@ describe('single feiertag does not collapse a school week', () => {
     const h = isHoliday('2026-08-12', sy.holidays);
     expect(h?.type).toBe('feiertag');
   });
+});
+
+describe('snapToFriday', () => {
+  it('keeps a Friday on the same date', () =>
+    expect(snapToFriday('2026-11-27')).toBe('2026-11-27'));
+  it('snaps a midweek date to that week Friday', () =>
+    expect(snapToFriday('2026-11-25')).toBe('2026-11-27'));
+  it('snaps Monday to Friday of same week', () =>
+    expect(snapToFriday('2026-11-23')).toBe('2026-11-27'));
+});
+
+describe('getQuarterForDate with snapped boundaries', () => {
+  const syMid: Schoolyear = { ...sy, quarterBoundaries: ['2026-11-25', '2027-01-29', '2027-04-09'] };
+  it('Montag 23.11 (in boundary week) belongs to Q1', () =>
+    expect(getQuarterForDate('2026-11-23', syMid)).toBe(1));
+  it('Montag 30.11 (after snapped boundary) belongs to Q2', () =>
+    expect(getQuarterForDate('2026-11-30', syMid)).toBe(2));
+});
+
+describe('getQuarterRange uses snapped end', () => {
+  const syMid: Schoolyear = { ...sy, quarterBoundaries: ['2026-11-25', '2027-01-29', '2027-04-09'] };
+  it('Q1 endDate is the snapped Friday', () =>
+    expect(getQuarterRange(1, syMid).endDate).toBe('2026-11-27'));
+  it('Q2 startDate is day after snapped Q1 end', () =>
+    expect(getQuarterRange(2, syMid).startDate).toBe('2026-11-28'));
 });

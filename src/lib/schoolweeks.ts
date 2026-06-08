@@ -26,6 +26,12 @@ function fmt(d: Date): ISODate {
   return format(d, 'yyyy-MM-dd');
 }
 
+/** Snaps a boundary date to the Friday of its Monday-based ISO week. */
+export function snapToFriday(iso: ISODate): ISODate {
+  const monday = startOfWeek(parseISO(iso), { weekStartsOn: 1 });
+  return fmt(addDays(monday, 4));
+}
+
 export function computeSchoolweeks(sy: Schoolyear): SchoolweekRange[] {
   const start = startOfWeek(parseISO(sy.firstSchoolDay), { weekStartsOn: 1 });
   const last = parseISO(sy.lastSchoolDay);
@@ -59,7 +65,7 @@ export function getQuarterForDate(
   iso: ISODate,
   sy: Schoolyear
 ): 1 | 2 | 3 | 4 {
-  const [q1End, q2End, q3End] = sy.quarterBoundaries;
+  const [q1End, q2End, q3End] = sy.quarterBoundaries.map(snapToFriday);
   if (iso <= q1End) return 1;
   if (iso <= q2End) return 2;
   if (iso <= q3End) return 3;
@@ -72,19 +78,19 @@ export interface QuarterRange {
 }
 
 export function getQuarterRange(quarter: 1 | 2 | 3 | 4, sy: Schoolyear): QuarterRange {
+  const snapped = sy.quarterBoundaries.map(snapToFriday);
+  const dayAfter = (iso: ISODate) => fmt(addDays(parseISO(iso), 1));
   const starts: ISODate[] = [
     sy.firstSchoolDay,
-    sy.quarterBoundaries[0],
-    sy.quarterBoundaries[1],
-    sy.quarterBoundaries[2]
+    dayAfter(snapped[0]),
+    dayAfter(snapped[1]),
+    dayAfter(snapped[2])
   ];
-  const ends: ISODate[] = [
-    sy.quarterBoundaries[0],
-    sy.quarterBoundaries[1],
-    sy.quarterBoundaries[2],
-    sy.lastSchoolDay
-  ];
-  return { startDate: starts[quarter - 1] ?? sy.firstSchoolDay, endDate: ends[quarter - 1] ?? sy.lastSchoolDay };
+  const ends: ISODate[] = [snapped[0], snapped[1], snapped[2], sy.lastSchoolDay];
+  return {
+    startDate: starts[quarter - 1] ?? sy.firstSchoolDay,
+    endDate: ends[quarter - 1] ?? sy.lastSchoolDay
+  };
 }
 
 export type WeekRow =

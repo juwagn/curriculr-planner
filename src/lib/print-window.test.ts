@@ -88,3 +88,15 @@ describe('generatePrintHtml', () => {
     expect(html).not.toContain('<b>Bad &amp; School</b>');
   });
 });
+
+describe('generatePrintHtml event title wrapping', () => {
+  it('clamps event titles to two lines instead of single-line ellipsis', () => {
+    const emptyModel: PrintModel = {
+      schoolName: 'Test', docName: 'Plan', schoolyearLabel: '2026/27',
+      sections: [], printedAt: '2026-06-08'
+    };
+    const html = generatePrintHtml(emptyModel, 'landscape');
+    expect(html).not.toContain('white-space: nowrap');
+    expect(html).toContain('-webkit-line-clamp: 2');
+  });
+});

@@ -81,7 +81,7 @@ export function generatePrintHtml(
     td.td-ann { background: #fafafa; word-break: break-word; white-space: normal; font-size: 7.5pt; color: #555; }
 
     /* ── Events: linker Farbbalken ── */
-    .event { font-size: 8.5pt; padding: 1.5pt 2pt 1.5pt 5pt; margin: 0.5pt 0; line-height: 1.3; color: #1a1a2e; background: transparent; border-left: 2.5pt solid #ccc; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .event { font-size: 8.5pt; padding: 1.5pt 2pt 1.5pt 5pt; margin: 0.5pt 0; line-height: 1.3; color: #1a1a2e; background: transparent; border-left: 2.5pt solid #ccc; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; overflow: hidden; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .event-time { font-size: 6.5pt; color: #666; margin-right: 2pt; }
     .writeline { border-bottom: 0.5pt dashed #ccc; height: 10pt; margin-bottom: 2pt; display: block; }
 

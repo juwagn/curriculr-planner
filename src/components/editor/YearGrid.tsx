@@ -1,4 +1,5 @@
 import { useMemo, type MouseEvent } from 'react';
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
@@ -199,16 +200,21 @@ export function YearGrid() {
     [doc]
   );
 
+  const events = doc?.events;
   const eventsByDate = useMemo(() => {
     const map = new Map<string, PlanEvent[]>();
-    if (!doc) return map;
-    for (const e of doc.events) {
-      const list = map.get(e.start) ?? [];
-      list.push(e);
-      map.set(e.start, list);
+    if (!events) return map;
+    for (const e of events) {
+      const span = Math.max(0, differenceInCalendarDays(parseISO(e.end), parseISO(e.start)));
+      for (let i = 0; i <= span; i++) {
+        const iso = format(addDays(parseISO(e.start), i), 'yyyy-MM-dd');
+        const list = map.get(iso) ?? [];
+        list.push(e);
+        map.set(iso, list);
+      }
     }
     return map;
-  }, [doc]);
+  }, [events]);
 
   if (!doc) return null;
 

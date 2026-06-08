@@ -6,6 +6,7 @@ import { useUiStore } from '@/stores/ui';
 import { useConflicts } from '@/hooks/useConflicts';
 import { ExportDropdown } from '@/components/export/ExportDropdown';
 import { ConflictPanel } from './ConflictPanel';
+import { WpSyncControls } from './WpSyncControls';
 
 interface Props {
   onSwitchPlan(): void;
@@ -45,6 +46,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
         </button>
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 tabular-nums">{stateLabel}</span>
+          <WpSyncControls />
           <div
             data-tour="view-toggle"
             className="flex items-center bg-white/10 rounded-[var(--radius-pill)] overflow-hidden"

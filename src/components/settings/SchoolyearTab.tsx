@@ -7,6 +7,7 @@ import { usePlannerStore } from '@/stores/planner';
 import type { Holiday } from '@/types';
 import { toast } from 'sonner';
 import { HolidayFetchControl } from './HolidayFetchControl';
+import { getQuarterRange, suggestQuarterBoundaries } from '@/lib/schoolweeks';
 
 export function SchoolyearTab() {
   const doc = usePlannerStore((s) => s.doc);
@@ -15,7 +16,32 @@ export function SchoolyearTab() {
 
   if (!doc || !sy) return null;
 
+  const qb = (sy.quarterBoundaries.length === 3 ? sy.quarterBoundaries : ['', '', '']) as string[];
+  const setQB = (i: number, v: string) => {
+    const next = [...qb];
+    next[i] = v;
+    setSy({ ...sy, quarterBoundaries: next });
+  };
+  const applySuggestion = () => {
+    const sug = suggestQuarterBoundaries(doc);
+    if (sug.every((s) => s === null)) {
+      toast.error('Keine "Ende N. Quartal"-Anmerkungen im Plan gefunden');
+      return;
+    }
+    const next = qb.map((cur, i) => sug[i] ?? cur);
+    setSy({ ...sy, quarterBoundaries: next });
+    toast.success('Quartalsgrenzen aus Plan übernommen – bitte prüfen und speichern');
+  };
+  const qbValid =
+    qb.every(Boolean) &&
+    qb[0] < qb[1] && qb[1] < qb[2] &&
+    qb[0] > sy.firstSchoolDay && qb[2] < sy.lastSchoolDay;
+
   const save = () => {
+    if (!qbValid) {
+      toast.error('Quartalsgrenzen ungültig – bitte korrigieren');
+      return;
+    }
     updateSY(sy);
     toast.success('Schuljahr-Daten gespeichert');
   };
@@ -47,6 +73,33 @@ export function SchoolyearTab() {
         <div>
           <Label className="mb-1.5">Letzter Schultag</Label>
           <DateInput value={sy.lastSchoolDay} onValueChange={(v) => setSy({ ...sy, lastSchoolDay: v })} />
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <Label>Quartalsgrenzen</Label>
+          <Button variant="outline" size="sm" onClick={applySuggestion}>
+            Aus Plan vorschlagen
+          </Button>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i}>
+              <Label className="mb-1.5 text-[12px] text-[var(--color-ink-500)]">
+                Ende {i + 1}. Quartal
+              </Label>
+              <DateInput value={qb[i] ?? ''} onValueChange={(v) => setQB(i, v)} />
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 space-y-0.5 text-[12px] text-[var(--color-ink-500)] tabular-nums">
+          {qbValid
+            ? ([1, 2, 3, 4] as const).map((q) => {
+                const r = getQuarterRange(q, { ...sy, quarterBoundaries: qb });
+                return <div key={q}>Q{q}: {r.startDate} – {r.endDate}</div>;
+              })
+            : <div className="text-[var(--color-danger,#b91c1c)]">Grenzen müssen aufsteigend und innerhalb des Schuljahres liegen.</div>}
         </div>
       </div>
 

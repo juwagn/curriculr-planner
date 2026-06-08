@@ -101,7 +101,13 @@ export class LocalStorageAdapter implements StorageAdapter {
   }
 
   async importJson(json: string): Promise<PlannerDocument> {
-    const parsed = migrate(JSON.parse(json));
+    let raw: unknown;
+    try {
+      raw = JSON.parse(json);
+    } catch {
+      throw new Error('Ungültige Backup-Datei: kein gültiges JSON.');
+    }
+    const parsed = migrate(raw);
     const result = PlannerDocumentSchema.safeParse(parsed);
     if (!result.success) throw new Error(`Invalid backup: ${result.error.message}`);
     return result.data as PlannerDocument;

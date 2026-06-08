@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DateInput } from '@/components/ui/date-input';
@@ -41,6 +41,7 @@ export function EventModal() {
     : null;
 
   const [form, setForm] = useState<PlanEvent | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!state.open || !doc) {
@@ -107,15 +108,19 @@ export function EventModal() {
   };
 
   const handleDelete = () => {
+    if (state.mode === 'edit' && editing) setDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
     if (state.mode === 'edit' && editing) {
-      if (confirm(`Termin "${editing.title}" wirklich löschen?`)) {
-        deleteEvent(editing.id);
-        close();
-      }
+      deleteEvent(editing.id);
+      setDeleteConfirm(false);
+      close();
     }
   };
 
   return (
+    <>
     <Dialog open onOpenChange={(o) => !o && close()}>
       <DialogContent className="max-w-lg" onKeyDown={(e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleSave();
@@ -238,5 +243,19 @@ export function EventModal() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <Dialog open={deleteConfirm} onOpenChange={(o) => !o && setDeleteConfirm(false)}>
+      <DialogContent className="max-w-sm">
+        <DialogTitle>Termin löschen</DialogTitle>
+        <DialogDescription>
+          „{editing?.title}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+        </DialogDescription>
+        <DialogFooter className="mt-4 gap-2">
+          <Button variant="ghost" onClick={() => setDeleteConfirm(false)}>Abbrechen</Button>
+          <Button variant="destructive" onClick={confirmDelete}>Löschen</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

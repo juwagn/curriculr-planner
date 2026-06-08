@@ -20,7 +20,9 @@ const BAD_AUTH = 'Benutzer oder Application Password falsch.';
 const BAD_URL = 'WordPress-Adresse muss mit https:// beginnen.';
 
 function authHeader(cfg: WpSyncConfig): string {
-  return 'Basic ' + btoa(`${cfg.username}:${cfg.appPassword}`);
+  // unescape(encodeURIComponent(...)) converts UTF-8 to Latin-1 before btoa so
+  // usernames with umlauts don't throw DOMException.
+  return 'Basic ' + btoa(unescape(encodeURIComponent(`${cfg.username}:${cfg.appPassword}`)));
 }
 
 function base(cfg: WpSyncConfig): string {

@@ -44,7 +44,7 @@ describe('wp-sync client', () => {
     const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', f);
     expect(r.status).toBe('conflict');
     expect(r.serverVersion).toBe(5);
-    expect(r.serverDoc).toMatchObject({ version: 4 });
+    expect(r.serverDoc).toMatchObject({ version: 5 });
   });
   it('pushDoc 409 with invalid server doc returns error', async () => {
     const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: { b: 2 } })) as unknown as typeof fetch;

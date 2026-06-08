@@ -1,4 +1,4 @@
-import { PlannerDocumentSchema } from '@/lib/schemas';
+import { PlannerDocumentSchema, migrate } from '@/lib/schemas';
 import type { PlannerDocument } from '@/types';
 import type { WpStage } from './wp-stage';
 import type { WpSyncConfig } from './wp-sync-config';
@@ -61,8 +61,8 @@ export async function pushDoc(
     });
     if (res.status === 409) {
       const data = await res.json();
-      // serverDoc kommt vom Server — Zod-Validierung als Trust-Boundary.
-      const parsed = PlannerDocumentSchema.safeParse(data.doc);
+      // serverDoc kommt vom Server — Migration + Zod-Validierung als Trust-Boundary.
+      const parsed = PlannerDocumentSchema.safeParse(migrate(data.doc));
       if (!parsed.success) return { status: 'error', message: 'Ungültiger Server-Dokument-Stand (409).' };
       return { status: 'conflict', serverVersion: data.serverVersion, serverDoc: parsed.data };
     }

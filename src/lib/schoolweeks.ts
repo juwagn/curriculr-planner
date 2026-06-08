@@ -1,5 +1,5 @@
 import { parseISO, format, addDays, startOfWeek, getDay, isWithinInterval } from 'date-fns';
-import type { Schoolyear, Holiday, ISODate } from '@/types';
+import type { Schoolyear, Holiday, ISODate, PlannerDocument } from '@/types';
 
 export interface SchoolweekRange {
   index: number;
@@ -128,4 +128,24 @@ export function computeWeekRows(sy: Schoolyear): WeekRow[] {
     cursor = addDays(cursor, 7);
   }
   return rows;
+}
+
+/**
+ * Scans week annotations for "Ende N. Quartal" markers and returns the
+ * endDate (Friday) of the annotated school week as the quarter boundary.
+ * Returns array of length 3; null where no marker found.
+ */
+export function suggestQuarterBoundaries(doc: PlannerDocument): (ISODate | null)[] {
+  const weeks = computeSchoolweeks(doc.schoolyear);
+  const byIndex = new Map(weeks.map((w) => [w.index, w.endDate]));
+  const result: (ISODate | null)[] = [null, null, null];
+  const re = /ende\s*([1-3])\.?\s*quartal/i;
+  for (const a of doc.annotations) {
+    const m = a.text.match(re);
+    if (!m) continue;
+    const q = Number(m[1]);
+    const end = byIndex.get(a.schoolweek);
+    if (end) result[q - 1] = end;
+  }
+  return result;
 }

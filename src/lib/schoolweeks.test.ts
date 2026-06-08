@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear, computeWeekRows, snapToFriday, getQuarterForDate, getQuarterRange } from './schoolweeks';
-import type { Schoolyear } from '@/types';
+import { computeSchoolweeks, isHoliday, isWeekend, isWithinSchoolyear, computeWeekRows, snapToFriday, getQuarterForDate, getQuarterRange, suggestQuarterBoundaries } from './schoolweeks';
+import type { Schoolyear, PlannerDocument } from '@/types';
 
 const sy: Schoolyear = {
   id: 'sy',
@@ -136,4 +136,32 @@ describe('getQuarterRange uses snapped end', () => {
     expect(getQuarterRange(2, syMid).startDate).toBe('2026-11-28'));
   it('Q4 endDate is lastSchoolDay (not snapped)', () =>
     expect(getQuarterRange(4, sy).endDate).toBe(sy.lastSchoolDay));
+});
+
+describe('suggestQuarterBoundaries', () => {
+  it('reads "Ende N. Quartal" annotations and returns the endDate of that school week', () => {
+    const weeks = computeSchoolweeks(sy);
+    const q1Week = weeks[10];
+    const q2Week = weeks[20];
+    const doc = {
+      schoolyear: sy,
+      annotations: [
+        { schoolweek: q1Week.index, text: 'Ende 1. Quartal', updatedAt: '' },
+        { schoolweek: q2Week.index, text: 'foo Ende 2. Quartal bar', updatedAt: '' }
+      ]
+    } as unknown as PlannerDocument;
+    const out = suggestQuarterBoundaries(doc);
+    expect(out[0]).toBe(q1Week.endDate);
+    expect(out[1]).toBe(q2Week.endDate);
+    expect(out[2]).toBeNull();
+  });
+
+  it('returns all nulls when no matching annotations exist', () => {
+    const doc = {
+      schoolyear: sy,
+      annotations: [{ schoolweek: 5, text: 'Elternabend', updatedAt: '' }]
+    } as unknown as PlannerDocument;
+    const out = suggestQuarterBoundaries(doc);
+    expect(out).toEqual([null, null, null]);
+  });
 });

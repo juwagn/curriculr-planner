@@ -266,21 +266,24 @@ neu: Auth (M1/M2), SPA-Auth + CORS/CSP (M3), Pull (M4).
 
 ---
 
-## 12. SSO-Einrichtungs-Anleitung (für den Administrator) — Platzhalter
+## 12. SSO-Einrichtungs-Anleitung (für den Administrator)
 
-> Wird bei der Umsetzung von **M1** Schritt für Schritt ausgefüllt. Grobgliederung:
-> 1. In IServ unter **Verwaltung → System → Single-Sign-On** einen Client **„Add"**.
-> 2. Name, Gruppen-/Rollenrechte (z.B. nur Gruppe „Schulleitung"), Scopes
->    (`openid`, `profile`, `iserv:groups`), erlaubte Grant-Types, **Redirect-URI**
->    (WP `/auth/callback`) eintragen.
-> 3. **Client-ID** und **Client-Secret** notieren.
-> 4. In `wp-config.php` Secret + Client-ID + IServ-Basis-URL hinterlegen.
-> 5. Im Planner die WP-Basis-URL eintragen; „Verbindung prüfen".
-> 6. Test-Login mit einem Schulleitungskonto; Gruppenfilter verifizieren.
->
-> Referenzen:
-> - IServ Single-Sign-On (Verwaltung): https://doku.iserv.de/manage/system/sso/
-> - IServ OAuth/OpenID (Entwickler): https://doku.iserv.de/development/oauth/
+Bei M1 umgesetzt. Vollständige Schritt-für-Schritt-Anleitung:
+`curriculr-terminplan/docs/anleitung-iserv-sso.md`. Kurzfassung:
+
+1. IServ-Client anlegen (Gruppenrechte, Scopes `openid profile iserv:groups`,
+   Redirect-URI = WP `/wp-json/curriculr/v1/auth/callback`).
+2. Client-ID + Secret notieren.
+3. In `wp-config.php`: `CURRICULR_ISERV_BASE_URL`, `CURRICULR_ISERV_CLIENT_ID`,
+   `CURRICULR_ISERV_CLIENT_SECRET`, `CURRICULR_APP_TOKEN_KEY`, `CURRICULR_SPA_URL`,
+   `CURRICULR_ALLOWED_GROUPS`.
+4. WP-Admin → System-Tab → IServ-SSO: Status „konfiguriert" prüfen, Redirect-URI
+   abgleichen.
+5. Test-Login mit Schulleitungskonto; Gruppenfilter mit Fremdkonto verifizieren.
+
+Referenzen:
+- IServ Single-Sign-On (Verwaltung): https://doku.iserv.de/manage/system/sso/
+- IServ OAuth/OpenID (Entwickler): https://doku.iserv.de/development/oauth/
 
 ---
 

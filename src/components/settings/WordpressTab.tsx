@@ -24,6 +24,7 @@ export function WordpressTab() {
   const link = docId ? config.links[docId] : undefined;
 
   function handleLogin() {
+    if (!config.enabled || !config.baseUrl) return;
     const base = config.baseUrl.replace(/\/+$/, '');
     window.location.href = `${base}/wp-json/curriculr/v1/auth/login`;
   }

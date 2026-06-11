@@ -9,7 +9,7 @@ describe('wp-sync-config', () => {
     expect(loadWpConfig().enabled).toBe(false);
   });
   it('round-trips a saved config', () => {
-    const cfg = { enabled: true, baseUrl: 'https://s.example', username: 'a', appPassword: 'p',
+    const cfg = { enabled: true, baseUrl: 'https://s.example',
       links: { 'doc-1': { schoolyearKey: 'sj_2026_27', wpProfileId: 'p2', stage: 'entwurf' as const, knownVersion: 3 } } };
     saveWpConfig(cfg);
     expect(loadWpConfig()).toEqual(cfg);

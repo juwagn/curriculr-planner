@@ -16,13 +16,11 @@ export interface PushResult {
 }
 
 const NOT_REACHABLE = 'WordPress nicht erreichbar — Internet/Adresse prüfen.';
-const BAD_AUTH = 'Benutzer oder Application Password falsch.';
-const BAD_URL = 'WordPress-Adresse muss mit https:// beginnen.';
+const BAD_TOKEN     = 'App-Token ungültig oder abgelaufen — bitte neu anmelden.';
+const BAD_URL       = 'WordPress-Adresse muss mit https:// beginnen.';
 
-function authHeader(cfg: WpSyncConfig): string {
-  // unescape(encodeURIComponent(...)) converts UTF-8 to Latin-1 before btoa so
-  // usernames with umlauts don't throw DOMException.
-  return 'Basic ' + btoa(unescape(encodeURIComponent(`${cfg.username}:${cfg.appPassword}`)));
+function bearerHeader(token: string): string {
+  return 'Bearer ' + token;
 }
 
 function base(cfg: WpSyncConfig): string {
@@ -31,15 +29,20 @@ function base(cfg: WpSyncConfig): string {
   return url + '/wp-json/curriculr/v1';
 }
 
-/** Nur https://-URLs werden als feedUrl akzeptiert — verhindert javascript:-Injection. */
 function safeFeedUrl(url: unknown): string | undefined {
   return typeof url === 'string' && /^https:\/\//i.test(url) ? url : undefined;
 }
 
-export async function testConnection(cfg: WpSyncConfig, fetchImpl: FetchLike = fetch): Promise<{ ok: boolean; message: string }> {
+export async function testConnection(
+  cfg: WpSyncConfig,
+  token: string,
+  fetchImpl: FetchLike = fetch,
+): Promise<{ ok: boolean; message: string }> {
   try {
-    const res = await fetchImpl(`${base(cfg)}/health`, { headers: { Authorization: authHeader(cfg) } });
-    if (res.status === 401) return { ok: false, message: BAD_AUTH };
+    const res = await fetchImpl(`${base(cfg)}/health`, {
+      headers: { Authorization: bearerHeader(token) },
+    });
+    if (res.status === 401 || res.status === 403) return { ok: false, message: BAD_TOKEN };
     if (!res.ok) return { ok: false, message: `Server antwortete mit ${res.status}.` };
     const data = await res.json();
     return { ok: true, message: `Verbunden (Plugin ${data.plugin ?? '?'}).` };
@@ -50,23 +53,27 @@ export async function testConnection(cfg: WpSyncConfig, fetchImpl: FetchLike = f
 }
 
 export async function pushDoc(
-  cfg: WpSyncConfig, schoolyearKey: string, doc: PlannerDocument, baseVersion: number, stage: WpStage,
+  cfg: WpSyncConfig,
+  schoolyearKey: string,
+  doc: PlannerDocument,
+  baseVersion: number,
+  stage: WpStage,
+  token: string,
   fetchImpl: FetchLike = fetch,
 ): Promise<PushResult> {
   try {
     const res = await fetchImpl(`${base(cfg)}/doc/${encodeURIComponent(schoolyearKey)}`, {
       method: 'PUT',
-      headers: { Authorization: authHeader(cfg), 'Content-Type': 'application/json' },
+      headers: { Authorization: bearerHeader(token), 'Content-Type': 'application/json' },
       body: JSON.stringify({ doc, baseVersion, stage }),
     });
     if (res.status === 409) {
       const data = await res.json();
-      // serverDoc kommt vom Server — Migration + Zod-Validierung als Trust-Boundary.
       const parsed = PlannerDocumentSchema.safeParse(migrate(data.doc));
       if (!parsed.success) return { status: 'error', message: 'Ungültiger Server-Dokument-Stand (409).' };
       return { status: 'conflict', serverVersion: data.serverVersion, serverDoc: parsed.data };
     }
-    if (res.status === 401) return { status: 'error', message: BAD_AUTH };
+    if (res.status === 401 || res.status === 403) return { status: 'error', message: BAD_TOKEN };
     if (!res.ok) return { status: 'error', message: `Server antwortete mit ${res.status}.` };
     const data = await res.json();
     return { status: 'ok', version: data.version, stage: data.stage, feedUrl: safeFeedUrl(data.feedUrl) };
@@ -77,10 +84,15 @@ export async function pushDoc(
 }
 
 export async function fetchDoc(
-  cfg: WpSyncConfig, schoolyearKey: string, fetchImpl: FetchLike = fetch,
+  cfg: WpSyncConfig,
+  schoolyearKey: string,
+  token: string,
+  fetchImpl: FetchLike = fetch,
 ): Promise<{ exists: boolean; version?: number; doc?: PlannerDocument; stage?: WpStage; message?: string }> {
   try {
-    const res = await fetchImpl(`${base(cfg)}/doc/${encodeURIComponent(schoolyearKey)}`, { headers: { Authorization: authHeader(cfg) } });
+    const res = await fetchImpl(`${base(cfg)}/doc/${encodeURIComponent(schoolyearKey)}`, {
+      headers: { Authorization: bearerHeader(token) },
+    });
     if (res.status === 404) return { exists: false };
     if (!res.ok) return { exists: false, message: `Server antwortete mit ${res.status}.` };
     const data = await res.json();

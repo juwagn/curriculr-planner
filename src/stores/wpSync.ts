@@ -4,6 +4,7 @@ import type { WpStage, StageAction } from '@/lib/wp-stage';
 import { nextStage } from '@/lib/wp-stage';
 import { loadWpConfig, saveWpConfig, type WpSyncConfig, type WpPlanLink } from '@/lib/wp-sync-config';
 import { pushDoc, type PushResult } from '@/lib/wp-sync';
+import { useAuthStore } from '@/stores/auth';
 
 export type WpSyncState = 'idle' | 'sending' | 'synced' | 'conflict' | 'error';
 
@@ -17,9 +18,7 @@ interface WpSyncStore {
 
   setConfig(cfg: WpSyncConfig): void;
   linkFor(docId: UUID): WpPlanLink | undefined;
-  /** Push the doc; if action given, advance the stage on success. Returns the final syncState. */
   send(doc: PlannerDocument, action?: StageAction): Promise<WpSyncState>;
-  /** Resolve a 409 by keeping local: re-push at server version. */
   keepLocal(doc: PlannerDocument): Promise<WpSyncState>;
   clearConflict(): void;
 }
@@ -36,6 +35,11 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
 
   async send(doc, action) {
     const { config } = get();
+    const token = useAuthStore.getState().token;
+    if (!token) {
+      set({ syncState: 'error', message: 'Nicht angemeldet — bitte unter Einstellungen → WordPress anmelden.' });
+      return 'error';
+    }
     const docId = doc.schoolyear.id;
     const link = config.links[docId];
     if (!config.enabled || !link) {
@@ -44,7 +48,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     }
     const targetStage: WpStage = action ? (nextStage(link.stage, action) ?? link.stage) : link.stage;
     set({ syncState: 'sending', message: 'Sende an WordPress…' });
-    const res: PushResult = await pushDoc(config, link.schoolyearKey, doc, link.knownVersion, targetStage);
+    const res: PushResult = await pushDoc(config, link.schoolyearKey, doc, link.knownVersion, targetStage, token);
     if (res.status === 'ok') {
       const newLink: WpPlanLink = { ...link, stage: res.stage ?? targetStage, knownVersion: res.version ?? link.knownVersion, feedUrl: res.feedUrl ?? link.feedUrl };
       get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
@@ -65,7 +69,6 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     if (!conflict) return 'error';
     const link = config.links[conflict.docId];
     if (!link) return 'error';
-    // Adopt the server version as the new base, then re-push local unchanged.
     get().setConfig({ ...config, links: { ...config.links, [conflict.docId]: { ...link, knownVersion: conflict.serverVersion } } });
     set({ conflict: null });
     return get().send(doc);

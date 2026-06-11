@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { usePlannerStore } from '@/stores/planner';
+import { useAuthStore } from '@/stores/auth';
 import { testConnection } from '@/lib/wp-sync';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
 import type { WpPlanLink } from '@/lib/wp-sync-config';
@@ -13,14 +14,19 @@ export function WordpressTab() {
   const config = useWpSyncStore((s) => s.config);
   const setConfig = useWpSyncStore((s) => s.setConfig);
   const doc = usePlannerStore((s) => s.doc);
+  const token = useAuthStore((s) => s.token);
   const [testState, setTestState] = useState({ msg: '', busy: false });
 
   const docId = doc?.schoolyear.id;
   const link = docId ? config.links[docId] : undefined;
 
   async function onTest() {
+    if (!token) {
+      setTestState({ msg: 'Nicht angemeldet — bitte zuerst anmelden.', busy: false });
+      return;
+    }
     setTestState({ msg: 'Teste…', busy: true });
-    const r = await testConnection(config);
+    const r = await testConnection(config, token);
     setTestState({ msg: r.message, busy: false });
   }
 
@@ -47,19 +53,12 @@ export function WordpressTab() {
           <Input value={config.baseUrl} placeholder="https://schule.example"
             onChange={(e) => setConfig({ ...config, baseUrl: e.target.value })} />
         </div>
-        <div>
-          <Label>Benutzername</Label>
-          <Input value={config.username} onChange={(e) => setConfig({ ...config, username: e.target.value })} />
-        </div>
-        <div>
-          <Label>Application Password</Label>
-          <Input type="password" value={config.appPassword}
-            onChange={(e) => setConfig({ ...config, appPassword: e.target.value })} />
-          <p className="text-[11px] text-[var(--color-ink-500)] mt-1">
-            In WordPress unter Benutzer → Profil → „Application Passwords" erzeugen. Wird nur in diesem Browser gespeichert; jederzeit in WordPress widerrufbar.
+        <Button variant="outline" onClick={onTest} disabled={testState.busy || !token}>Verbindung testen</Button>
+        {!token && (
+          <p className="text-[11px] text-[var(--color-ink-500)]">
+            Melde dich zuerst an (Einstellungen → Anmeldung), dann kannst du die Verbindung testen.
           </p>
-        </div>
-        <Button variant="outline" onClick={onTest} disabled={testState.busy}>Verbindung testen</Button>
+        )}
         {testState.msg && <p className="text-[13px]">{testState.msg}</p>}
       </div>
 

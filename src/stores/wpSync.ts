@@ -92,7 +92,11 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     set({ syncState: 'sending', message: 'Lade von WordPress…' });
     const res = await fetchDoc(config, link.schoolyearKey, token);
     if (!res.exists) {
-      set({ syncState: 'idle', message: res.message ?? 'Dokument nicht auf WordPress gefunden.' });
+      if (res.message) {
+        set({ syncState: 'error', message: res.message });
+        return 'error';
+      }
+      set({ syncState: 'idle', message: 'Dokument nicht auf WordPress gefunden.' });
       return 'not-found';
     }
     if (!res.doc) {

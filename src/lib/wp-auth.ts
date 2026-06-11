@@ -10,12 +10,28 @@ export interface AppTokenClaims {
 
 export type FetchLike = typeof fetch;
 
+function isAppTokenClaims(v: unknown): v is AppTokenClaims {
+  if (typeof v !== 'object' || v === null) return false;
+  const c = v as Record<string, unknown>;
+  return (
+    typeof c.sub === 'string' &&
+    typeof c.name === 'string' &&
+    Array.isArray(c.groups) &&
+    (c.groups as unknown[]).every((g) => typeof g === 'string') &&
+    typeof c.exp === 'number' &&
+    typeof c.iat === 'number' &&
+    typeof c.iss === 'string' &&
+    typeof c.aud === 'string'
+  );
+}
+
 function decodeJwtClaims(jwt: string): AppTokenClaims | null {
   const parts = jwt.split('.');
   if (parts.length !== 3) return null;
   try {
     const padded = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(padded)) as AppTokenClaims;
+    const parsed: unknown = JSON.parse(atob(padded));
+    return isAppTokenClaims(parsed) ? parsed : null;
   } catch {
     return null;
   }

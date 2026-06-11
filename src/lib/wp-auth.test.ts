@@ -72,4 +72,12 @@ describe('exchangeToken', () => {
     const f = (async () => fakeRes(200, { token: 'not.a.jwt' })) as unknown as typeof fetch;
     expect(await exchangeToken('https://wp.test', 'CODE', f)).toBeNull();
   });
+
+  it('returns null when JWT payload is valid JSON but missing required claims', async () => {
+    const partialPayload = btoa(JSON.stringify({ sub: 'u1' }))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const badJwt = `eyJhbGciOiJIUzI1NiJ9.${partialPayload}.fakesig`;
+    const f = (async () => fakeRes(200, { token: badJwt })) as unknown as typeof fetch;
+    expect(await exchangeToken('https://wp.test', 'CODE', f)).toBeNull();
+  });
 });

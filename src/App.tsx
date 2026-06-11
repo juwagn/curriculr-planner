@@ -35,6 +35,8 @@ export default function App() {
           const result = await exchangeToken(cfg.baseUrl, exchangeCode);
           if (result) {
             useAuthStore.getState().setToken(result.token, result.claims);
+          } else {
+            toast.error('Anmeldung fehlgeschlagen — bitte erneut versuchen.');
           }
         }
       }

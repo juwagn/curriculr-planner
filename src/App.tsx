@@ -7,6 +7,9 @@ import { PlanSwitcherDialog } from '@/components/welcome/PlanSwitcherDialog';
 import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
+import { exchangeToken } from '@/lib/wp-auth';
+import { useAuthStore } from '@/stores/auth';
+import { loadWpConfig } from '@/lib/wp-sync-config';
 import { createDemoDoc } from '@/lib/demo';
 import { toast } from 'sonner';
 import type { PlannerDocument, UUID } from '@/types';
@@ -20,7 +23,24 @@ export default function App() {
   const setTourPending = useUiStore((s) => s.setTourPending);
 
   useEffect(() => {
-    storage.getActiveDoc().then(async (id) => {
+    async function boot() {
+      // Intercept SSO handoff: WP redirects back with ?exchange=<one-time-code>
+      const params = new URLSearchParams(window.location.search);
+      const exchangeCode = params.get('exchange');
+      if (exchangeCode) {
+        // Strip from URL immediately to prevent reuse on reload
+        history.replaceState({}, '', location.pathname + location.hash);
+        const cfg = loadWpConfig();
+        if (cfg.baseUrl) {
+          const result = await exchangeToken(cfg.baseUrl, exchangeCode);
+          if (result) {
+            useAuthStore.getState().setToken(result.token, result.claims);
+          }
+        }
+      }
+
+      // Normal doc routing
+      const id = await storage.getActiveDoc();
       if (!id) {
         setRoute('welcome');
         return;
@@ -33,7 +53,8 @@ export default function App() {
         await storage.setActiveDoc(null);
         setRoute('welcome');
       }
-    });
+    }
+    void boot();
   }, [setDoc]);
 
   const openDoc = async (id: UUID) => {

@@ -9,6 +9,7 @@ import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { exchangeToken } from '@/lib/wp-auth';
 import { useAuthStore } from '@/stores/auth';
+import { useWpSyncStore } from '@/stores/wpSync';
 import { loadWpConfig } from '@/lib/wp-sync-config';
 import { createDemoDoc } from '@/lib/demo';
 import { toast } from 'sonner';
@@ -54,6 +55,10 @@ export default function App() {
         const doc = await storage.loadDoc(id);
         setDoc(doc);
         setRoute('editor');
+        const wpState = useWpSyncStore.getState();
+        if (useAuthStore.getState().token && wpState.config.enabled && wpState.config.links[id]) {
+          void wpState.pull(id, setDoc);
+        }
       } catch {
         await storage.setActiveDoc(null);
         setRoute('welcome');

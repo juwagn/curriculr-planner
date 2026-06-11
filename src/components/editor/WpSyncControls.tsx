@@ -46,9 +46,10 @@ function showSyncToast(syncState: string, message: string, successMsg: string) {
 export function WpSyncControls() {
   const doc = usePlannerStore((s) => s.doc);
   const setDoc = usePlannerStore((s) => s.setDoc);
-  const { config, syncState, conflict, send, keepLocal, clearConflict } = useWpSyncStore(
-    useShallow((s) => ({ config: s.config, syncState: s.syncState, conflict: s.conflict,
-      send: s.send, keepLocal: s.keepLocal, clearConflict: s.clearConflict }))
+  const { config, syncState, conflict, send, pull, keepLocal, clearConflict } = useWpSyncStore(
+    useShallow((s) => ({ config: s.config, syncState: s.syncState,
+      conflict: s.conflict, send: s.send, pull: s.pull,
+      keepLocal: s.keepLocal, clearConflict: s.clearConflict }))
   );
 
   const [open, setOpen] = useState(false);
@@ -84,6 +85,15 @@ export function WpSyncControls() {
     }
   }
 
+  async function onPull() {
+    if (!doc) return;
+    setOpen(false);
+    const result = await pull(doc.schoolyear.id, setDoc);
+    if (result === 'pulled') toast.success('Stand von WordPress geladen.');
+    else if (result === 'error') toast.error(useWpSyncStore.getState().message || 'Laden fehlgeschlagen.');
+    else toast.info('Noch kein Plan auf WordPress vorhanden.');
+  }
+
   return (
     <>
       <Popover open={open} onOpenChange={setOpen}>
@@ -115,6 +125,10 @@ export function WpSyncControls() {
           <div className="p-3 space-y-2">
             <Button className="w-full justify-center" disabled={sending} onClick={() => void run()}>
               {sending ? 'Sende…' : 'Nach WordPress senden'}
+            </Button>
+
+            <Button variant="outline" className="w-full justify-center" disabled={sending} onClick={() => void onPull()}>
+              Aktualisieren
             </Button>
 
             {actions.map((a) => (

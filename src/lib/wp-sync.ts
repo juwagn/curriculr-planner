@@ -12,6 +12,8 @@ export interface PushResult {
   feedUrl?: string;
   serverDoc?: PlannerDocument;
   serverVersion?: number;
+  authorName?: string;
+  savedAt?: string;
   message?: string;
 }
 
@@ -71,7 +73,13 @@ export async function pushDoc(
       const data = await res.json();
       const parsed = PlannerDocumentSchema.safeParse(migrate(data.doc));
       if (!parsed.success) return { status: 'error', message: 'Ungültiger Server-Dokument-Stand (409).' };
-      return { status: 'conflict', serverVersion: data.serverVersion, serverDoc: parsed.data };
+      return {
+        status: 'conflict',
+        serverVersion: data.serverVersion,
+        serverDoc: parsed.data,
+        authorName: typeof data.authorName === 'string' && data.authorName ? data.authorName : undefined,
+        savedAt: typeof data.savedAt === 'string' && data.savedAt ? data.savedAt : undefined,
+      };
     }
     if (res.status === 401 || res.status === 403) return { status: 'error', message: BAD_TOKEN };
     if (!res.ok) return { status: 'error', message: `Server antwortete mit ${res.status}.` };

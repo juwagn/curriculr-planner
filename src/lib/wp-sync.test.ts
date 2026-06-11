@@ -67,6 +67,23 @@ describe('wp-sync client', () => {
     expect(r.status).toBe('error');
   });
 
+  it('pushDoc 409 includes authorName and savedAt when present', async () => {
+    const serverDoc = { version: 3, schoolyear: { id: 'sy1', label: 'T', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15', holidays: [], quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' }, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'T', lastSaved: '2026-01-01T00:00:00Z' } };
+    const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: serverDoc, authorName: 'Max Mustermann', savedAt: '2026-01-01 12:00:00' })) as unknown as typeof fetch;
+    const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', token, f);
+    expect(r.status).toBe('conflict');
+    expect(r.authorName).toBe('Max Mustermann');
+    expect(r.savedAt).toBe('2026-01-01 12:00:00');
+  });
+
+  it('pushDoc 409 without author fields returns undefined authorName/savedAt', async () => {
+    const serverDoc = { version: 3, schoolyear: { id: 'sy1', label: 'T', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15', holidays: [], quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' }, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'T', lastSaved: '2026-01-01T00:00:00Z' } };
+    const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: serverDoc })) as unknown as typeof fetch;
+    const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', token, f);
+    expect(r.authorName).toBeUndefined();
+    expect(r.savedAt).toBeUndefined();
+  });
+
   it('fetchDoc 404 -> not exists', async () => {
     const f = (async () => fakeRes(404, {})) as unknown as typeof fetch;
     expect(await fetchDoc(cfg, 'sj', token, f)).toEqual({ exists: false });

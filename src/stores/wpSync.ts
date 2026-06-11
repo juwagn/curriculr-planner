@@ -91,9 +91,13 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     }
     set({ syncState: 'sending', message: 'Lade von WordPress…' });
     const res = await fetchDoc(config, link.schoolyearKey, token);
-    if (!res.exists || !res.doc) {
-      set({ syncState: 'idle', message: res.message ?? '' });
+    if (!res.exists) {
+      set({ syncState: 'idle', message: res.message ?? 'Dokument nicht auf WordPress gefunden.' });
       return 'not-found';
+    }
+    if (!res.doc) {
+      set({ syncState: 'error', message: res.message ?? 'Ungültige Antwort vom Server.' });
+      return 'error';
     }
     const newLink: WpPlanLink = {
       ...link,

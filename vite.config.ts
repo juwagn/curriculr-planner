@@ -22,11 +22,10 @@ export default defineConfig(({ command }) => ({
               content: [
                 "default-src 'self'",
                 "script-src 'self'",
-                "style-src 'self' 'unsafe-inline'",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                 "img-src 'self' data:",
                 "connect-src 'self' https:",
-                "font-src 'self'",
-                "frame-ancestors 'none'",
+                "font-src 'self' https://fonts.gstatic.com",
               ].join('; '),
             },
             injectTo: 'head',

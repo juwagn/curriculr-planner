@@ -188,3 +188,49 @@ describe('computeWeekRows holiday threshold (5/5)', () => {
     expect(indices).toEqual(indices.map((_v, i) => indices[0] + i));
   });
 });
+
+// Sommerferien extending into the teacher preparation week: the first school week
+// (SW 00) must always be included even if all 5 days are within the holiday period.
+describe('SW 00 always included when firstSchoolDay falls within Sommerferien', () => {
+  const syInSommerferien: Schoolyear = {
+    id: 'sy-sf',
+    label: '2026/27',
+    firstSchoolDay: '2026-08-24',
+    firstTeachingDay: '2026-09-02',
+    lastSchoolDay: '2027-07-16',
+    // Sommerferien cover the full week of 24.08 (and beyond)
+    holidays: [
+      { id: 'sf', label: 'Sommerferien', start: '2026-07-30', end: '2026-09-11', type: 'ferien' }
+    ],
+    quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-09'],
+    createdAt: '',
+    updatedAt: ''
+  };
+
+  it('computeSchoolweeks: includes SW 00 (2026-08-24) despite all 5 days being Sommerferien', () => {
+    const weeks = computeSchoolweeks(syInSommerferien);
+    expect(weeks[0]).toEqual({
+      index: 0,
+      startDate: '2026-08-24',
+      endDate: '2026-08-28'
+    });
+  });
+
+  it('computeWeekRows: first row is a schoolweek row (SW 00) despite all 5 days being Sommerferien', () => {
+    const rows = computeWeekRows(syInSommerferien);
+    expect(rows[0].kind).toBe('schoolweek');
+    expect(rows[0].startDate).toBe('2026-08-24');
+  });
+
+  it('computeWeekRows: subsequent fully-holiday weeks are still rendered as holiday banners', () => {
+    const rows = computeWeekRows(syInSommerferien);
+    // Week 31.08–04.09 is still fully in Sommerferien → holiday banner
+    const secondWeek = rows.find((r) => r.startDate === '2026-08-31');
+    expect(secondWeek?.kind).toBe('holiday');
+  });
+
+  it('computeSchoolweeks: indices remain sequential starting from 0', () => {
+    const weeks = computeSchoolweeks(syInSommerferien);
+    weeks.forEach((w, i) => expect(w.index).toBe(i));
+  });
+});

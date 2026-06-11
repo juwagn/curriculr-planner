@@ -7,6 +7,8 @@ import { useConflicts } from '@/hooks/useConflicts';
 import { ExportDropdown } from '@/components/export/ExportDropdown';
 import { ConflictPanel } from './ConflictPanel';
 import { WpSyncControls } from './WpSyncControls';
+import { useAuthStore } from '@/stores/auth';
+import { useWpSyncStore } from '@/stores/wpSync';
 
 interface Props {
   onSwitchPlan(): void;
@@ -22,6 +24,22 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const conflicts = useConflicts();
   const [panelOpen, setPanelOpen] = useState(false);
   const hasError = conflicts.some((c) => c.severity === 'error');
+  const authStatus = useAuthStore((s) => s.status);
+  const authClaims = useAuthStore((s) => s.claims);
+  const authToken = useAuthStore((s) => s.token);
+  const authLogout = useAuthStore((s) => s.logout);
+  const wpBaseUrl = useWpSyncStore((s) => s.config.baseUrl);
+
+  function handleLogout() {
+    const currentToken = authToken;
+    authLogout();
+    if (wpBaseUrl && currentToken) {
+      fetch(`${wpBaseUrl.replace(/\/+$/, '')}/wp-json/curriculr/v1/auth/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${currentToken}` },
+      }).catch(() => {});
+    }
+  }
 
   if (!doc) return null;
 
@@ -47,6 +65,20 @@ export function EditorHeader({ onSwitchPlan }: Props) {
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 tabular-nums">{stateLabel}</span>
           <WpSyncControls />
+          {authStatus === 'authenticated' && authClaims && (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[13px]">
+              <span>{authClaims.name}</span>
+              <button
+                onClick={handleLogout}
+                aria-label="Abmelden"
+                title="Abmelden"
+                className="opacity-60 hover:opacity-100 transition-opacity"
+                style={{ transitionDuration: 'var(--dur-state)' }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
           <div
             data-tour="view-toggle"
             className="flex items-center bg-white/10 rounded-[var(--radius-pill)] overflow-hidden"

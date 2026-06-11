@@ -71,4 +71,22 @@ describe('wp-sync client', () => {
     const f = (async () => fakeRes(404, {})) as unknown as typeof fetch;
     expect(await fetchDoc(cfg, 'sj', token, f)).toEqual({ exists: false });
   });
+
+  it('fetchDoc 200 returns doc and version', async () => {
+    const sy = { id: 'sy1', label: 'Test', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15', holidays: [], quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' };
+    const wpDoc = { version: 5, schoolyear: sy, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Test', lastSaved: '2026-01-01T00:00:00Z' } };
+    const f = (async () => fakeRes(200, { version: 7, stage: 'oeffentlich', doc: wpDoc })) as unknown as typeof fetch;
+    const r = await fetchDoc(cfg, 'sj_2026_27', token, f);
+    expect(r.exists).toBe(true);
+    expect(r.version).toBe(7);
+    expect(r.stage).toBe('oeffentlich');
+    expect(r.doc).toMatchObject({ version: 5 });
+  });
+
+  it('fetchDoc 401 returns BAD_TOKEN message', async () => {
+    const f = (async () => fakeRes(401, {})) as unknown as typeof fetch;
+    const r = await fetchDoc(cfg, 'sj', token, f);
+    expect(r.exists).toBe(false);
+    expect(r.message).toMatch(/ungültig/i);
+  });
 });

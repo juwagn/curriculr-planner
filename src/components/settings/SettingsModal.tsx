@@ -10,6 +10,7 @@ import { AppearanceTab } from './AppearanceTab';
 import { AboutTab } from './AboutTab';
 import { SchoolTab } from './SchoolTab';
 import { WordpressTab } from './WordpressTab';
+import { PrivacyTab } from './PrivacyTab';
 
 const NAV_GROUPS: { group: string; items: { value: SettingsTab; label: string }[] }[] = [
   {
@@ -41,7 +42,10 @@ const NAV_GROUPS: { group: string; items: { value: SettingsTab; label: string }[
   },
   {
     group: 'System',
-    items: [{ value: 'about', label: 'Über' }],
+    items: [
+      { value: 'about', label: 'Über' },
+      { value: 'privacy', label: 'Datenschutz' },
+    ],
   },
 ];
 
@@ -56,6 +60,7 @@ const CONTENT: Record<SettingsTab, React.ReactNode> = {
   import: <ImportTab />,
   about: <AboutTab />,
   wordpress: <WordpressTab />,
+  privacy: <PrivacyTab />,
 };
 
 export function SettingsModal() {

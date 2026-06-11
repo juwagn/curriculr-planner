@@ -1,5 +1,5 @@
 const REPO_URL = 'https://github.com/juwagn/curriculr-planner';
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.6.0';
 
 type ChangelogEntry = {
   version: string;
@@ -9,6 +9,16 @@ type ChangelogEntry = {
 
 /** Wichtigste Feature-Updates und Bugfixes je Version (neueste zuerst). */
 const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.6.0',
+    date: '11.06.2026',
+    highlights: [
+      'IServ-SSO-Anmeldung: Login über IServ, App-Token nur im RAM (kein localStorage)',
+      'Alle WordPress-Aufrufe mit Bearer-Token gesichert — Application Password entfernt',
+      'CSP-Header im Produktions-Build (kein unsafe-inline/eval)',
+      'Datenschutz-Tab in den Einstellungen',
+    ],
+  },
   {
     version: '1.5.0',
     date: '01.06.2026',

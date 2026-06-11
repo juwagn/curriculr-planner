@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth';
 
 export type WpSyncState = 'idle' | 'sending' | 'synced' | 'conflict' | 'error';
 
-interface ConflictInfo { docId: UUID; serverVersion: number; serverDoc: PlannerDocument; }
+interface ConflictInfo { docId: UUID; serverVersion: number; serverDoc: PlannerDocument; authorName?: string; savedAt?: string; }
 
 interface WpSyncStore {
   config: WpSyncConfig;
@@ -57,7 +57,8 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       return 'synced';
     } else if (res.status === 'conflict') {
       set({ syncState: 'conflict', message: 'WordPress hat eine neuere Version.',
-        conflict: { docId, serverVersion: res.serverVersion ?? 0, serverDoc: res.serverDoc as PlannerDocument } });
+        conflict: { docId, serverVersion: res.serverVersion ?? 0, serverDoc: res.serverDoc as PlannerDocument,
+          authorName: res.authorName, savedAt: res.savedAt } });
       return 'conflict';
     } else {
       set({ syncState: 'error', message: res.message ?? 'Senden fehlgeschlagen.' });

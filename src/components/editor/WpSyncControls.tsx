@@ -38,6 +38,14 @@ function StageDot({ stage }: { stage: WpStage }) {
   );
 }
 
+function formatSavedAt(raw: string): string {
+  const d = new Date(raw.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return '';
+  const date = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  return ` am ${date} um ${time} Uhr`;
+}
+
 function showSyncToast(syncState: string, message: string, successMsg: string) {
   if (syncState === 'synced') toast.success(successMsg);
   else if (syncState === 'error') toast.error(message || 'Senden fehlgeschlagen.');
@@ -168,7 +176,12 @@ export function WpSyncControls() {
             <DialogTitle>WordPress hat eine neuere Version</DialogTitle>
           </DialogHeader>
           <p className="text-[14px] text-[var(--color-text-muted)]">
-            Auf WordPress liegt bereits eine neuere Fassung (Version {conflict?.serverVersion}). Was möchtest du tun?
+            Auf WordPress liegt bereits eine neuere Fassung (Version {conflict?.serverVersion}).
+            {conflict?.authorName && (
+              <> Gespeichert von <strong className="font-semibold text-[var(--color-text-main)]">{conflict.authorName}</strong>
+              {conflict.savedAt ? formatSavedAt(conflict.savedAt) : ''}.</>
+            )}
+            {' '}Was möchtest du tun?
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline"

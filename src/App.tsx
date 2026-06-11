@@ -24,12 +24,15 @@ export default function App() {
 
   useEffect(() => {
     async function boot() {
-      // Intercept SSO handoff: WP redirects back with ?exchange=<one-time-code>
-      const params = new URLSearchParams(window.location.search);
-      const exchangeCode = params.get('exchange');
-      if (exchangeCode) {
+      // Intercept SSO handoff: WP redirects back with #auth=<one-time-code> or #auth_error=<reason>
+      const hash = window.location.hash;
+      if (hash.startsWith('#auth_error=')) {
+        history.replaceState({}, '', location.pathname + location.search);
+        toast.error('Anmeldung abgelehnt — ' + decodeURIComponent(hash.slice(12)));
+      } else if (hash.startsWith('#auth=')) {
+        const exchangeCode = decodeURIComponent(hash.slice(6));
         // Strip from URL immediately to prevent reuse on reload
-        history.replaceState({}, '', location.pathname + location.hash);
+        history.replaceState({}, '', location.pathname + location.search);
         const cfg = loadWpConfig();
         if (cfg.baseUrl) {
           const result = await exchangeToken(cfg.baseUrl, exchangeCode);

@@ -94,6 +94,7 @@ export async function fetchDoc(
       headers: { Authorization: bearerHeader(token) },
     });
     if (res.status === 404) return { exists: false };
+    if (res.status === 401 || res.status === 403) return { exists: false, message: BAD_TOKEN };
     if (!res.ok) return { exists: false, message: `Server antwortete mit ${res.status}.` };
     const data = await res.json();
     return { exists: true, version: data.version, doc: data.doc, stage: data.stage };

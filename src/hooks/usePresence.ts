@@ -24,7 +24,6 @@ export function usePresence(docId: string | undefined): LatestRevision | null {
 
   useEffect(() => {
     if (!docId || !token) {
-      setLatest(null);
       return;
     }
 

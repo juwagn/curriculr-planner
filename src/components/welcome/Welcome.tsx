@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
@@ -95,7 +96,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: P
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8">
+    <div className="min-h-[100dvh] flex items-center justify-center p-8">
       <Card className="max-w-2xl w-full p-10 shadow-[var(--shadow-modal)] border-[var(--color-ink-200)]">
         <div className="text-center mb-8">
           <img src={`${import.meta.env.BASE_URL}curriculr-logo-dark.svg`} alt="Curriculr" className="h-12 mx-auto mb-3" onError={(e) => { e.currentTarget.src = `${import.meta.env.BASE_URL}curriculr-logo.svg`; }} />
@@ -130,12 +131,39 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: P
         )}
 
         <div className="flex flex-col gap-3">
+          {/* Primary action */}
           <Button size="lg" onClick={onCreateNew}>
             + Neuen Jahresplan erstellen
           </Button>
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-            JSON-Backup laden
-          </Button>
+
+          {/* Import group */}
+          <div className="flex flex-col gap-2 pt-1">
+            <div className="text-[11px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em] px-1">
+              Aus Datei importieren
+            </div>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+              JSON-Backup laden
+            </Button>
+            <Button variant="outline" onClick={() => icsInputRef.current?.click()}>
+              Aus ICS-Datei erstellen
+            </Button>
+            <Button variant="outline" onClick={() => xlsxInputRef.current?.click()}>
+              Aus Excel-Datei erstellen
+            </Button>
+          </div>
+
+          {/* Utility group */}
+          <div className="flex flex-col gap-1 pt-1 border-t border-[var(--color-ink-200)]">
+            <Button variant="ghost" onClick={() => onImportJson(createDemoDoc())}>
+              Demo ausprobieren
+            </Button>
+            <Button variant="ghost" onClick={onStartTour} className="flex items-center gap-1.5">
+              <Play className="w-3 h-3" />
+              Geführte Tour starten
+            </Button>
+          </div>
+
+          {/* Hidden file inputs — keep these exactly as-is */}
           <input
             ref={fileInputRef}
             type="file"
@@ -147,9 +175,6 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: P
               e.target.value = '';
             }}
           />
-          <Button variant="outline" onClick={() => icsInputRef.current?.click()}>
-            Aus ICS-Datei erstellen
-          </Button>
           <input
             ref={icsInputRef}
             type="file"
@@ -161,9 +186,6 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: P
               e.target.value = '';
             }}
           />
-          <Button variant="outline" onClick={() => xlsxInputRef.current?.click()}>
-            Aus Excel-Datei erstellen
-          </Button>
           <input
             ref={xlsxInputRef}
             type="file"
@@ -175,12 +197,6 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: P
               e.target.value = '';
             }}
           />
-          <Button variant="ghost" onClick={() => onImportJson(createDemoDoc())}>
-            Demo ausprobieren
-          </Button>
-          <Button variant="ghost" onClick={onStartTour}>
-            ▶ Geführte Tour starten
-          </Button>
         </div>
       </Card>
       <IcsImportDialog

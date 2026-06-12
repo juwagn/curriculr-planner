@@ -36,28 +36,28 @@ afterEach(() => {
 });
 
 describe('relativeTime', () => {
+  function localDatetime(d: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
   it('returns "gerade eben" for < 1 min ago', () => {
-    const now = new Date();
-    now.setSeconds(now.getSeconds() - 30);
-    const raw = now.toISOString().replace('T', ' ').slice(0, 19);
+    const raw = localDatetime(new Date(Date.now() - 30_000));
     expect(relativeTime(raw)).toBe('gerade eben');
   });
 
   it('returns "vor X Min" for 1–59 min ago', () => {
-    const d = new Date(Date.now() - 5 * 60_000);
-    const raw = d.toISOString().replace('T', ' ').slice(0, 19);
+    const raw = localDatetime(new Date(Date.now() - 5 * 60_000));
     expect(relativeTime(raw)).toBe('vor 5 Min');
   });
 
   it('returns "vor X Std" for 1–23 hours ago', () => {
-    const d = new Date(Date.now() - 2 * 3_600_000);
-    const raw = d.toISOString().replace('T', ' ').slice(0, 19);
+    const raw = localDatetime(new Date(Date.now() - 2 * 3_600_000));
     expect(relativeTime(raw)).toBe('vor 2 Std');
   });
 
   it('returns "" for ≥ 24 hours ago', () => {
-    const d = new Date(Date.now() - 25 * 3_600_000);
-    const raw = d.toISOString().replace('T', ' ').slice(0, 19);
+    const raw = localDatetime(new Date(Date.now() - 25 * 3_600_000));
     expect(relativeTime(raw)).toBe('');
   });
 

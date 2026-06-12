@@ -6,7 +6,7 @@ import { fetchLatestRevision, type LatestRevision } from '@/lib/wp-sync';
 const POLL_MS = 60_000;
 
 export function relativeTime(raw: string): string {
-  const d = new Date(raw.replace(' ', 'T') + 'Z');
+  const d = new Date(raw.replace(' ', 'T'));
   if (isNaN(d.getTime())) return '';
   const diffMs = Date.now() - d.getTime();
   const diffMin = Math.floor(diffMs / 60_000);

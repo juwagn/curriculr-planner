@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { testConnection, pushDoc, fetchDoc } from './wp-sync';
+import { testConnection, pushDoc, fetchDoc, fetchLatestRevision } from './wp-sync';
 import type { WpSyncConfig } from './wp-sync-config';
 
 const cfg: WpSyncConfig = { enabled: true, baseUrl: 'https://s.example/', links: {} };
@@ -107,5 +107,32 @@ describe('wp-sync client', () => {
     const r = await fetchDoc(cfg, 'sj', token, f);
     expect(r.exists).toBe(false);
     expect(r.message).toMatch(/ungültig/i);
+  });
+
+  describe('fetchLatestRevision', () => {
+    it('returns the first entry from a non-empty revisions list', async () => {
+      const rows = [
+        { id: 3, version: 3, author_name: 'Max Mustermann', author_sub: 'u1', created_at: '2026-06-01 10:30:00' },
+        { id: 2, version: 2, author_name: 'Anna Schmidt',   author_sub: 'u2', created_at: '2026-06-01 09:00:00' },
+      ];
+      const f = (async () => fakeRes(200, rows)) as unknown as typeof fetch;
+      const r = await fetchLatestRevision(cfg, 'sj_2026_27', token, f);
+      expect(r).toEqual({ version: 3, authorName: 'Max Mustermann', authorSub: 'u1', savedAt: '2026-06-01 10:30:00' });
+    });
+
+    it('returns null for an empty list', async () => {
+      const f = (async () => fakeRes(200, [])) as unknown as typeof fetch;
+      expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBeNull();
+    });
+
+    it('returns null on 401', async () => {
+      const f = (async () => fakeRes(401, {})) as unknown as typeof fetch;
+      expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBeNull();
+    });
+
+    it('returns null on network error', async () => {
+      const f = (async () => { throw new Error('net'); }) as unknown as typeof fetch;
+      expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBeNull();
+    });
   });
 });

@@ -91,6 +91,13 @@ export async function pushDoc(
   }
 }
 
+export interface LatestRevision {
+  version: number;
+  authorName: string;
+  authorSub: string;
+  savedAt: string;
+}
+
 export async function fetchDoc(
   cfg: WpSyncConfig,
   schoolyearKey: string,
@@ -109,5 +116,31 @@ export async function fetchDoc(
   } catch (err) {
     const msg = err instanceof Error ? err.message : NOT_REACHABLE;
     return { exists: false, message: msg === BAD_URL ? msg : NOT_REACHABLE };
+  }
+}
+
+export async function fetchLatestRevision(
+  cfg: WpSyncConfig,
+  schoolyearKey: string,
+  token: string,
+  fetchImpl: FetchLike = fetch,
+): Promise<LatestRevision | null> {
+  try {
+    const res = await fetchImpl(
+      `${base(cfg)}/doc/${encodeURIComponent(schoolyearKey)}/revisions`,
+      { headers: { Authorization: bearerHeader(token) } },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return null;
+    const r = data[0];
+    return {
+      version:    typeof r.version     === 'number' ? r.version     : 0,
+      authorName: typeof r.author_name === 'string' ? r.author_name : '',
+      authorSub:  typeof r.author_sub  === 'string' ? r.author_sub  : '',
+      savedAt:    typeof r.created_at  === 'string' ? r.created_at  : '',
+    };
+  } catch {
+    return null;
   }
 }

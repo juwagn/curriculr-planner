@@ -3,9 +3,9 @@ export interface AppTokenClaims {
   name: string;
   groups: string[];
   exp: number;
-  iat: number;
-  iss: string;
-  aud: string;
+  iat?: number;
+  iss?: string;
+  aud?: string;
 }
 
 export type FetchLike = typeof fetch;

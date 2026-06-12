@@ -115,7 +115,11 @@ describe('wp-sync client', () => {
         { id: 3, version: 3, author_name: 'Max Mustermann', author_sub: 'u1', created_at: '2026-06-01 10:30:00' },
         { id: 2, version: 2, author_name: 'Anna Schmidt',   author_sub: 'u2', created_at: '2026-06-01 09:00:00' },
       ];
-      const f = (async () => fakeRes(200, rows)) as unknown as typeof fetch;
+      const f = (async (url: string, init?: RequestInit) => {
+        expect(url).toBe('https://s.example/wp-json/curriculr/v1/doc/sj_2026_27/revisions');
+        expect((init?.headers as Record<string, string>).Authorization).toBe('Bearer test.bearer.token');
+        return fakeRes(200, rows);
+      }) as unknown as typeof fetch;
       const r = await fetchLatestRevision(cfg, 'sj_2026_27', token, f);
       expect(r).toEqual({ version: 3, authorName: 'Max Mustermann', authorSub: 'u1', savedAt: '2026-06-01 10:30:00' });
     });

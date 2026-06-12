@@ -38,6 +38,7 @@ export function computeSchoolweeks(sy: Schoolyear): SchoolweekRange[] {
   const weeks: SchoolweekRange[] = [];
   let index = 0;
   let cursor = start;
+  let isFirstWeek = true;
   while (cursor <= last) {
     const monday = cursor;
     const friday = addDays(cursor, 4);
@@ -45,10 +46,13 @@ export function computeSchoolweeks(sy: Schoolyear): SchoolweekRange[] {
     for (let i = 0; i < 5; i++) {
       if (isHoliday(fmt(addDays(cursor, i)), sy.holidays)) holidayDays++;
     }
-    if (holidayDays < 5) {
+    // The first school week (SW 00) is always included even if it falls entirely
+    // within a holiday period (e.g. teacher preparation week inside Sommerferien).
+    if (isFirstWeek || holidayDays < 5) {
       weeks.push({ index, startDate: fmt(monday), endDate: fmt(friday) });
       index++;
     }
+    isFirstWeek = false;
     cursor = addDays(cursor, 7);
   }
   return weeks;
@@ -107,6 +111,7 @@ export function computeWeekRows(sy: Schoolyear): WeekRow[] {
   const rows: WeekRow[] = [];
   let index = 0;
   let cursor = start;
+  let isFirstWeek = true;
   while (cursor <= last) {
     const monday = cursor;
     const friday = addDays(cursor, 4);
@@ -119,12 +124,15 @@ export function computeWeekRows(sy: Schoolyear): WeekRow[] {
         if (!holidayLabel) holidayLabel = h.label;
       }
     }
-    if (holidayDays === 5) {
+    // The first school week (SW 00) is always a schoolweek row even if it falls
+    // entirely within a holiday period (e.g. teacher preparation week inside Sommerferien).
+    if (!isFirstWeek && holidayDays === 5) {
       rows.push({ kind: 'holiday', label: holidayLabel ?? 'Ferien', startDate: fmt(monday), endDate: fmt(friday) });
     } else {
       rows.push({ kind: 'schoolweek', index, startDate: fmt(monday), endDate: fmt(friday) });
       index++;
     }
+    isFirstWeek = false;
     cursor = addDays(cursor, 7);
   }
   return rows;

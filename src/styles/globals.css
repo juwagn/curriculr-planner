@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
 
 @import "tailwindcss";
 
@@ -70,7 +73,7 @@
   --radius-default: 10px;
   --radius-card: 14px;
   --radius-pill: 9999px;
-  --radius-btn: 9999px;
+  --radius-btn: var(--radius-default);
 
   /* Schatten — State-Antwort, nicht Identität */
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05);

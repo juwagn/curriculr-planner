@@ -1,11 +1,23 @@
 # Curriculr Planner
 
-Standalone web tool for school principals to create an annual school schedule. Exports as ICS for the Curriculr WordPress plugin.
+Standalone web tool for school principals to create and publish an annual school schedule. Exports to WordPress (REST API) and IServ (ICS calendar subscription).
 
-## Live demo
+**Live:** `https://juwagn.github.io/curriculr-planner/`
 
-After enabling GitHub Pages on the repository, the app is published at
-`https://<user>.github.io/curriculr-planner/`.
+## Features
+
+- Wizard to create a new school year plan (holidays, categories, groups)
+- Weekly table editor with drag-and-drop event placement
+- Year grid overview (months × days)
+- Undo/redo (Ctrl+Z / Ctrl+Shift+Z)
+- Event templates (drag/click-to-place)
+- Export: ICS, JSON backup, Excel (Konverter-compatible), PDF print
+- Multi-plan management
+- IServ SSO login (OIDC) — app-token RAM-only, never persisted
+- WordPress sync: push/pull with stage management (Entwurf → Genehmigt → Öffentlich)
+- Multi-user collaborative editing: sequential conflict resolution (409 + author info)
+- Presence indicator: "X hat vor N Min gespeichert" in editor header
+- Datenschutz/Vibecoding transparency tab in settings
 
 ## Development
 
@@ -15,37 +27,30 @@ npm run dev          # http://localhost:5173
 npm run test         # watch mode
 npm run test:run     # CI mode
 npm run typecheck
-npm run build        # production bundle in dist/
+npm run lint
+npm run build        # production bundle → dist/
 npm run preview      # serve dist/ locally
 ```
 
-## Spec & Roadmap
-
-The full design spec lives in the sibling repo:
-`Wordpress Plugin Terminplaner/docs/superpowers/specs/2026-05-26-curriculr-planner-design.md`
-
-v1.0 covers wizard, quarter editor, drag-drop, ICS export, LocalStorage. Roadmap: v1.1 conflict detection, v1.2 templates + Excel import, v1.3 cloud sync, v1.4 recurring events.
-
 ## Stack
 
-- Vite + React 19 + TypeScript (strict)
+- Vite + React 19 + TypeScript strict
 - Tailwind v4 + shadcn/ui
 - @dnd-kit (drag-drop)
 - Zustand (state) + react-hook-form + Zod (validation)
 - Vitest + Testing-Library
 
-## Releases
+## Architecture
 
-### v1.0.0 — 2026-05-26 (MVP)
-- Setup wizard (3 steps: schoolyear/categories/groups)
-- Quarter editor with FullCalendar (drag-drop between days)
-- Event create/edit modal with category auto-matching via keywords
-- Weekend + holiday warning toasts on drop
-- Note per schoolweek (popover trigger via 📝 icon + slide-in sidebar)
-- Settings modal (5 tabs: schoolyear, categories, groups, export, about)
-- Export: ICS, JSON-backup, Excel (Konverter-compatible format)
-- Multi-plan management via plan-switcher dialog
-- LocalStorage with auto-save (300ms debounced) + restore-from-backup
+See [CLAUDE.md](CLAUDE.md) for full architecture documentation (store layout, storage layer, domain logic, conventions).
+
+## Deployment
+
+GitHub Pages via `.github/workflows/deploy.yml`. Push to `main` → auto-deploy. Vite `base` = `/curriculr-planner/` in production.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

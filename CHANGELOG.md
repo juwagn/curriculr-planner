@@ -5,6 +5,26 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.7.0] – 2026-06-12 — „Mehrbenutzer & IServ-SSO"
+
+### Hinzugefügt
+- **IServ-SSO-Login** in Einstellungen → WordPress: Anmeldung per IServ-OIDC-Code-Flow; App-Token wird nur im RAM gehalten (kein localStorage).
+- **Mehrbenutzer-Modus**: mehrere Schulleitungsmitglieder bearbeiten denselben Plan; sequentielle Konfliktlösung via 409-Flow.
+- **Automatischer Pull beim Start**: beim App-Start wird der aktuelle WP-Stand automatisch geladen, wenn die Verbindung konfiguriert ist.
+- **Aktualisieren-Schaltfläche** im Veröffentlichen-Popover: manueller Pull des WP-Stands.
+- **Konflikt-Dialog mit Autorenangabe**: 409-Konflikt zeigt „Gespeichert von X am TT.MM.JJJJ um HH:MM Uhr".
+- **Präsenz-Indikator** im Editor-Header: „X hat vor N Min gespeichert" (60-Sekunden-Polling, filtert eigene Speichervorgänge, blendet sich nach 24 h aus).
+- **Datenschutz- & Transparenz-Tab** in Einstellungen: DSGVO-Hinweise zur Datenverarbeitung + Vibecoding-Transparenzhinweis.
+- **Content-Security-Policy** (CSP-Meta-Tag) im Produktions-Build.
+
+### Geändert
+- Application-Password-Authentifizierung durch IServ-SSO-Bearer-Token ersetzt. WP-App-Passwort in Einstellungen entfernt.
+
+### Behoben
+- `pull()` unterscheidet 401/403 (Fehler-Toast) von 404 (kein Plan vorhanden — kein Toast).
+
+---
+
 ## [1.6.0] – 2026-06-03 — „PDF-Export"
 
 ### Hinzugefügt
@@ -146,6 +166,9 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
   Wochentabelle, Kategorien/Gruppen, Notizen, Export als ICS / JSON / Excel.
 - MIT-Lizenz.
 
+[1.7.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.7.0
+[1.6.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.6.0
+[1.5.1]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.5.1
 [1.5.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.5.0
 [1.4.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.4.0
 [1.3.2]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.3.2

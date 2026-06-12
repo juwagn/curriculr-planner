@@ -9,6 +9,7 @@ import { ConflictPanel } from './ConflictPanel';
 import { WpSyncControls } from './WpSyncControls';
 import { useAuthStore } from '@/stores/auth';
 import { useWpSyncStore } from '@/stores/wpSync';
+import { usePresence, relativeTime } from '@/hooks/usePresence';
 
 interface Props {
   onSwitchPlan(): void;
@@ -16,6 +17,7 @@ interface Props {
 
 export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
+  const presence = usePresence(doc?.schoolyear.id);
   const savingState = usePlannerStore((s) => s.savingState);
   const openSettings = useUiStore((s) => s.openSettings);
   const openHelp = useUiStore((s) => s.openHelp);
@@ -64,6 +66,14 @@ export function EditorHeader({ onSwitchPlan }: Props) {
         </button>
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 tabular-nums">{stateLabel}</span>
+          {(() => {
+            const rel = presence?.authorName ? relativeTime(presence.savedAt) : '';
+            return rel ? (
+              <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[12px] opacity-70 whitespace-nowrap">
+                {presence!.authorName} hat {rel} gespeichert
+              </span>
+            ) : null;
+          })()}
           <WpSyncControls />
           {authStatus === 'authenticated' && authClaims && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[13px]">

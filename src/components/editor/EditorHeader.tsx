@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Settings as SettingsIcon, HelpCircle } from 'lucide-react';
+import { Settings as SettingsIcon, HelpCircle, CheckCircle2, Loader2, AlertTriangle } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { useConflicts } from '@/hooks/useConflicts';
@@ -45,11 +45,11 @@ export function EditorHeader({ onSwitchPlan }: Props) {
 
   if (!doc) return null;
 
-  const stateLabel = {
-    idle: '● Gespeichert',
-    saving: '○ Speichert…',
-    saved: '● Gespeichert',
-    error: '⚠ Fehler beim Speichern'
+  const stateIndicator = {
+    idle:   <><CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Gespeichert</>,
+    saving: <><Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" /> Speichert…</>,
+    saved:  <><CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Gespeichert</>,
+    error:  <><AlertTriangle className="w-3 h-3" aria-hidden="true" /> Fehler beim Speichern</>,
   }[savingState];
 
   return (
@@ -65,7 +65,9 @@ export function EditorHeader({ onSwitchPlan }: Props) {
           {doc.meta.name} <span className="opacity-60">▼</span>
         </button>
         <div className="ml-auto flex items-center gap-3 text-xs">
-          <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 tabular-nums">{stateLabel}</span>
+          <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 flex items-center gap-1.5">
+            {stateIndicator}
+          </span>
           {(() => {
             const rel = presence?.authorName ? relativeTime(presence.savedAt) : '';
             return rel ? (

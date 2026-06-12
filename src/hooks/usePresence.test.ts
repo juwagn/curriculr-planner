@@ -97,9 +97,14 @@ describe('usePresence', () => {
     await act(async () => { await Promise.resolve(); });
     expect(result.current?.authorName).toBe('Max');
     await act(async () => {
-      vi.advanceTimersByTime(60_000);
-      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(60_000);
     });
     expect(result.current?.authorName).toBe('Anna');
+  });
+
+  it('returns null when docId is undefined', async () => {
+    const { result } = renderHook(() => usePresence(undefined));
+    await act(async () => { await Promise.resolve(); });
+    expect(result.current).toBeNull();
   });
 });

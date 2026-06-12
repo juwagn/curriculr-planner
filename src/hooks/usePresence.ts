@@ -30,9 +30,10 @@ export function usePresence(docId: string | undefined): LatestRevision | null {
 
     async function poll() {
       const { config } = useWpSyncStore.getState();
+      const { token: currentToken } = useAuthStore.getState();
       const link = docId ? config.links[docId] : undefined;
-      if (!config.enabled || !link) { setLatest(null); return; }
-      const rev = await fetchLatestRevision(config, link.schoolyearKey, token!);
+      if (!config.enabled || !link || !currentToken) { setLatest(null); return; }
+      const rev = await fetchLatestRevision(config, link.schoolyearKey, currentToken);
       setLatest(rev);
     }
 

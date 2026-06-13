@@ -120,13 +120,13 @@ export function WpSyncControls() {
           </button>
         </PopoverTrigger>
 
-        <PopoverContent align="end" className="w-72 p-0 text-[var(--color-text-main)]">
+        <PopoverContent align="end" className="w-72 p-0 text-[var(--color-ink-900)]">
           <div className="px-4 py-3 border-b border-[var(--color-ink-200)]">
             <p className="text-[13px] font-semibold">Veröffentlichen</p>
             <div className="mt-1.5 flex items-center gap-2 text-[13px]">
               <StageDot stage={stage} />
               <span style={{ color: STAGE_COLOR[stage] }} className="font-medium">{STAGE_LABELS[stage]}</span>
-              <span className="text-[var(--color-text-muted)]">
+              <span className="text-[var(--color-ink-500)]">
                 · {link.knownVersion > 0 ? `auf WordPress (v${link.knownVersion})` : 'noch nicht gesendet'}
               </span>
             </div>
@@ -148,7 +148,7 @@ export function WpSyncControls() {
               </Button>
             ))}
 
-            <p className="text-[11px] text-[var(--color-text-muted)] pt-1">{STAGE_HINT[stage]}</p>
+            <p className="text-[11px] text-[var(--color-ink-500)] pt-1">{STAGE_HINT[stage]}</p>
           </div>
         </PopoverContent>
       </Popover>
@@ -159,7 +159,7 @@ export function WpSyncControls() {
           <DialogHeader>
             <DialogTitle>Für das ganze Kollegium sichtbar machen?</DialogTitle>
           </DialogHeader>
-          <p className="text-[14px] text-[var(--color-text-muted)]">
+          <p className="text-[14px] text-[var(--color-ink-500)]">
             Der Plan „{doc.meta.name}" wird damit öffentlich und für alle im Kollegium sichtbar.
           </p>
           <DialogFooter className="gap-2">
@@ -177,7 +177,7 @@ export function WpSyncControls() {
           <DialogHeader>
             <DialogTitle>Ältere Version laden?</DialogTitle>
           </DialogHeader>
-          <p className="text-[14px] text-[var(--color-text-muted)]">
+          <p className="text-[14px] text-[var(--color-ink-500)]">
             WordPress hat Version {pendingPull?.version}, aber hier ist bereits Version {pendingPull?.knownVersion} bekannt.
             Dein aktueller lokaler Stand wird überschrieben.
           </p>
@@ -196,10 +196,10 @@ export function WpSyncControls() {
           <DialogHeader>
             <DialogTitle>WordPress hat eine neuere Version</DialogTitle>
           </DialogHeader>
-          <p className="text-[14px] text-[var(--color-text-muted)]">
+          <p className="text-[14px] text-[var(--color-ink-500)]">
             Auf WordPress liegt bereits eine neuere Fassung (Version {conflict?.serverVersion}).
             {conflict?.authorName && (
-              <> Gespeichert von <strong className="font-semibold text-[var(--color-text-main)]">{conflict.authorName}</strong>
+              <> Gespeichert von <strong className="font-semibold text-[var(--color-ink-900)]">{conflict.authorName}</strong>
               {conflict.savedAt ? formatSavedAt(conflict.savedAt) : ''}.</>
             )}
             {' '}Was möchtest du tun?

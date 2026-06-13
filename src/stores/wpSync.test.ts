@@ -27,7 +27,7 @@ const baseConfig = {
 function setDocFn() { /* no-op */ }
 
 beforeEach(() => {
-  useWpSyncStore.setState({ config: baseConfig, syncState: 'idle', message: '', conflict: null });
+  useWpSyncStore.setState({ config: baseConfig, syncState: 'idle', message: '', conflict: null, pendingPull: null });
   useAuthStore.setState({ token: 'tok123', claims: null });
 });
 
@@ -45,6 +45,20 @@ describe('pull()', () => {
     const result = await useWpSyncStore.getState().pull('sy1', setDocFn);
     expect(result).toBe('not-found');
     expect(useWpSyncStore.getState().syncState).toBe('idle');
+  });
+
+  it('returns downgrade and sets pendingPull when WP version < knownVersion', async () => {
+    // baseConfig has knownVersion: 3; WP returns version 2
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wpDoc = { schoolyear: { id: 'sy1' }, events: [], categories: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'T', lastSaved: '' } } as any;
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: wpDoc, version: 2, stage: 'entwurf' });
+    const result = await useWpSyncStore.getState().pull('sy1', setDocFn);
+    expect(result).toBe('downgrade');
+    const state = useWpSyncStore.getState();
+    expect(state.pendingPull).not.toBeNull();
+    expect(state.pendingPull?.version).toBe(2);
+    expect(state.pendingPull?.knownVersion).toBe(3);
+    expect(state.syncState).toBe('idle');
   });
 
   it('returns error when no token', async () => {

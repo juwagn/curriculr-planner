@@ -9,19 +9,23 @@ import { useAuthStore } from '@/stores/auth';
 export type WpSyncState = 'idle' | 'sending' | 'synced' | 'conflict' | 'error';
 
 interface ConflictInfo { docId: UUID; serverVersion: number; serverDoc: PlannerDocument; authorName?: string; savedAt?: string; }
+interface PendingPull { docId: UUID; doc: PlannerDocument; version: number; stage: WpStage; knownVersion: number; }
 
 interface WpSyncStore {
   config: WpSyncConfig;
   syncState: WpSyncState;
   message: string;
   conflict: ConflictInfo | null;
+  pendingPull: PendingPull | null;
 
   setConfig(cfg: WpSyncConfig): void;
   linkFor(docId: UUID): WpPlanLink | undefined;
   send(doc: PlannerDocument, action?: StageAction): Promise<WpSyncState>;
   keepLocal(doc: PlannerDocument): Promise<WpSyncState>;
   clearConflict(): void;
-  pull(docId: UUID, setDocFn: (doc: PlannerDocument) => void): Promise<'pulled' | 'not-found' | 'error'>;
+  pull(docId: UUID, setDocFn: (doc: PlannerDocument) => void): Promise<'pulled' | 'not-found' | 'error' | 'downgrade'>;
+  confirmPull(setDocFn: (doc: PlannerDocument) => void): void;
+  cancelPull(): void;
 }
 
 export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
@@ -29,6 +33,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
   syncState: 'idle',
   message: '',
   conflict: null,
+  pendingPull: null,
 
   setConfig(cfg) { saveWpConfig(cfg); set({ config: cfg }); },
 
@@ -104,14 +109,33 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       set({ syncState: 'error', message: res.message ?? 'Ungültige Antwort vom Server.' });
       return 'error';
     }
-    const newLink: WpPlanLink = {
-      ...link,
-      knownVersion: res.version ?? link.knownVersion,
-      stage: res.stage ?? link.stage,
-    };
+    const wpVer = res.version ?? 0;
+    if (wpVer < link.knownVersion) {
+      set({
+        syncState: 'idle',
+        message: '',
+        pendingPull: { docId, doc: res.doc as PlannerDocument, version: wpVer, stage: res.stage ?? link.stage, knownVersion: link.knownVersion },
+      });
+      return 'downgrade';
+    }
+    const newLink: WpPlanLink = { ...link, knownVersion: wpVer, stage: res.stage ?? link.stage };
     get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
     setDocFn(res.doc);
     set({ syncState: 'synced', message: '✓ Stand von WordPress geladen', conflict: null });
     return 'pulled';
   },
+
+  confirmPull(setDocFn) {
+    const { pendingPull, config } = get();
+    if (!pendingPull) return;
+    const link = config.links[pendingPull.docId];
+    if (link) {
+      const newLink: WpPlanLink = { ...link, knownVersion: pendingPull.version, stage: pendingPull.stage };
+      get().setConfig({ ...config, links: { ...config.links, [pendingPull.docId]: newLink } });
+    }
+    setDocFn(pendingPull.doc);
+    set({ pendingPull: null, syncState: 'synced', message: '✓ Stand von WordPress geladen', conflict: null });
+  },
+
+  cancelPull() { set({ pendingPull: null, syncState: 'idle', message: '' }); },
 }));

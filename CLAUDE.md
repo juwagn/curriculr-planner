@@ -61,9 +61,10 @@ docs. Keys: `curriculr-planner:docs` (id list), `curriculr-planner:doc:<id>`,
 ### Domain logic (`src/lib/`)
 Pure, framework-agnostic, TDD'd:
 - `schoolweeks.ts` — derives `SchoolweekRange[]` and `WeekRow[]` (school weeks
-  vs ferien rows) from `Schoolyear`. Rule: ≥3 holiday days in a Mon-Fri block →
-  ferien row, not a numbered school week. `getQuarterRange` / `getQuarterForDate`
-  use `quarterBoundaries` (always length-3).
+  vs ferien rows) from `Schoolyear`. Rule: all 5 days holiday → ferien row; SW 00
+  (the week containing `firstSchoolDay`) is always a school week row even if it
+  falls entirely within Sommerferien (teacher preparation week). `getQuarterRange`
+  / `getQuarterForDate` use `quarterBoundaries` (always length-3).
 - `ics-export.ts`, `excel-export.ts` — output formats. Excel matches the legacy
   Konverter schema (sibling WordPress plugin consumes it).
 - `colors.ts` — category color helpers.
@@ -95,6 +96,14 @@ is coerced to `'table'` on load (`stores/ui.ts`).
 **v1.2 (Komfort):** Termin-Vorlagen (`TemplatesSidebar` drag/click-to-place +
 `TemplatesTab` management in Settings), Excel-Import, `YearGrid` year view, and
 Undo/Redo (`useUndoRedo` hook + toolbar; Ctrl+Z / Ctrl+Shift+Z).
+
+### Auth + Sync (M1–M6)
+- `stores/auth.ts` — Zustand store for IServ SSO session. Holds app-token in RAM only (never persisted). `AppTokenClaims` type in `src/lib/wp-auth.ts`.
+- `stores/wpSyncStore.ts` — push/pull/stage state. `pull()` returns `'error'` on non-404 failures (401/403). Conflict on push surfaces `ConflictInfo` (who saved, when).
+- `src/lib/wp-auth.ts` — `exchangeCodeForToken()` (code→app-token via WP `/auth/token`) + `isAppTokenClaims` type guard.
+- `src/lib/wp-sync.ts` — all WP REST calls send `Authorization: Bearer <app-token>`. `fetchLatestRevision()` polls for presence (60s interval via `usePresence` hook).
+- `vite.config.ts` — CSP meta tag injected at build time. Update if new external origins are added.
+- `src/components/settings/PrivacyTab.tsx` — Datenschutz + Vibecoding disclosure (legally required, do not remove).
 
 ### Path alias
 `@/*` → `src/*` (configured in `vite.config.ts`, `vitest.config.ts`,

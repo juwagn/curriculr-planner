@@ -8,7 +8,7 @@ import { storage } from '@/lib/storage';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import { exchangeToken } from '@/lib/wp-auth';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, loadSession } from '@/stores/auth';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { loadWpConfig } from '@/lib/wp-sync-config';
 import { createDemoDoc } from '@/lib/demo';
@@ -25,6 +25,10 @@ export default function App() {
 
   useEffect(() => {
     async function boot() {
+      // Restore token from sessionStorage (survives hard reload, cleared on tab close)
+      const session = loadSession();
+      if (session) useAuthStore.getState().setToken(session.token, session.claims);
+
       // Intercept SSO handoff: WP redirects back with #auth=<one-time-code> or #auth_error=<reason>
       const hash = window.location.hash;
       if (hash.startsWith('#auth_error=')) {

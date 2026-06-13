@@ -54,10 +54,11 @@ function showSyncToast(syncState: string, message: string, successMsg: string) {
 export function WpSyncControls() {
   const doc = usePlannerStore((s) => s.doc);
   const setDoc = usePlannerStore((s) => s.setDoc);
-  const { config, syncState, conflict, send, pull, keepLocal, clearConflict } = useWpSyncStore(
+  const { config, syncState, conflict, pendingPull, send, pull, keepLocal, clearConflict, confirmPull, cancelPull } = useWpSyncStore(
     useShallow((s) => ({ config: s.config, syncState: s.syncState,
-      conflict: s.conflict, send: s.send, pull: s.pull,
-      keepLocal: s.keepLocal, clearConflict: s.clearConflict }))
+      conflict: s.conflict, pendingPull: s.pendingPull, send: s.send, pull: s.pull,
+      keepLocal: s.keepLocal, clearConflict: s.clearConflict,
+      confirmPull: s.confirmPull, cancelPull: s.cancelPull }))
   );
 
   const [open, setOpen] = useState(false);
@@ -99,7 +100,8 @@ export function WpSyncControls() {
     const result = await pull(doc.schoolyear.id, setDoc);
     if (result === 'pulled') toast.success('Stand von WordPress geladen.');
     else if (result === 'error') toast.error(useWpSyncStore.getState().message || 'Laden fehlgeschlagen.');
-    else toast.info('Noch kein Plan auf WordPress vorhanden.');
+    else if (result === 'not-found') toast.info('Noch kein Plan auf WordPress vorhanden.');
+    // 'downgrade' → pendingPull dialog opens automatically
   }
 
   return (
@@ -164,6 +166,25 @@ export function WpSyncControls() {
             <Button variant="outline" onClick={() => setConfirmPublic(false)}>Abbrechen</Button>
             <Button onClick={() => { setConfirmPublic(false); void run('oeffentlich-schalten'); }}>
               Öffentlich schalten
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Downgrade-Warnung: WP hat ältere Version als zuletzt synchronisiert */}
+      <Dialog open={!!pendingPull} onOpenChange={(o) => { if (!o) cancelPull(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ältere Version laden?</DialogTitle>
+          </DialogHeader>
+          <p className="text-[14px] text-[var(--color-text-muted)]">
+            WordPress hat Version {pendingPull?.version}, aber hier ist bereits Version {pendingPull?.knownVersion} bekannt.
+            Dein aktueller lokaler Stand wird überschrieben.
+          </p>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => cancelPull()}>Abbrechen</Button>
+            <Button onClick={() => { confirmPull(setDoc); toast.success('Stand von WordPress geladen.'); }}>
+              Trotzdem laden
             </Button>
           </DialogFooter>
         </DialogContent>

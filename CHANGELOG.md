@@ -5,6 +5,16 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.8.0] – 2026-06-13 — „Design-Vereinheitlichung Phase 1"
+
+### Behoben
+- **Einstellungs-Modal** hat jetzt feste Höhe — kein Größensprung mehr beim Tab-Wechsel.
+
+### Geändert
+- **Design-Tokens aufgeräumt** — Legacy-Farb-Aliase entfernt (kanonische `marine`/`ink`/`paper` Tokens); Typo-Scale als CSS-Tokens (`--fs-*` / `--lh-*` / `--ls-*`) etabliert.
+
+---
+
 ## [1.7.0] – 2026-06-12 — „Mehrbenutzer & IServ-SSO"
 
 ### Hinzugefügt

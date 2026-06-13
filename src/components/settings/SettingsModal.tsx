@@ -74,7 +74,7 @@ export function SettingsModal() {
   return (
     <Dialog open onOpenChange={(o) => !o && close()}>
       <DialogContent
-        className="!max-w-[min(1060px,calc(100vw-2rem))] !w-[min(1060px,calc(100vw-2rem))] !p-0 max-h-[90vh] overflow-hidden flex flex-col"
+        className="!max-w-[min(1060px,calc(100vw-2rem))] !w-[min(1060px,calc(100vw-2rem))] !p-0 h-[min(680px,90vh)] max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Accessible hidden title */}
         <DialogTitle className="sr-only">Einstellungen</DialogTitle>

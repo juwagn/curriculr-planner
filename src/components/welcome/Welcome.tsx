@@ -100,7 +100,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour }: P
       <Card className="max-w-2xl w-full p-10 shadow-[var(--shadow-modal)] border-[var(--color-ink-200)]">
         <div className="text-center mb-8">
           <img src={`${import.meta.env.BASE_URL}curriculr-logo-dark.svg`} alt="Curriculr" className="h-12 mx-auto mb-3" onError={(e) => { e.currentTarget.src = `${import.meta.env.BASE_URL}curriculr-logo.svg`; }} />
-          <h1 className="text-[20px] font-bold leading-[1.2] tracking-[-0.01em] text-[var(--color-marine-800)]">Planner</h1>
+          <h1 className="text-[length:var(--fs-display)] font-bold leading-[var(--lh-display)] tracking-[var(--ls-display)] text-[var(--color-marine-800)]">Planner</h1>
           <p className="text-[13px] text-[var(--color-ink-500)] mt-2">
             Jahresterminplan für die Schulleitung
           </p>

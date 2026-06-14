@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { testConnection, pushDoc, fetchDoc, fetchLatestRevision } from './wp-sync';
+import { describe, it, expect, vi } from 'vitest';
+import { testConnection, pushDoc, fetchDoc, fetchLatestRevision, fetchDocList } from './wp-sync';
 import type { WpSyncConfig } from './wp-sync-config';
 
 const cfg: WpSyncConfig = { enabled: true, baseUrl: 'https://s.example/', links: {} };
@@ -138,5 +138,50 @@ describe('wp-sync client', () => {
       const f = (async () => { throw new Error('net'); }) as unknown as typeof fetch;
       expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBeNull();
     });
+  });
+});
+
+describe('fetchDocList', () => {
+  const cfg = { enabled: true, baseUrl: 'https://schule.example', links: {} };
+
+  it('parses a valid list response', async () => {
+    const body = [
+      { sj: 'sj_2026_27', name: 'Schuljahr 2026/27', stage: 'genehmigt', version: 12, updatedAt: '2026-06-12 09:00:00', authorName: 'M. Weber' },
+      { sj: 'sj_2025_26', name: 'Schuljahr 2025/26', stage: 'oeffentlich', version: 40, updatedAt: '2026-06-03 10:00:00', authorName: 'A. Klein' },
+    ];
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => body });
+    const res = await fetchDocList(cfg, 'tok', fetchImpl as unknown as typeof fetch);
+    expect(res.items).toHaveLength(2);
+    expect(res.items[0]).toMatchObject({ sj: 'sj_2026_27', name: 'Schuljahr 2026/27', stage: 'genehmigt', version: 12 });
+    expect(res.message).toBeUndefined();
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'https://schule.example/wp-json/curriculr/v1/docs',
+      expect.objectContaining({ headers: { Authorization: 'Bearer tok' } }),
+    );
+  });
+
+  it('returns BAD_TOKEN message on 401', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
+    const res = await fetchDocList(cfg, 'tok', fetchImpl as unknown as typeof fetch);
+    expect(res.items).toEqual([]);
+    expect(res.message).toMatch(/abgelaufen/);
+  });
+
+  it('drops malformed items and keeps valid ones', async () => {
+    const body = [
+      { sj: 'ok', name: 'A', stage: 'entwurf', version: 1, updatedAt: 't', authorName: '' },
+      { sj: 123, name: 'B' }, // malformed
+    ];
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => body });
+    const res = await fetchDocList(cfg, 'tok', fetchImpl as unknown as typeof fetch);
+    expect(res.items).toHaveLength(1);
+    expect(res.items[0].sj).toBe('ok');
+  });
+
+  it('returns NOT_REACHABLE message on network error', async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new Error('boom'));
+    const res = await fetchDocList(cfg, 'tok', fetchImpl as unknown as typeof fetch);
+    expect(res.items).toEqual([]);
+    expect(res.message).toMatch(/nicht erreichbar/);
   });
 });

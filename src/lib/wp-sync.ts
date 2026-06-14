@@ -119,6 +119,54 @@ export async function fetchDoc(
   }
 }
 
+const STAGES = new Set<WpStage>(['entwurf', 'genehmigt', 'oeffentlich']);
+
+export interface DocListItem {
+  sj: string;
+  name: string;
+  stage: WpStage;
+  version: number;
+  updatedAt: string;
+  authorName: string;
+}
+
+function parseDocListItem(v: unknown): DocListItem | null {
+  if (!v || typeof v !== 'object') return null;
+  const o = v as Record<string, unknown>;
+  if (typeof o.sj !== 'string' || typeof o.name !== 'string') return null;
+  const stage = typeof o.stage === 'string' && STAGES.has(o.stage as WpStage)
+    ? (o.stage as WpStage) : 'entwurf';
+  return {
+    sj: o.sj,
+    name: o.name,
+    stage,
+    version: typeof o.version === 'number' ? o.version : 0,
+    updatedAt: typeof o.updatedAt === 'string' ? o.updatedAt : '',
+    authorName: typeof o.authorName === 'string' ? o.authorName : '',
+  };
+}
+
+export async function fetchDocList(
+  cfg: WpSyncConfig,
+  token: string,
+  fetchImpl: FetchLike = fetch,
+): Promise<{ items: DocListItem[]; message?: string }> {
+  try {
+    const res = await fetchImpl(`${base(cfg)}/docs`, {
+      headers: { Authorization: bearerHeader(token) },
+    });
+    if (res.status === 401 || res.status === 403) return { items: [], message: BAD_TOKEN };
+    if (!res.ok) return { items: [], message: `Server antwortete mit ${res.status}.` };
+    const data = await res.json();
+    if (!Array.isArray(data)) return { items: [], message: 'Ungültige Antwort vom Server.' };
+    const items = data.map(parseDocListItem).filter((x): x is DocListItem => x !== null);
+    return { items };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : NOT_REACHABLE;
+    return { items: [], message: msg === BAD_URL ? msg : NOT_REACHABLE };
+  }
+}
+
 export async function fetchLatestRevision(
   cfg: WpSyncConfig,
   schoolyearKey: string,

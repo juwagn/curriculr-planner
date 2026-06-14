@@ -18,6 +18,23 @@ import type { PlannerDocument } from '@/types';
 
 type Source = 'local' | 'wordpress' | 'new';
 
+interface TabProps { id: Source; label: string; source: Source; onSelect: (id: Source) => void; }
+
+function WelcomeTab({ id, label, source, onSelect }: TabProps) {
+  return (
+    <button
+      onClick={() => onSelect(id)}
+      className={`flex-1 text-[13px] font-bold py-2 px-2 rounded-[8px] transition ${
+        source === id
+          ? 'bg-white text-[var(--color-marine-800)] shadow-[0_2px_8px_rgba(0,52,92,.12)]'
+          : 'text-[var(--color-ink-500)]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 interface Props {
   onCreateNew(): void;
   onOpenDoc(id: string): void;
@@ -53,13 +70,22 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
 
   useEffect(() => {
     if (source !== 'wordpress' || !authed || !token) return;
-    setWpLoading(true);
-    setWpMsg(null);
-    fetchDocList(config, token).then(({ items, message }) => {
-      setWpItems(items);
-      setWpMsg(message ?? (items.length === 0 ? 'Keine Pläne auf WordPress.' : null));
-      setWpLoading(false);
-    });
+    const ac = new AbortController();
+    Promise.resolve()
+      .then(() => {
+        if (ac.signal.aborted) return;
+        setWpLoading(true);
+        setWpMsg(null);
+        return fetchDocList(config, token);
+      })
+      .then((result) => {
+        if (!result || ac.signal.aborted) return;
+        const { items, message } = result;
+        setWpItems(items);
+        setWpMsg(message ?? (items.length === 0 ? 'Keine Pläne auf WordPress.' : null));
+        setWpLoading(false);
+      });
+    return () => { ac.abort(); };
   }, [source, authed, token, config]);
 
   const handleLogin = () => {
@@ -103,19 +129,6 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
     return doc;
   };
 
-  const Tab = ({ id, label }: { id: Source; label: string }) => (
-    <button
-      onClick={() => setSource(id)}
-      className={`flex-1 text-[13px] font-bold py-2 px-2 rounded-[8px] transition ${
-        source === id
-          ? 'bg-white text-[var(--color-marine-800)] shadow-[0_2px_8px_rgba(0,52,92,.12)]'
-          : 'text-[var(--color-ink-500)]'
-      }`}
-    >
-      {label}
-    </button>
-  );
-
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-6">
       <Card
@@ -145,9 +158,9 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
               className="flex gap-1.5 p-1.5 rounded-[12px] mb-4"
               style={{ background: 'var(--color-paper-bg)' }}
             >
-              <Tab id="local" label="Dieses Gerät" />
-              <Tab id="wordpress" label="WordPress" />
-              <Tab id="new" label="Neu" />
+              <WelcomeTab id="local" label="Dieses Gerät" source={source} onSelect={setSource} />
+              <WelcomeTab id="wordpress" label="WordPress" source={source} onSelect={setSource} />
+              <WelcomeTab id="new" label="Neu" source={source} onSelect={setSource} />
             </div>
 
             {source === 'local' && (

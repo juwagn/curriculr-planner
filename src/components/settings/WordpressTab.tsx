@@ -3,6 +3,7 @@ import { useWpSyncStore } from '@/stores/wpSync';
 import { usePlannerStore } from '@/stores/planner';
 import { useAuthStore } from '@/stores/auth';
 import { testConnection } from '@/lib/wp-sync';
+import { startIservLogin, iservLogout } from '@/lib/wp-auth-actions';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
 import type { WpPlanLink } from '@/lib/wp-sync-config';
 import { Button } from '@/components/ui/button';
@@ -25,20 +26,13 @@ export function WordpressTab() {
 
   function handleLogin() {
     if (!config.enabled || !config.baseUrl) return;
-    const base = config.baseUrl.replace(/\/+$/, '');
-    window.location.href = `${base}/wp-json/curriculr/v1/auth/login`;
+    startIservLogin(config.baseUrl);
   }
 
   function handleLogout() {
     const currentToken = token;
     logout();
-    if (config.baseUrl && currentToken) {
-      const base = config.baseUrl.replace(/\/+$/, '');
-      fetch(`${base}/wp-json/curriculr/v1/auth/logout`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${currentToken}` },
-      }).catch(() => {});
-    }
+    if (config.baseUrl && currentToken) void iservLogout(config.baseUrl, currentToken);
   }
 
   async function onTest() {

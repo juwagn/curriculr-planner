@@ -5,6 +5,7 @@ import { nextStage } from '@/lib/wp-stage';
 import { loadWpConfig, saveWpConfig, type WpSyncConfig, type WpPlanLink } from '@/lib/wp-sync-config';
 import { pushDoc, fetchDoc, type PushResult } from '@/lib/wp-sync';
 import { useAuthStore } from '@/stores/auth';
+import { storage } from '@/lib/storage';
 
 export type WpSyncState = 'idle' | 'sending' | 'synced' | 'conflict' | 'error';
 
@@ -26,6 +27,7 @@ interface WpSyncStore {
   pull(docId: UUID, setDocFn: (doc: PlannerDocument) => void): Promise<'pulled' | 'not-found' | 'error' | 'downgrade'>;
   confirmPull(setDocFn: (doc: PlannerDocument) => void): void;
   cancelPull(): void;
+  loadFromWp(sj: string, name: string, setDocFn: (doc: PlannerDocument) => void): Promise<'loaded' | 'error'>;
 }
 
 export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
@@ -138,4 +140,35 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
   },
 
   cancelPull() { set({ pendingPull: null, syncState: 'idle', message: '' }); },
+
+  async loadFromWp(sj, name, setDocFn) {
+    const { config } = get();
+    const token = useAuthStore.getState().token;
+    if (!token) {
+      set({ syncState: 'error', message: 'Nicht angemeldet — bitte mit IServ anmelden.' });
+      return 'error';
+    }
+    set({ syncState: 'sending', message: `Lade „${name}" von WordPress…` });
+    const res = await fetchDoc(config, sj, token);
+    if (!res.exists || !res.doc) {
+      set({ syncState: 'error', message: res.message ?? 'Plan nicht auf WordPress gefunden.' });
+      return 'error';
+    }
+    const doc = res.doc as PlannerDocument;
+    const docId = doc.schoolyear.id;
+    const version = res.version ?? 0;
+    const stage = res.stage ?? 'entwurf';
+    await storage.saveDoc(doc);
+    await storage.setActiveDoc(docId);
+    const link: WpPlanLink = {
+      schoolyearKey: sj,
+      wpProfileId: config.links[docId]?.wpProfileId ?? '',
+      stage,
+      knownVersion: version,
+    };
+    get().setConfig({ ...config, enabled: true, links: { ...config.links, [docId]: link } });
+    setDocFn(doc);
+    set({ syncState: 'synced', message: '✓ Von WordPress geladen', conflict: null });
+    return 'loaded';
+  },
 }));

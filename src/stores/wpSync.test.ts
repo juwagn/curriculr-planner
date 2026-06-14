@@ -12,7 +12,12 @@ vi.mock('@/lib/wp-sync-config', () => ({
   saveWpConfig: vi.fn(),
 }));
 
+vi.mock('@/lib/storage', () => ({
+  storage: { saveDoc: vi.fn(), setActiveDoc: vi.fn() },
+}));
+
 import { fetchDoc, pushDoc } from '@/lib/wp-sync';
+import { storage } from '@/lib/storage';
 const mockFetchDoc = vi.mocked(fetchDoc);
 const mockPushDoc = vi.mocked(pushDoc);
 
@@ -93,5 +98,41 @@ describe('send()', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await useWpSyncStore.getState().send({ schoolyear: { id: 'sy1' } } as any);
     expect(useWpSyncStore.getState().conflict?.authorName).toBeUndefined();
+  });
+});
+
+describe('loadFromWp()', () => {
+  const wpDoc = {
+    schoolyear: { id: 'sy-load', label: '2026/27', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15', holidays: [], quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [],
+    meta: { name: 'Schuljahr 2026/27', lastSaved: '2026-01-01T00:00:00Z' },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
+
+  it('saves locally, creates a link, sets active, and returns loaded', async () => {
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: wpDoc, version: 7, stage: 'genehmigt' });
+    let received: unknown = null;
+    const result = await useWpSyncStore.getState().loadFromWp('sj_2026_27', 'Schuljahr 2026/27', (d) => { received = d; });
+
+    expect(result).toBe('loaded');
+    expect(storage.saveDoc).toHaveBeenCalledWith(wpDoc);
+    expect(storage.setActiveDoc).toHaveBeenCalledWith('sy-load');
+    expect(received).toBe(wpDoc);
+    const link = useWpSyncStore.getState().config.links['sy-load'];
+    expect(link).toMatchObject({ schoolyearKey: 'sj_2026_27', stage: 'genehmigt', knownVersion: 7 });
+    expect(useWpSyncStore.getState().syncState).toBe('synced');
+  });
+
+  it('returns error when not authenticated', async () => {
+    useAuthStore.setState({ token: null, claims: null });
+    const result = await useWpSyncStore.getState().loadFromWp('sj_2026_27', 'X', () => {});
+    expect(result).toBe('error');
+  });
+
+  it('returns error when the doc is not found on WP', async () => {
+    mockFetchDoc.mockResolvedValueOnce({ exists: false });
+    const result = await useWpSyncStore.getState().loadFromWp('sj_2026_27', 'X', () => {});
+    expect(result).toBe('error');
+    expect(useWpSyncStore.getState().syncState).toBe('error');
   });
 });

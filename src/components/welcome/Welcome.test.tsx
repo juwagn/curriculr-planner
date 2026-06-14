@@ -1,82 +1,82 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Welcome } from './Welcome';
 
-beforeEach(() => localStorage.clear());
+vi.mock('@/lib/storage', () => ({
+  storage: {
+    listDocs: vi.fn().mockResolvedValue([
+      { id: 'sy1', name: 'Mein Plan', schoolyearLabel: '2026/27', eventCount: 12, lastSaved: '2026-06-12T09:00:00Z' },
+    ]),
+  },
+}));
+
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: vi.fn((selector) => selector({ status: 'unauthenticated', claims: null, token: null, logout: vi.fn() })),
+}));
+
+vi.mock('@/stores/wpSync', () => ({
+  useWpSyncStore: vi.fn((selector) => selector({
+    config: { enabled: false, baseUrl: '', links: {} },
+    syncState: 'idle',
+    message: '',
+    setConfig: vi.fn(),
+    loadFromWp: vi.fn().mockResolvedValue('loaded'),
+  })),
+}));
+
+vi.mock('@/stores/planner', () => ({
+  usePlannerStore: vi.fn((selector) => selector({ setDoc: vi.fn() })),
+  createEmptyDoc: vi.fn(() => ({ categories: [{ id: 'c1', slug: 'sondertag', name: 'Sondertag', color: '#000', isDefault: false }] })),
+}));
+
+vi.mock('@/lib/wp-sync', () => ({
+  fetchDocList: vi.fn().mockResolvedValue({ items: [] }),
+}));
+
+vi.mock('@/lib/wp-auth-actions', () => ({
+  startIservLogin: vi.fn(),
+  iservLogout: vi.fn(),
+}));
+
+const noop = () => {};
+function renderWelcome(over: Record<string, unknown> = {}) {
+  return render(
+    <Welcome onCreateNew={noop} onOpenDoc={noop} onImportJson={noop} onStartTour={noop} onEnterEditor={noop} {...over} />,
+  );
+}
+
+beforeEach(() => vi.clearAllMocks());
 
 describe('Welcome', () => {
-  it('shows "Neuen Jahresplan erstellen" button', async () => {
-    render(<Welcome onCreateNew={() => {}} onOpenDoc={() => {}} onImportJson={() => {}} onStartTour={() => {}} />);
-    expect(await screen.findByRole('button', { name: /Neuen Jahresplan/i })).toBeInTheDocument();
+  it('shows the three source buttons', () => {
+    renderWelcome();
+    expect(screen.getByRole('button', { name: /Dieses Gerät/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /WordPress/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Neu/i })).toBeInTheDocument();
   });
 
-  it('shows JSON-Backup-Button', async () => {
-    render(<Welcome onCreateNew={() => {}} onOpenDoc={() => {}} onImportJson={() => {}} onStartTour={() => {}} />);
-    expect(await screen.findByRole('button', { name: /JSON-Backup laden/i })).toBeInTheDocument();
+  it('local source lists saved plans and opens one', async () => {
+    const onOpenDoc = vi.fn();
+    renderWelcome({ onOpenDoc });
+    await waitFor(() => expect(screen.getByText('Mein Plan')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /öffnen/i }));
+    expect(onOpenDoc).toHaveBeenCalledWith('sy1');
   });
 
-  it('fires onCreateNew on click', async () => {
+  it('"Neu" source exposes create / ICS / demo / tour and NO Excel', () => {
     const onCreateNew = vi.fn();
-    render(<Welcome onCreateNew={onCreateNew} onOpenDoc={() => {}} onImportJson={() => {}} onStartTour={() => {}} />);
-    await userEvent.click(await screen.findByRole('button', { name: /Neuen Jahresplan/i }));
+    renderWelcome({ onCreateNew });
+    fireEvent.click(screen.getByRole('button', { name: /^Neu$/i }));
+    expect(screen.getByRole('button', { name: /Neuen Jahresplan/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /ICS/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Excel/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Neuen Jahresplan/i }));
     expect(onCreateNew).toHaveBeenCalled();
   });
 
-  it('renders Tour starten button', async () => {
-    render(
-      <Welcome
-        onCreateNew={() => {}}
-        onOpenDoc={() => {}}
-        onImportJson={() => {}}
-        onStartTour={() => {}}
-      />
-    );
-    expect(await screen.findByRole('button', { name: /Tour starten/i })).toBeInTheDocument();
-  });
-
-  it('calls onStartTour when Tour starten is clicked', async () => {
-    const onStartTour = vi.fn();
-    render(
-      <Welcome
-        onCreateNew={() => {}}
-        onOpenDoc={() => {}}
-        onImportJson={() => {}}
-        onStartTour={onStartTour}
-      />
-    );
-    await userEvent.click(await screen.findByRole('button', { name: /Tour starten/i }));
-    expect(onStartTour).toHaveBeenCalledOnce();
-  });
-
-  it('lists existing docs from storage', async () => {
-    localStorage.setItem('curriculr-planner:docs', JSON.stringify(['doc1']));
-    localStorage.setItem(
-      'curriculr-planner:doc:doc1',
-      JSON.stringify({
-        version: 2,
-        schoolyear: {
-          id: 'doc1',
-          label: '2026/27',
-          firstSchoolDay: '2026-08-24',
-          firstTeachingDay: '2026-08-31',
-          lastSchoolDay: '2027-07-16',
-          holidays: [],
-          quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-09'],
-          createdAt: '',
-          updatedAt: ''
-        },
-        categories: [],
-        events: [],
-        annotations: [],
-        availableGroups: [],
-        ignoredConflicts: [],
-        meta: { name: 'Jahresplan 2026/27', lastSaved: '2026-05-26T10:00:00Z' }
-      })
-    );
-    render(<Welcome onCreateNew={() => {}} onOpenDoc={() => {}} onImportJson={() => {}} onStartTour={() => {}} />);
-    await waitFor(() => {
-      expect(screen.getByText(/Jahresplan 2026\/27/i)).toBeInTheDocument();
-    });
+  it('WordPress source while logged out prompts to log in', () => {
+    renderWelcome();
+    fireEvent.click(screen.getByRole('button', { name: /WordPress/i }));
+    expect(screen.getByText(/anmelden/i)).toBeInTheDocument();
   });
 });

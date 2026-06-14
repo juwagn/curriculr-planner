@@ -112,6 +112,7 @@ export default function App() {
           onOpenDoc={openDoc}
           onImportJson={importDoc}
           onStartTour={startTour}
+          onEnterEditor={() => setRoute('editor')}
         />
       )}
       {route === 'wizard' && (

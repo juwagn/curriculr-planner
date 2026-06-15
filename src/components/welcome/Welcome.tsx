@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Play } from 'lucide-react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { Play, HardDrive, Globe, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
@@ -18,9 +18,9 @@ import type { PlannerDocument } from '@/types';
 
 type Source = 'local' | 'wordpress' | 'new';
 
-interface TabProps { id: Source; label: string; source: Source; onSelect: (id: Source) => void; }
+interface TabProps { id: Source; label: string; icon: ReactNode; source: Source; onSelect: (id: Source) => void; }
 
-function WelcomeTab({ id, label, source, onSelect }: TabProps) {
+function WelcomeTab({ id, label, icon, source, onSelect }: TabProps) {
   return (
     <button
       onClick={() => onSelect(id)}
@@ -30,7 +30,10 @@ function WelcomeTab({ id, label, source, onSelect }: TabProps) {
           : 'text-[var(--color-ink-500)]'
       }`}
     >
-      {label}
+      <span className="flex items-center justify-center gap-1.5">
+        {icon}
+        {label}
+      </span>
     </button>
   );
 }
@@ -158,9 +161,9 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
               className="flex gap-1.5 p-1.5 rounded-[12px] mb-4"
               style={{ background: 'var(--color-paper-bg)' }}
             >
-              <WelcomeTab id="local" label="Dieses Gerät" source={source} onSelect={setSource} />
-              <WelcomeTab id="wordpress" label="WordPress" source={source} onSelect={setSource} />
-              <WelcomeTab id="new" label="Neu" source={source} onSelect={setSource} />
+              <WelcomeTab id="local" label="Dieses Gerät" icon={<HardDrive className="w-3.5 h-3.5" />} source={source} onSelect={setSource} />
+              <WelcomeTab id="wordpress" label="WordPress" icon={<Globe className="w-3.5 h-3.5" />} source={source} onSelect={setSource} />
+              <WelcomeTab id="new" label="Neu" icon={<Plus className="w-3.5 h-3.5" />} source={source} onSelect={setSource} />
             </div>
 
             {source === 'local' && (

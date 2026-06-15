@@ -16,18 +16,11 @@ function initials(name: string): string {
 }
 
 export function BrandPanel({ authed, userName, groups, baseUrl, onBaseUrlChange, onLogin, onLogout }: Props) {
+  const logoSrc = `${import.meta.env.BASE_URL}curriculr-logo.svg`;
   return (
     <div className="flex flex-col p-7 text-white" style={{ background: 'linear-gradient(160deg, var(--color-marine-800) 0%, #012740 100%)' }}>
-      <div
-        className="font-extrabold text-2xl flex items-center justify-center"
-        style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--color-gelb-500)', color: 'var(--color-marine-800)' }}
-      >
-        C
-      </div>
-      <div className="text-[23px] font-extrabold tracking-[-0.4px] mt-4">
-        Curri<span style={{ color: 'var(--color-gelb-500)' }}>culr</span>
-      </div>
-      <p className="text-[13px] mt-2 leading-[1.55]" style={{ color: 'rgba(255,255,255,0.65)' }}>
+      <img src={logoSrc} alt="Curriculr" style={{ width: 180, height: 'auto', display: 'block' }} />
+      <p className="text-[13px] mt-3 leading-[1.55]" style={{ color: 'rgba(255,255,255,0.65)' }}>
         Jahresterminplan für Ihre Schule
       </p>
 
@@ -59,15 +52,13 @@ export function BrandPanel({ authed, userName, groups, baseUrl, onBaseUrlChange,
         ) : (
           <div className="space-y-2">
             <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.65)' }}>Nicht angemeldet</div>
-            {!baseUrl && (
-              <Input
-                value={baseUrl}
-                placeholder="WP-Adresse deiner Schule (https://…)"
-                onChange={(e) => onBaseUrlChange(e.target.value)}
-                className="text-white placeholder:text-white/50"
-                style={{ background: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.25)' }}
-              />
-            )}
+            <Input
+              value={baseUrl}
+              placeholder="WP-Adresse deiner Schule (https://…)"
+              onChange={(e) => onBaseUrlChange(e.target.value)}
+              className="text-white placeholder:text-white/50"
+              style={{ background: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.25)' }}
+            />
             <Button
               onClick={onLogin}
               disabled={!baseUrl}

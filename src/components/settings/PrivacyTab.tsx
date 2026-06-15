@@ -18,9 +18,12 @@ export function PrivacyTab() {
           Anzeigename und freigegebene Gruppen — sowie die Plandaten des Schuljahres.
         </p>
         <p>
-          Das App-Token wird ausschließlich im Arbeitsspeicher des Browsers gehalten
-          (nicht in <code className="text-[12px] font-mono bg-[var(--color-paper-bg)] px-1 rounded">localStorage</code>{' '}
-          oder Cookies). IServ-Tokens werden nicht dauerhaft gespeichert.
+          Das App-Token wird im{' '}
+          <code className="text-[12px] font-mono bg-[var(--color-paper-bg)] px-1 rounded">sessionStorage</code>{' '}
+          des Browsers gespeichert — nicht in{' '}
+          <code className="text-[12px] font-mono bg-[var(--color-paper-bg)] px-1 rounded">localStorage</code>{' '}
+          oder Cookies. Es wird beim Schließen des Browser-Tabs automatisch gelöscht.
+          IServ-Zugangsdaten werden nicht gespeichert.
         </p>
       </div>
 

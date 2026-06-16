@@ -64,8 +64,8 @@ export function EventModal() {
         title: '',
         start: presetDate,
         end: presetDate,
-        startTime: '08:00',
-        endTime: '09:00',
+        startTime: undefined,
+        endTime: undefined,
         allDay: true,
         categoryId: doc.categories[0]?.id ?? '',
         notes: '',
@@ -154,7 +154,22 @@ export function EventModal() {
           </div>
 
           <label className="flex items-center gap-2 text-[13px] text-[var(--color-ink-900)] cursor-pointer">
-            <Checkbox checked={form.allDay} onCheckedChange={(v) => update('allDay', v === true)} />
+            <Checkbox
+              checked={form.allDay}
+              onCheckedChange={(v) => {
+                const allDay = v === true;
+                setForm((f) =>
+                  f
+                    ? {
+                        ...f,
+                        allDay,
+                        startTime: allDay ? undefined : f.startTime ?? '08:00',
+                        endTime: allDay ? undefined : f.endTime ?? '09:00'
+                      }
+                    : f
+                );
+              }}
+            />
             Ganztägig
           </label>
 

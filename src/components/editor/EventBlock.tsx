@@ -44,11 +44,13 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
 
   const baseBg = hexToRgba(category.color, 0.25);
   const bg = pastelize(category.color);
-  const timeLabel = event.startTime
-    ? event.endTime
-      ? `${fmtTime(event.startTime)}-${fmtTime(event.endTime)}`
-      : fmtTime(event.startTime)
-    : '';
+  const timeLabel = event.allDay
+    ? ''
+    : event.startTime
+      ? event.endTime
+        ? `${fmtTime(event.startTime)}-${fmtTime(event.endTime)}`
+        : fmtTime(event.startTime)
+      : '';
 
   return (
     <button

@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { usePlannerStore } from '@/stores/planner';
 import { useAuthStore } from '@/stores/auth';
-import { testConnection } from '@/lib/wp-sync';
+import { testConnection, postProfileMap } from '@/lib/wp-sync';
 import { startIservLogin, iservLogout } from '@/lib/wp-auth-actions';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
-import type { WpPlanLink } from '@/lib/wp-sync-config';
+import type { WpPlanLink, CalendarMapping } from '@/lib/wp-sync-config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ export function WordpressTab() {
   const token = useAuthStore((s) => s.token);
   const logout = useAuthStore((s) => s.logout);
   const [testState, setTestState] = useState({ msg: '', busy: false });
+  const [pmStatus, setPmStatus] = useState<'idle' | 'sending' | 'ok' | 'error'>('idle');
 
   const docId = doc?.schoolyear.id;
   const link = docId ? config.links[docId] : undefined;
@@ -46,6 +47,31 @@ export function WordpressTab() {
     if (!docId) return;
     const base: WpPlanLink = link ?? { schoolyearKey: '', wpProfileId: '', stage: 'entwurf', knownVersion: 0 };
     setConfig({ ...config, links: { ...config.links, [docId]: { ...base, ...patch } } });
+  }
+
+  const calMappings: CalendarMapping[] = link?.calendarMappings ?? [];
+
+  function addCalMapping() {
+    patchLink({ calendarMappings: [...calMappings, { group: null, profileId: '' }] });
+  }
+
+  function removeCalMapping(i: number) {
+    patchLink({ calendarMappings: calMappings.filter((_, idx) => idx !== i) });
+  }
+
+  function updateCalMapping(i: number, patch: Partial<CalendarMapping>) {
+    patchLink({ calendarMappings: calMappings.map((m, idx) => idx === i ? { ...m, ...patch } : m) });
+  }
+
+  async function onSendProfileMap() {
+    if (!token || !docId || !link) return;
+    const mappings = [
+      { group: null, profileId: link.wpProfileId },
+      ...calMappings,
+    ].filter(m => Boolean(m.profileId));
+    setPmStatus('sending');
+    const result = await postProfileMap(config, token, link.schoolyearKey, mappings);
+    setPmStatus(result);
   }
 
   return (
@@ -148,6 +174,51 @@ export function WordpressTab() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {doc && link && config.enabled && (
+        <div className="space-y-3 border-t pt-4">
+          <p className="text-[13px] font-semibold">Gruppen-Kalender</p>
+          <div className="rounded-md bg-[var(--color-marine-50,#f0f5fa)] border border-[var(--color-marine-200,#c8d8e8)] p-3 space-y-1">
+            <p className="text-[12px] text-[var(--color-ink-600)]">
+              Der Haupt-Feed (oben) enthält alle Termine. Zusätzlich kannst du separate Feeds je Gruppe einrichten — z.B. einen Feed nur für Schulleitung-Termine.
+            </p>
+            <p className="text-[12px] text-[var(--color-ink-600)]">
+              Termine <strong>ohne Gruppe</strong> erscheinen in allen Gruppen-Feeds.
+            </p>
+          </div>
+          {calMappings.map((m, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <select
+                className="border border-input rounded-md px-2 py-1 text-[13px] bg-background"
+                value={m.group ?? ''}
+                onChange={(e) => updateCalMapping(i, { group: e.target.value || null })}
+              >
+                <option value="">Gruppe wählen…</option>
+                {doc.availableGroups.map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+              <Input
+                className="flex-1"
+                value={m.profileId}
+                placeholder="WP-Profil-ID"
+                onChange={(e) => updateCalMapping(i, { profileId: e.target.value })}
+              />
+              <Button variant="ghost" size="sm" onClick={() => removeCalMapping(i)}>×</Button>
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addCalMapping}>
+            + Gruppe hinzufügen
+          </Button>
+          <div className="flex items-center gap-3 pt-1">
+            <Button onClick={onSendProfileMap} disabled={pmStatus === 'sending'}>
+              {pmStatus === 'sending' ? 'Sende…' : 'Konfiguration senden'}
+            </Button>
+            {pmStatus === 'ok'    && <p className="text-[12px] text-green-700">✓ Gespeichert</p>}
+            {pmStatus === 'error' && <p className="text-[12px] text-red-600">Fehler beim Senden</p>}
+          </div>
         </div>
       )}
     </div>

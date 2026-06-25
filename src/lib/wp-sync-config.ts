@@ -5,12 +5,18 @@ const KEY = 'curriculr-planner:wp-sync';
 
 const VALID_STAGES = new Set<string>(['entwurf', 'genehmigt', 'oeffentlich']);
 
+export interface CalendarMapping {
+  group: string | null;
+  profileId: string;
+}
+
 export interface WpPlanLink {
   schoolyearKey: string;
   wpProfileId: string;
   stage: WpStage;
   knownVersion: number;
   feedUrl?: string;
+  calendarMappings?: CalendarMapping[];
 }
 
 export interface WpSyncConfig {
@@ -23,17 +29,33 @@ export const EMPTY_CONFIG: WpSyncConfig = {
   enabled: false, baseUrl: '', links: {},
 };
 
+function parseCalendarMappings(raw: unknown): CalendarMapping[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const parsed = raw
+    .filter((m): m is Record<string, unknown> => m !== null && typeof m === 'object')
+    .map((m): CalendarMapping | null => {
+      const pid = typeof m.profileId === 'string' ? m.profileId : '';
+      if (!pid) return null;
+      const group = typeof m.group === 'string' ? m.group : null;
+      return { profileId: pid, group };
+    })
+    .filter((m): m is CalendarMapping => m !== null);
+  return parsed.length > 0 ? parsed : undefined;
+}
+
 function parseLink(v: unknown): WpPlanLink | null {
   if (!v || typeof v !== 'object') return null;
   const l = v as Record<string, unknown>;
   const stage = typeof l.stage === 'string' && VALID_STAGES.has(l.stage) ? (l.stage as WpStage) : 'entwurf';
   const feedUrl = typeof l.feedUrl === 'string' && /^https:\/\//i.test(l.feedUrl) ? l.feedUrl : undefined;
+  const calendarMappings = parseCalendarMappings(l.calendarMappings);
   return {
     schoolyearKey: typeof l.schoolyearKey === 'string' ? l.schoolyearKey : '',
     wpProfileId:   typeof l.wpProfileId   === 'string' ? l.wpProfileId   : '',
     stage,
     knownVersion:  typeof l.knownVersion  === 'number' ? l.knownVersion  : 0,
-    ...(feedUrl ? { feedUrl } : {}),
+    ...(feedUrl          ? { feedUrl }          : {}),
+    ...(calendarMappings ? { calendarMappings } : {}),
   };
 }
 

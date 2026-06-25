@@ -1,7 +1,7 @@
 import { PlannerDocumentSchema, migrate } from '@/lib/schemas';
 import type { PlannerDocument } from '@/types';
 import type { WpStage } from './wp-stage';
-import type { WpSyncConfig } from './wp-sync-config';
+import type { WpSyncConfig, CalendarMapping } from './wp-sync-config';
 
 export type FetchLike = typeof fetch;
 
@@ -190,5 +190,24 @@ export async function fetchLatestRevision(
     };
   } catch {
     return null;
+  }
+}
+
+export async function postProfileMap(
+  cfg: WpSyncConfig,
+  token: string,
+  sj: string,
+  mappings: CalendarMapping[],
+  fetchImpl: FetchLike = fetch,
+): Promise<'ok' | 'error'> {
+  try {
+    const res = await fetchImpl(`${base(cfg)}/profile-map`, {
+      method: 'POST',
+      headers: { Authorization: bearerHeader(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sj, mappings }),
+    });
+    return res.ok ? 'ok' : 'error';
+  } catch {
+    return 'error';
   }
 }

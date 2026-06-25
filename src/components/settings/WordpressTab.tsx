@@ -180,11 +180,11 @@ export function WordpressTab() {
       {doc && link && config.enabled && (
         <div className="space-y-3 border-t pt-4">
           <p className="text-[13px] font-semibold">Gruppen-Kalender</p>
-          <div className="rounded-md bg-[var(--color-marine-50,#f0f5fa)] border border-[var(--color-marine-200,#c8d8e8)] p-3 space-y-1">
-            <p className="text-[12px] text-[var(--color-ink-600)]">
+          <div className="rounded-md bg-[var(--color-marine-100)] border border-[var(--color-marine-500)] p-3 space-y-1">
+            <p className="text-[12px] text-[var(--color-ink-500)]">
               Der Haupt-Feed (oben) enthält alle Termine. Zusätzlich kannst du separate Feeds je Gruppe einrichten — z.B. einen Feed nur für Schulleitung-Termine.
             </p>
-            <p className="text-[12px] text-[var(--color-ink-600)]">
+            <p className="text-[12px] text-[var(--color-ink-500)]">
               Termine <strong>ohne Gruppe</strong> erscheinen in allen Gruppen-Feeds.
             </p>
           </div>
@@ -216,8 +216,8 @@ export function WordpressTab() {
             <Button onClick={onSendProfileMap} disabled={pmStatus === 'sending'}>
               {pmStatus === 'sending' ? 'Sende…' : 'Konfiguration senden'}
             </Button>
-            {pmStatus === 'ok'    && <p className="text-[12px] text-green-700">✓ Gespeichert</p>}
-            {pmStatus === 'error' && <p className="text-[12px] text-red-600">Fehler beim Senden</p>}
+            {pmStatus === 'ok'    && <p className="text-[12px] text-[var(--color-status-green)]">✓ Gespeichert</p>}
+            {pmStatus === 'error' && <p className="text-[12px] text-[var(--color-status-red)]">Fehler beim Senden</p>}
           </div>
         </div>
       )}

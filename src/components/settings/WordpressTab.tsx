@@ -175,7 +175,7 @@ export function WordpressTab() {
       )}
 
       {/* Gruppen-Kalender */}
-      {doc && link && config.enabled && (
+      {doc && link && config.enabled && authStatus === 'authenticated' && (
         <div className="space-y-3 border-t pt-4">
           <p className="text-[13px] font-semibold">Kalender-Konfiguration</p>
           <div className="rounded-md bg-[var(--color-marine-100)] border border-[var(--color-marine-500)] p-3 space-y-1">

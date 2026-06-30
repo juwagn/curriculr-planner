@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { Play, HardDrive, Globe, Plus } from 'lucide-react';
+import { Play, HardDrive, Globe, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { storage, type DocSummary } from '@/lib/storage';
@@ -49,6 +49,7 @@ interface Props {
 export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onEnterEditor }: Props) {
   const [source, setSource] = useState<Source>('local');
   const [docs, setDocs] = useState<DocSummary[]>([]);
+  const [confirmDeleteLocalId, setConfirmDeleteLocalId] = useState<string | null>(null);
   const [wpItems, setWpItems] = useState<DocListItem[]>([]);
   const [wpLoading, setWpLoading] = useState(false);
   const [wpMsg, setWpMsg] = useState<string | null>(null);
@@ -90,6 +91,13 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
       });
     return () => { ac.abort(); };
   }, [source, authed, token, config]);
+
+  const removeLocalDoc = async (id: string, name: string) => {
+    await storage.deleteDoc(id);
+    setDocs((prev) => prev.filter((d) => d.id !== id));
+    setConfirmDeleteLocalId(null);
+    toast.success(`Plan „${name}" gelöscht`);
+  };
 
   const handleLogin = () => {
     if (!config.enabled) setConfig({ ...config, enabled: true });
@@ -168,28 +176,67 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
 
             {source === 'local' && (
               <div className="space-y-2">
+                <p className="text-[12px] text-[var(--color-ink-500)] mb-3">
+                  Pläne werden in diesem Browser gespeichert — nur auf diesem Gerät verfügbar.
+                </p>
                 {docs.length === 0 && (
                   <p className="text-[13px] text-[var(--color-ink-500)]">Noch keine Pläne auf diesem Gerät.</p>
                 )}
-                {docs.map((d) => (
-                  <div
-                    key={d.id}
-                    className="flex items-center justify-between border border-[var(--color-ink-200)] rounded-[12px] p-3.5"
-                  >
-                    <div>
-                      <div className="text-[14px] font-bold text-[var(--color-ink-900)]">{d.name}</div>
-                      <div className="text-[12px] text-[var(--color-ink-500)] tabular-nums">
-                        {d.eventCount} Termine · {new Date(d.lastSaved).toLocaleDateString('de-DE')}
+                {docs.map((d) => {
+                  if (confirmDeleteLocalId === d.id) {
+                    return (
+                      <div
+                        key={d.id}
+                        className="flex items-center justify-between gap-3 border border-[var(--color-status-red)] bg-red-50 rounded-[12px] p-3.5"
+                      >
+                        <span className="text-[13px] font-medium text-[var(--color-status-red)] min-w-0 truncate">
+                          „{d.name}" wirklich löschen?
+                        </span>
+                        <div className="flex gap-2 shrink-0">
+                          <Button size="sm" variant="ghost" onClick={() => setConfirmDeleteLocalId(null)}>
+                            Abbrechen
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => removeLocalDoc(d.id, d.name)}>
+                            Löschen
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div
+                      key={d.id}
+                      className="flex items-center justify-between gap-3 border border-[var(--color-ink-200)] rounded-[12px] p-3.5"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-[14px] font-bold text-[var(--color-ink-900)] truncate">{d.name}</div>
+                        <div className="text-[12px] text-[var(--color-ink-500)] tabular-nums">
+                          {d.eventCount} Termine · {new Date(d.lastSaved).toLocaleDateString('de-DE')}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Button onClick={() => onOpenDoc(d.id)}>Öffnen</Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] hover:bg-red-50"
+                          onClick={() => setConfirmDeleteLocalId(d.id)}
+                          aria-label={`${d.name} löschen`}
+                        >
+                          <Trash2 />
+                        </Button>
                       </div>
                     </div>
-                    <Button onClick={() => onOpenDoc(d.id)}>Öffnen</Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
             {source === 'wordpress' && (
               <div className="space-y-2">
+                <p className="text-[12px] text-[var(--color-ink-500)] mb-3">
+                  Pläne von der Schul-Website laden — gemeinsamer Stand für alle Berechtigten.
+                </p>
                 {!authed && (
                   <p className="text-[13px] text-[var(--color-ink-500)]">
                     Für WordPress-Pläne bitte links mit IServ einloggen.
@@ -226,20 +273,42 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
             )}
 
             {source === 'new' && (
-              <div className="flex flex-col gap-2">
-                <Button size="lg" onClick={onCreateNew}>+ Neuen Jahresplan erstellen</Button>
-                <Button variant="outline" onClick={() => icsInputRef.current?.click()}>Aus ICS-Datei erstellen</Button>
-                <div className="flex gap-2 pt-1 border-t border-[var(--color-ink-200)]">
-                  <Button variant="ghost" className="flex-1" onClick={() => onImportJson(createDemoDoc())}>
-                    Demo ausprobieren
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="flex-1 flex items-center gap-1.5"
-                    onClick={onStartTour}
-                  >
-                    <Play className="w-3 h-3" /> Geführte Tour
-                  </Button>
+              <div className="flex flex-col gap-3">
+                <div className="space-y-1">
+                  <Button size="lg" className="w-full" onClick={onCreateNew}>+ Neuen Jahresplan erstellen</Button>
+                  <p className="text-[12px] text-[var(--color-ink-500)] px-0.5">
+                    Startet den Einrichtungsassistenten — Schuljahr, Ferien und Kategorien festlegen.
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <Button variant="outline" className="w-full" onClick={() => icsInputRef.current?.click()}>Aus ICS-Datei importieren</Button>
+                  <p className="text-[12px] text-[var(--color-ink-500)] px-0.5">
+                    Termine aus einer bestehenden Kalenderdatei (.ics) übernehmen.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1 pt-1 border-t border-[var(--color-ink-200)]">
+                  <div className="flex gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Button variant="ghost" className="w-full" onClick={() => onImportJson(createDemoDoc())}>
+                        Demo ausprobieren
+                      </Button>
+                      <p className="text-[12px] text-[var(--color-ink-500)] text-center">
+                        Beispieldaten laden
+                      </p>
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full flex items-center gap-1.5"
+                        onClick={onStartTour}
+                      >
+                        <Play className="w-3 h-3" /> Geführte Tour
+                      </Button>
+                      <p className="text-[12px] text-[var(--color-ink-500)] text-center">
+                        Interaktive Einführung
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <input
                   ref={icsInputRef}

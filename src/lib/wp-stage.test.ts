@@ -4,7 +4,7 @@ import { nextStage, availableActions, STAGE_LABELS } from './wp-stage';
 describe('wp-stage', () => {
   it('labels all three stages in German', () => {
     expect(STAGE_LABELS.entwurf).toBe('Entwurf');
-    expect(STAGE_LABELS.genehmigt).toBe('Genehmigt');
+    expect(STAGE_LABELS.genehmigt).toBe('Intern');
     expect(STAGE_LABELS.oeffentlich).toBe('Öffentlich');
   });
   it('freigeben moves entwurf -> genehmigt only', () => {

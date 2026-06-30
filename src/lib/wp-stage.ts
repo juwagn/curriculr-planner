@@ -2,14 +2,14 @@ export type WpStage = 'entwurf' | 'genehmigt' | 'oeffentlich';
 
 export const STAGE_LABELS: Record<WpStage, string> = {
   entwurf: 'Entwurf',
-  genehmigt: 'Genehmigt',
+  genehmigt: 'Intern',
   oeffentlich: 'Öffentlich',
 };
 
 export type StageAction = 'freigeben' | 'oeffentlich-schalten';
 
 export const STAGE_ACTION_LABELS: Record<StageAction, string> = {
-  'freigeben': 'Freigeben',
+  'freigeben': 'Intern freigeben',
   'oeffentlich-schalten': 'Öffentlich schalten',
 };
 

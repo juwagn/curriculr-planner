@@ -23,9 +23,9 @@ const STAGE_COLOR: Record<WpStage, string> = {
 };
 
 const STAGE_HINT: Record<WpStage, string> = {
-  entwurf: 'Nur die Leitung sieht den Entwurf (geschützter Link).',
-  genehmigt: 'Genehmigt — noch nicht öffentlich. „Öffentlich schalten" macht ihn fürs Kollegium sichtbar.',
-  oeffentlich: 'Öffentlich — das ganze Kollegium sieht diesen Plan.',
+  entwurf: 'Nur für dich sichtbar (Entwurf).',
+  genehmigt: 'Intern — Kollegium sieht die Entwurf-Vorschau. „Öffentlich schalten" macht den Plan auf der Schulwebsite sichtbar.',
+  oeffentlich: 'Öffentlich — der Plan erscheint auf der Schulwebsite.',
 };
 
 function StageDot({ stage }: { stage: WpStage }) {

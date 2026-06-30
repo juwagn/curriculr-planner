@@ -20,8 +20,10 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
 
   useEffect(() => {
     if (open) {
-      storage.listDocs().then(setDocs);
-      setConfirmDeleteId(null);
+      storage.listDocs().then((docs) => {
+        setDocs(docs);
+        setConfirmDeleteId(null);
+      });
     }
   }, [open]);
 

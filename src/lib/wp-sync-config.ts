@@ -5,6 +5,17 @@ const KEY = 'curriculr-planner:wp-sync';
 
 const VALID_STAGES = new Set<string>(['entwurf', 'genehmigt', 'oeffentlich']);
 
+/** Calendar returned by REST provisioning. */
+export interface WpCalendarGroup {
+  group: string | null;
+  label: string;
+  feedUrl: string | null;
+}
+
+/**
+ * @deprecated Use WpCalendarGroup instead.
+ * Kept for backward-compat until WordpressTab is updated in Task 6.
+ */
 export interface CalendarMapping {
   group: string | null;
   profileId: string;
@@ -12,10 +23,21 @@ export interface CalendarMapping {
 
 export interface WpPlanLink {
   schoolyearKey: string;
-  wpProfileId: string;
+  schoolyearLabel: string;
   stage: WpStage;
   knownVersion: number;
   feedUrl?: string;
+  /** Selected group names to provision as separate calendars. */
+  calendarGroups?: string[];
+  /** Last-provisioned calendars with feed URLs (set after successful send). */
+  provisionedCalendars?: WpCalendarGroup[];
+  /**
+   * @deprecated Remove after WordpressTab is updated in Task 6.
+   */
+  wpProfileId?: string;
+  /**
+   * @deprecated Remove after WordpressTab is updated in Task 6.
+   */
   calendarMappings?: CalendarMapping[];
 }
 
@@ -28,6 +50,28 @@ export interface WpSyncConfig {
 export const EMPTY_CONFIG: WpSyncConfig = {
   enabled: false, baseUrl: '', links: {},
 };
+
+function parseCalendarGroups(raw: unknown): string[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const groups = raw
+    .filter((g): g is string => typeof g === 'string' && g.length > 0);
+  return groups.length > 0 ? groups : undefined;
+}
+
+function parseProvisionedCalendars(raw: unknown): WpCalendarGroup[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const cals = raw
+    .filter((c): c is Record<string, unknown> => c !== null && typeof c === 'object')
+    .map((c): WpCalendarGroup | null => {
+      const label = typeof c.label === 'string' ? c.label : '';
+      if (!label) return null;
+      const group = typeof c.group === 'string' ? c.group : null;
+      const feedUrl = typeof c.feedUrl === 'string' ? c.feedUrl : null;
+      return { group, label, feedUrl };
+    })
+    .filter((c): c is WpCalendarGroup => c !== null);
+  return cals.length > 0 ? cals : undefined;
+}
 
 function parseCalendarMappings(raw: unknown): CalendarMapping[] | undefined {
   if (!Array.isArray(raw)) return undefined;
@@ -48,14 +92,20 @@ function parseLink(v: unknown): WpPlanLink | null {
   const l = v as Record<string, unknown>;
   const stage = typeof l.stage === 'string' && VALID_STAGES.has(l.stage) ? (l.stage as WpStage) : 'entwurf';
   const feedUrl = typeof l.feedUrl === 'string' && /^https:\/\//i.test(l.feedUrl) ? l.feedUrl : undefined;
+  const calendarGroups = parseCalendarGroups(l.calendarGroups);
+  const provisionedCalendars = parseProvisionedCalendars(l.provisionedCalendars);
   const calendarMappings = parseCalendarMappings(l.calendarMappings);
+  const wpProfileId = typeof l.wpProfileId === 'string' ? l.wpProfileId : undefined;
   return {
-    schoolyearKey: typeof l.schoolyearKey === 'string' ? l.schoolyearKey : '',
-    wpProfileId:   typeof l.wpProfileId   === 'string' ? l.wpProfileId   : '',
+    schoolyearKey:   typeof l.schoolyearKey   === 'string' ? l.schoolyearKey   : '',
+    schoolyearLabel: typeof l.schoolyearLabel  === 'string' ? l.schoolyearLabel  : '',
     stage,
-    knownVersion:  typeof l.knownVersion  === 'number' ? l.knownVersion  : 0,
-    ...(feedUrl          ? { feedUrl }          : {}),
-    ...(calendarMappings ? { calendarMappings } : {}),
+    knownVersion: typeof l.knownVersion === 'number' ? l.knownVersion : 0,
+    ...(feedUrl              ? { feedUrl }              : {}),
+    ...(calendarGroups       ? { calendarGroups }       : {}),
+    ...(provisionedCalendars ? { provisionedCalendars } : {}),
+    ...(calendarMappings     ? { calendarMappings }     : {}),
+    ...(wpProfileId          ? { wpProfileId }          : {}),
   };
 }
 
@@ -70,11 +120,7 @@ export function loadWpConfig(): WpSyncConfig {
       const parsed = parseLink(v);
       if (parsed) links[k as UUID] = parsed;
     }
-    return {
-      enabled: !!p.enabled,
-      baseUrl: typeof p.baseUrl === 'string' ? p.baseUrl : '',
-      links,
-    };
+    return { enabled: !!p.enabled, baseUrl: typeof p.baseUrl === 'string' ? p.baseUrl : '', links };
   } catch {
     return structuredClone(EMPTY_CONFIG);
   }

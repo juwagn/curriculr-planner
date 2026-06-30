@@ -10,7 +10,7 @@ describe('wp-sync-config', () => {
   });
   it('round-trips a saved config', () => {
     const cfg = { enabled: true, baseUrl: 'https://s.example',
-      links: { 'doc-1': { schoolyearKey: 'sj_2026_27', wpProfileId: 'p2', stage: 'entwurf' as const, knownVersion: 3 } } };
+      links: { 'doc-1': { schoolyearKey: 'sj_2026_27', schoolyearLabel: '2026/27', stage: 'entwurf' as const, knownVersion: 3 } } };
     saveWpConfig(cfg);
     expect(loadWpConfig()).toEqual(cfg);
   });

@@ -1,7 +1,7 @@
 import { PlannerDocumentSchema, migrate } from '@/lib/schemas';
 import type { PlannerDocument } from '@/types';
 import type { WpStage } from './wp-stage';
-import type { WpSyncConfig, CalendarMapping } from './wp-sync-config';
+import type { WpSyncConfig, WpCalendarGroup } from './wp-sync-config';
 
 export type FetchLike = typeof fetch;
 
@@ -197,17 +197,23 @@ export async function postProfileMap(
   cfg: WpSyncConfig,
   token: string,
   sj: string,
-  mappings: CalendarMapping[],
+  label: string,
+  groups: string[],
   fetchImpl: FetchLike = fetch,
-): Promise<'ok' | 'error'> {
+): Promise<{ status: 'ok' | 'error'; calendars?: WpCalendarGroup[] }> {
   try {
     const res = await fetchImpl(`${base(cfg)}/profile-map`, {
       method: 'POST',
       headers: { Authorization: bearerHeader(token), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sj, mappings }),
+      body: JSON.stringify({ sj, label, groups }),
     });
-    return res.ok ? 'ok' : 'error';
+    if (!res.ok) return { status: 'error' };
+    const data = await res.json() as Record<string, unknown>;
+    const calendars = Array.isArray(data.calendars)
+      ? (data.calendars as WpCalendarGroup[])
+      : undefined;
+    return { status: 'ok', calendars };
   } catch {
-    return 'error';
+    return { status: 'error' };
   }
 }

@@ -45,7 +45,7 @@ export function WordpressTab() {
 
   function patchLink(patch: Partial<WpPlanLink>) {
     if (!docId) return;
-    const base: WpPlanLink = link ?? { schoolyearKey: '', wpProfileId: '', stage: 'entwurf', knownVersion: 0 };
+    const base: WpPlanLink = link ?? { schoolyearKey: '', schoolyearLabel: '', stage: 'entwurf', knownVersion: 0 };
     setConfig({ ...config, links: { ...config.links, [docId]: { ...base, ...patch } } });
   }
 
@@ -65,13 +65,14 @@ export function WordpressTab() {
 
   async function onSendProfileMap() {
     if (!token || !docId || !link) return;
-    const mappings = [
-      { group: null, profileId: link.wpProfileId },
-      ...calMappings,
-    ].filter(m => Boolean(m.profileId));
+    // TODO Task 6: replace with new calendarGroups-based API
+    const label = link.schoolyearLabel;
+    const groups = (link.calendarMappings ?? [])
+      .map(m => m.group)
+      .filter((g): g is string => g !== null && g.length > 0);
     setPmStatus('sending');
-    const result = await postProfileMap(config, token, link.schoolyearKey, mappings);
-    setPmStatus(result);
+    const result = await postProfileMap(config, token, link.schoolyearKey, label, groups);
+    setPmStatus(result.status);
   }
 
   return (

@@ -21,7 +21,7 @@ const mockFetch = vi.mocked(fetchLatestRevision);
 const baseConfig = {
   enabled: true,
   baseUrl: 'https://example.com',
-  links: { 'sy1': { schoolyearKey: 'sj_2026_27', wpProfileId: 'p1', stage: 'entwurf' as const, knownVersion: 3 } },
+  links: { 'sy1': { schoolyearKey: 'sj_2026_27', schoolyearLabel: '2026/27', stage: 'entwurf' as const, knownVersion: 3 } },
 };
 
 beforeEach(() => {

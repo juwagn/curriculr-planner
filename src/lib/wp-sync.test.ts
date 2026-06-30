@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { testConnection, pushDoc, fetchDoc, fetchLatestRevision, fetchDocList } from './wp-sync';
+import { testConnection, pushDoc, fetchDoc, fetchLatestRevision, fetchDocList, postProfileMap } from './wp-sync';
 import type { WpSyncConfig } from './wp-sync-config';
 
 const cfg: WpSyncConfig = { enabled: true, baseUrl: 'https://s.example/', links: {} };
@@ -183,5 +183,46 @@ describe('fetchDocList', () => {
     const res = await fetchDocList(cfg, 'tok', fetchImpl as unknown as typeof fetch);
     expect(res.items).toEqual([]);
     expect(res.message).toMatch(/nicht erreichbar/);
+  });
+});
+
+describe('postProfileMap', () => {
+  const pmCfg: WpSyncConfig = { enabled: true, baseUrl: 'https://example.com', links: {} };
+  const pmToken = 'tok';
+
+  it('sends new-form body and returns ok + calendars', async () => {
+    const fakeFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        updated: true,
+        calendars: [
+          { group: null,          label: 'Alle Termine',  feedUrl: 'https://example.com/wp-json/curriculr/v1/feed/sj_2026_27/abc.ics' },
+          { group: 'Schulleitung', label: 'Schulleitung', feedUrl: 'https://example.com/wp-json/curriculr/v1/feed/sj_2026_27/abc/schulleitung.ics' },
+        ],
+      }),
+    });
+
+    const result = await postProfileMap(pmCfg, pmToken, 'sj_2026_27', '2026/27', ['Schulleitung'], fakeFetch);
+
+    expect(result.status).toBe('ok');
+    expect(result.calendars).toHaveLength(2);
+    expect(result.calendars![0].group).toBeNull();
+    expect(result.calendars![1].group).toBe('Schulleitung');
+
+    const body = JSON.parse(fakeFetch.mock.calls[0][1].body as string);
+    expect(body).toEqual({ sj: 'sj_2026_27', label: '2026/27', groups: ['Schulleitung'] });
+    expect(body).not.toHaveProperty('mappings'); // new form, not old form
+  });
+
+  it('returns error on non-ok response', async () => {
+    const fakeFetch = vi.fn().mockResolvedValue({ ok: false });
+    const result = await postProfileMap(pmCfg, pmToken, 'sj', '26/27', [], fakeFetch);
+    expect(result.status).toBe('error');
+  });
+
+  it('returns error on network failure', async () => {
+    const fakeFetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    const result = await postProfileMap(pmCfg, pmToken, 'sj', '26/27', [], fakeFetch);
+    expect(result.status).toBe('error');
   });
 });

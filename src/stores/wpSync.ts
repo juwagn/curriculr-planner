@@ -162,7 +162,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     await storage.setActiveDoc(docId);
     const link: WpPlanLink = {
       schoolyearKey: sj,
-      wpProfileId: config.links[docId]?.wpProfileId ?? '',
+      schoolyearLabel: name,
       stage,
       knownVersion: version,
     };

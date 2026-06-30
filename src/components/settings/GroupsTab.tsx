@@ -9,6 +9,7 @@ const SUGGESTED_GROUPS = [
   'Eltern',
   'Schülerinnen und Schüler',
   'Schulleitung',
+  'Orga',
   'Sekretariat',
   'Hausmeister',
   'Kollegium',

@@ -16,6 +16,42 @@ const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    version: '1.10.0',
+    date: '30.06.2026',
+    highlights: [
+      'Gruppen-Kalender einrichten: pro Gruppe eigener ICS-Feed-Link für IServ-Abo',
+      'Kalender-Konfiguration nur bei angemeldeter WordPress-Verbindung sichtbar',
+    ],
+  },
+  {
+    version: '1.9.0',
+    date: '20.06.2026',
+    highlights: [
+      'Willkommensseite neu gestaltet: BrandPanel mit Login, Zwei-Spalten-Auswahl (Neuer Plan / aus WordPress laden)',
+      'Plan direkt von WordPress laden möglich, ohne vorherigen lokalen Plan',
+      'Ganztägige Termine per Tages-Klick zeigen keine falsche Uhrzeit mehr',
+    ],
+  },
+  {
+    version: '1.8.0',
+    date: '13.06.2026',
+    highlights: [
+      'Einstellungs-Modal hat feste Höhe — kein Größensprung mehr beim Tab-Wechsel',
+      'Design-Tokens aufgeräumt: kanonische marine/ink/paper-Farben, Typo-Scale als CSS-Tokens',
+    ],
+  },
+  {
+    version: '1.7.0',
+    date: '12.06.2026',
+    highlights: [
+      'IServ-SSO-Login ersetzt WordPress-Application-Passwort',
+      'Mehrbenutzer-Modus: mehrere Schulleitungsmitglieder bearbeiten denselben Plan, Konfliktlösung via 409-Flow',
+      'Automatischer Pull beim Start + manuelles Aktualisieren im Veröffentlichen-Popover',
+      'Präsenz-Indikator im Editor-Header: „X hat vor N Min gespeichert"',
+      'Datenschutz- & Transparenz-Tab: DSGVO-Hinweise + Vibecoding-Transparenzhinweis',
+    ],
+  },
+  {
     version: '1.6.0',
     date: '11.06.2026',
     highlights: [

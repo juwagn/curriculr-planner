@@ -227,18 +227,20 @@ export function PublishTab() {
               <p className="text-[12px] font-semibold text-[var(--color-ink-700)]">
                 Kalender-Links (für IServ-Abo):
               </p>
-              {provisionedCalendars.map((cal) => (
+              {provisionedCalendars.map((cal) => {
+                const feedUrl = cal.feedUrl;
+                return (
                 <div key={cal.group ?? '__main'} className="text-[12px] flex items-start gap-2 flex-wrap">
                   <span className="font-medium shrink-0">{cal.group ?? 'Alle Termine'}:</span>
-                  {cal.feedUrl ? (
+                  {feedUrl ? (
                     <>
-                      <a href={cal.feedUrl} target="_blank" rel="noopener noreferrer"
+                      <a href={feedUrl} target="_blank" rel="noopener noreferrer"
                          className="underline break-all" style={{ color: 'var(--color-marine-500)' }}>
-                        {cal.feedUrl}
+                        {feedUrl}
                       </a>
                       <button
                         onClick={() => {
-                          void navigator.clipboard.writeText(cal.feedUrl!);
+                          void navigator.clipboard.writeText(feedUrl);
                           toast.success('Link kopiert');
                         }}
                         className="shrink-0 text-[11px] px-1.5 py-0.5 rounded border border-[var(--color-ink-300)] hover:bg-[var(--color-paper-bg)]"
@@ -250,7 +252,8 @@ export function PublishTab() {
                     <em className="text-[var(--color-ink-400)]">wird nach erstem Veröffentlichen gesetzt</em>
                   )}
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
           <details className="text-[12px]">

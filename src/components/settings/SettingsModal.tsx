@@ -4,10 +4,8 @@ import { SchoolyearTab } from './SchoolyearTab';
 import { CategoriesTab } from './CategoriesTab';
 import { GroupsTab }     from './GroupsTab';
 import { TemplatesTab }  from './TemplatesTab';
-import { ExportTab }     from './ExportTab';
-import { ImportTab }     from './ImportTab';
 import { AppearanceTab } from './AppearanceTab';
-import { WordpressTab }  from './WordpressTab';
+import { PublishTab }    from './PublishTab';
 import { InfoTab }       from './InfoTab';
 
 const NAV_GROUPS: { group: string; items: { value: SettingsTab; label: string }[] }[] = [
@@ -24,7 +22,7 @@ const NAV_GROUPS: { group: string; items: { value: SettingsTab; label: string }[
     group: 'Ausgabe',
     items: [
       { value: 'appearance', label: 'Darstellung & Druck' },
-      { value: 'wordpress',  label: 'Veröffentlichung' },
+      { value: 'publish',    label: 'Veröffentlichung & Export' },
     ],
   },
   {
@@ -41,9 +39,7 @@ const CONTENT: Record<SettingsTab, React.ReactNode> = {
   groups:     <GroupsTab />,
   templates:  <TemplatesTab />,
   appearance: <AppearanceTab />,
-  export:     <ExportTab />,
-  import:     <ImportTab />,
-  wordpress:  <WordpressTab />,
+  publish:    <PublishTab />,
   info:       <InfoTab />,
 };
 

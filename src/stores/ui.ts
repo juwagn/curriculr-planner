@@ -9,9 +9,7 @@ export type SettingsTab =
   | 'groups'
   | 'templates'
   | 'appearance'
-  | 'export'
-  | 'import'
-  | 'wordpress'
+  | 'publish'
   | 'info';
 
 interface UiState {

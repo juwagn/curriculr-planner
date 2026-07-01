@@ -6,7 +6,7 @@ import { useUiStore } from '@/stores/ui';
 import { useConflicts } from '@/hooks/useConflicts';
 import { ExportDropdown } from '@/components/export/ExportDropdown';
 import { ConflictPanel } from './ConflictPanel';
-import { WpSyncControls } from './WpSyncControls';
+import { StatusBar } from './StatusBar';
 import { useAuthStore } from '@/stores/auth';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { usePresence, relativeTime } from '@/hooks/usePresence';
@@ -76,7 +76,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               </span>
             ) : null;
           })()}
-          <WpSyncControls />
+          <StatusBar />
           {authStatus === 'authenticated' && authClaims && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[13px]">
               <span>{authClaims.name}</span>

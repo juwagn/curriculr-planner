@@ -6,7 +6,7 @@ import { useUiStore } from '@/stores/ui';
 describe('SettingsModal sizing', () => {
   beforeEach(() => {
     cleanup();
-    useUiStore.setState({ settingsModalOpen: true, settingsTab: 'export' });
+    useUiStore.setState({ settingsModalOpen: true, settingsTab: 'publish' });
   });
 
   it('applies a fixed height so the box does not resize per tab', () => {
@@ -16,7 +16,7 @@ describe('SettingsModal sizing', () => {
   });
 
   it('uses the same height class regardless of active tab', () => {
-    useUiStore.setState({ settingsTab: 'export' });
+    useUiStore.setState({ settingsTab: 'publish' });
     render(<SettingsModal />);
     const short = screen.getByRole('dialog').className;
     cleanup();

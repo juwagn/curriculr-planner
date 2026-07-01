@@ -91,7 +91,7 @@ export function StatusBar() {
           </>
         ) : (
           <button
-            onClick={() => openSettings('wordpress')}
+            onClick={() => openSettings('publish')}
             className="text-[11px] opacity-40 hover:opacity-70 transition-opacity underline"
             style={{ transitionDuration: 'var(--dur-state)' }}
           >

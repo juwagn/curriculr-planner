@@ -1,9 +1,20 @@
 const REPO_URL    = 'https://github.com/juwagn/curriculr-planner';
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.7.0';
 
 type ChangelogEntry = { version: string; date: string; highlights: string[] };
 
 const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.7.0',
+    date: '30.06.2026',
+    highlights: [
+      'Neue Navigationsstruktur: 7 Tabs in 3 Gruppen (Inhalt / Ausgabe / Info)',
+      'StatusBar: Veröffentlichungs-Stufe und letzter Push immer sichtbar im Editor',
+      'Veröffentlichen-Dialog mit Sichtbarkeits-Auswahl (Entwurf / Intern / Öffentlich)',
+      'Veröffentlichung & Export: WordPress, Kalender-Einrichtung, Export und Import in einem Tab',
+      'Stage-Begriff „Genehmigt" umbenannt in „Intern" (beschreibt Sichtbarkeit, nicht Prozess)',
+    ],
+  },
   {
     version: '1.6.0',
     date: '11.06.2026',

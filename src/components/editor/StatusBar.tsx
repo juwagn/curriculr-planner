@@ -9,9 +9,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-// PublishDialog added in Task 8 — placeholder for now
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const PublishDialog = (_props: { open: boolean; onClose(): void }) => null;
+import { PublishDialog } from './PublishDialog';
 
 const STAGE_COLOR: Record<WpStage, string> = {
   entwurf:     'var(--color-warning)',

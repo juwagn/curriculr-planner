@@ -2,49 +2,35 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useUiStore, type SettingsTab } from '@/stores/ui';
 import { SchoolyearTab } from './SchoolyearTab';
 import { CategoriesTab } from './CategoriesTab';
-import { GroupsTab } from './GroupsTab';
-import { TemplatesTab } from './TemplatesTab';
-import { ExportTab } from './ExportTab';
-import { ImportTab } from './ImportTab';
+import { GroupsTab }     from './GroupsTab';
+import { TemplatesTab }  from './TemplatesTab';
+import { ExportTab }     from './ExportTab';
+import { ImportTab }     from './ImportTab';
 import { AppearanceTab } from './AppearanceTab';
-import { AboutTab } from './AboutTab';
-import { SchoolTab } from './SchoolTab';
-import { WordpressTab } from './WordpressTab';
-import { PrivacyTab } from './PrivacyTab';
+import { WordpressTab }  from './WordpressTab';
+import { InfoTab }       from './InfoTab';
 
 const NAV_GROUPS: { group: string; items: { value: SettingsTab; label: string }[] }[] = [
   {
-    group: 'Schuljahr',
-    items: [{ value: 'schoolyear', label: 'Schuljahr & Quartale' }],
-  },
-  {
-    group: 'Inhalte',
+    group: 'Inhalt',
     items: [
+      { value: 'schoolyear', label: 'Schuljahr & Quartale' },
       { value: 'categories', label: 'Kategorien' },
-      { value: 'groups', label: 'Gruppen' },
-      { value: 'templates', label: 'Vorlagen' },
+      { value: 'groups',     label: 'Gruppen' },
+      { value: 'templates',  label: 'Vorlagen' },
     ],
   },
   {
-    group: 'Darstellung',
+    group: 'Ausgabe',
     items: [
-      { value: 'appearance', label: 'Ansicht' },
-      { value: 'school', label: 'Schule & Druck' },
+      { value: 'appearance', label: 'Darstellung & Druck' },
+      { value: 'wordpress',  label: 'Veröffentlichung' },
     ],
   },
   {
-    group: 'Daten',
+    group: 'Info',
     items: [
-      { value: 'export', label: 'Export' },
-      { value: 'import', label: 'Import' },
-      { value: 'wordpress', label: 'WordPress' },
-    ],
-  },
-  {
-    group: 'System',
-    items: [
-      { value: 'about', label: 'Über' },
-      { value: 'privacy', label: 'Datenschutz' },
+      { value: 'info', label: 'Info & Datenschutz' },
     ],
   },
 ];
@@ -52,15 +38,13 @@ const NAV_GROUPS: { group: string; items: { value: SettingsTab; label: string }[
 const CONTENT: Record<SettingsTab, React.ReactNode> = {
   schoolyear: <SchoolyearTab />,
   categories: <CategoriesTab />,
-  groups: <GroupsTab />,
-  templates: <TemplatesTab />,
+  groups:     <GroupsTab />,
+  templates:  <TemplatesTab />,
   appearance: <AppearanceTab />,
-  school: <SchoolTab />,
-  export: <ExportTab />,
-  import: <ImportTab />,
-  about: <AboutTab />,
-  wordpress: <WordpressTab />,
-  privacy: <PrivacyTab />,
+  export:     <ExportTab />,
+  import:     <ImportTab />,
+  wordpress:  <WordpressTab />,
+  info:       <InfoTab />,
 };
 
 export function SettingsModal() {

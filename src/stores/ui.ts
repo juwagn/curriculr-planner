@@ -11,10 +11,8 @@ export type SettingsTab =
   | 'appearance'
   | 'export'
   | 'import'
-  | 'school'
-  | 'about'
   | 'wordpress'
-  | 'privacy';
+  | 'info';
 
 interface UiState {
   currentQuarter: 1 | 2 | 3 | 4;

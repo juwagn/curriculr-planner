@@ -20,7 +20,7 @@ describe('SettingsModal sizing', () => {
     render(<SettingsModal />);
     const short = screen.getByRole('dialog').className;
     cleanup();
-    useUiStore.setState({ settingsModalOpen: true, settingsTab: 'about' });
+    useUiStore.setState({ settingsModalOpen: true, settingsTab: 'info' });
     render(<SettingsModal />);
     const tall = screen.getByRole('dialog').className;
     expect(tall).toBe(short);

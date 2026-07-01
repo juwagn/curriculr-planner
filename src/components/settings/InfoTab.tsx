@@ -1,12 +1,12 @@
 const REPO_URL    = 'https://github.com/juwagn/curriculr-planner';
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.11.0';
 
 type ChangelogEntry = { version: string; date: string; highlights: string[] };
 
 const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '1.7.0',
-    date: '30.06.2026',
+    version: '1.11.0',
+    date: '01.07.2026',
     highlights: [
       'Neue Navigationsstruktur: 7 Tabs in 3 Gruppen (Inhalt / Ausgabe / Info)',
       'StatusBar: Veröffentlichungs-Stufe und letzter Push immer sichtbar im Editor',

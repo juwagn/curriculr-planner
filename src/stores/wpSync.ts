@@ -45,13 +45,13 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     const { config } = get();
     const token = useAuthStore.getState().token;
     if (!token) {
-      set({ syncState: 'error', message: 'Nicht angemeldet — bitte unter Einstellungen → WordPress anmelden.' });
+      set({ syncState: 'error', message: 'Nicht angemeldet — bitte unter Einstellungen → Veröffentlichung anmelden.' });
       return 'error';
     }
     const docId = doc.schoolyear.id;
     const link = config.links[docId];
     if (!config.enabled || !link) {
-      set({ syncState: 'error', message: 'Dieser Plan ist nicht mit WordPress verknüpft (Einstellungen → WordPress).' });
+      set({ syncState: 'error', message: 'Dieser Plan ist nicht mit WordPress verknüpft (Einstellungen → Veröffentlichung).' });
       return 'error';
     }
     const targetStage: WpStage = action ? (nextStage(link.stage, action) ?? link.stage) : link.stage;
@@ -95,7 +95,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     const { config } = get();
     const token = useAuthStore.getState().token;
     if (!token) {
-      set({ syncState: 'error', message: 'Nicht angemeldet — bitte unter Einstellungen → WordPress anmelden.' });
+      set({ syncState: 'error', message: 'Nicht angemeldet — bitte unter Einstellungen → Veröffentlichung anmelden.' });
       return 'error';
     }
     const link = config.links[docId];

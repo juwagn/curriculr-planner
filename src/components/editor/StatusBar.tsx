@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { usePlannerStore } from '@/stores/planner';
 import { useWpSyncStore } from '@/stores/wpSync';
+import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
+import { startIservLogin } from '@/lib/wp-auth-actions';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
 import { Button } from '@/components/ui/button';
 import {
@@ -52,13 +54,16 @@ export function StatusBar() {
       }))
     );
 
+  const authStatus = useAuthStore((s) => s.status);
+
   const [publishOpen, setPublishOpen] = useState(false);
 
   if (!doc) return null;
 
-  const link      = config.links[doc.schoolyear.id];
-  const stage     = (link?.stage ?? 'entwurf') as WpStage;
-  const isEnabled = config.enabled && !!link;
+  const link           = config.links[doc.schoolyear.id];
+  const stage          = (link?.stage ?? 'entwurf') as WpStage;
+  const isEnabled      = config.enabled && !!link;
+  const isAuthenticated = authStatus === 'authenticated';
 
   return (
     <>
@@ -81,13 +86,23 @@ export function StatusBar() {
                 Gesendet: {formatPushedAt(link.lastPushedAt)}
               </span>
             )}
-            <Button
-              size="sm"
-              onClick={() => setPublishOpen(true)}
-              className="bg-white/15 hover:bg-white/25 text-[var(--color-paper-card)] border border-white/20 text-[12px] px-3 py-1 h-auto"
-            >
-              Veröffentlichen
-            </Button>
+            {isAuthenticated ? (
+              <Button
+                size="sm"
+                onClick={() => setPublishOpen(true)}
+                className="bg-white/15 hover:bg-white/25 text-[var(--color-paper-card)] border border-white/20 text-[12px] px-3 py-1 h-auto"
+              >
+                Veröffentlichen
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => startIservLogin(config.baseUrl)}
+                className="bg-white/15 hover:bg-white/25 text-[var(--color-paper-card)] border border-white/20 text-[12px] px-3 py-1 h-auto"
+              >
+                Mit IServ anmelden
+              </Button>
+            )}
           </>
         ) : (
           <button

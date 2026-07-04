@@ -306,6 +306,11 @@ export function PublishTab() {
             Excel-Konverter-Format (.xlsx)
           </Button>
         </div>
+        <p className="text-[12px] text-[var(--color-ink-500)]">
+          Keine IServ-SSO-Anbindung? Lade das „JSON-Backup" (Export-Menü oben rechts) herunter und
+          trage es im WordPress-Backend unter Einstellungen → Schul-Terminplan → Schuljahre in der
+          Karte des jeweiligen Schuljahres hoch.
+        </p>
       </section>
 
       {/* Import */}

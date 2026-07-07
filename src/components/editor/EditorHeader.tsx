@@ -21,8 +21,6 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const savingState = usePlannerStore((s) => s.savingState);
   const openSettings = useUiStore((s) => s.openSettings);
   const openHelp = useUiStore((s) => s.openHelp);
-  const viewMode = useUiStore((s) => s.viewMode);
-  const setViewMode = useUiStore((s) => s.setViewMode);
   const conflicts = useConflicts();
   const [panelOpen, setPanelOpen] = useState(false);
   const hasError = conflicts.some((c) => c.severity === 'error');
@@ -91,35 +89,6 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               </button>
             </div>
           )}
-          <div
-            data-tour="view-toggle"
-            className="flex items-center bg-white/10 rounded-[var(--radius-pill)] overflow-hidden"
-          >
-            <button
-              onClick={() => setViewMode('table')}
-              aria-pressed={viewMode === 'table'}
-              className="px-3 py-1 font-semibold transition-colors"
-              style={{
-                background: viewMode === 'table' ? 'var(--color-paper-card)' : 'transparent',
-                color: viewMode === 'table' ? 'var(--color-marine-800)' : 'rgba(255,255,255,0.7)',
-                transitionDuration: 'var(--dur-state)'
-              }}
-            >
-              Tabelle
-            </button>
-            <button
-              onClick={() => setViewMode('year')}
-              aria-pressed={viewMode === 'year'}
-              className="px-3 py-1 font-semibold transition-colors"
-              style={{
-                background: viewMode === 'year' ? 'var(--color-paper-card)' : 'transparent',
-                color: viewMode === 'year' ? 'var(--color-marine-800)' : 'rgba(255,255,255,0.7)',
-                transitionDuration: 'var(--dur-state)'
-              }}
-            >
-              Schuljahr
-            </button>
-          </div>
           {conflicts.length > 0 && (
             <button
               onClick={() => setPanelOpen((v) => !v)}

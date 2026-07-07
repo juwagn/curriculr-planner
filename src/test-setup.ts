@@ -14,3 +14,15 @@ import '@testing-library/jest-dom';
     });
   }
 }
+
+// Radix's DropdownMenu calls hasPointerCapture, releasePointerCapture, and
+// scrollIntoView when opening. jsdom v29 doesn't implement these, so polyfill them.
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false;
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => {};
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}

@@ -175,6 +175,15 @@ export function InfoTab() {
           </p>
         </div>
         <div className="space-y-2">
+          <h4 className="font-semibold">Ferien-Abruf (OpenHolidays)</h4>
+          <p>
+            Beim manuellen Ferien-Abruf („Ferien laden") wird{' '}
+            <strong>openholidaysapi.org</strong> (EU-Dienst) kontaktiert; übertragen werden
+            dabei die IP-Adresse, das gewählte Bundesland und der Zeitraum. Der Abruf
+            passiert nur auf Klick — nie automatisch.
+          </p>
+        </div>
+        <div className="space-y-2">
           <h4 className="font-semibold">Speicherorte</h4>
           <p>Plandaten werden auf dem WordPress-Server (Hoster w3w.de, DE/EU) gespeichert.</p>
           <p>

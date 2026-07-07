@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import type { DragStartEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import type { Announcements, DragStartEvent, ScreenReaderInstructions } from '@dnd-kit/core';
 import { usePlannerStore } from '@/stores/planner';
 import { EditorHeader } from './EditorHeader';
 import { EditorToolbar } from './EditorToolbar';
@@ -20,6 +20,31 @@ interface Props {
   onSwitchPlan(): void;
 }
 
+// German screen-reader instructions + live-region announcements for keyboard DnD
+// (WCAG 2.1.1). dnd-kit shows `screenReaderInstructions.draggable` via a hidden
+// element referenced by `aria-describedby` (wired automatically through the
+// `attributes` spread on each draggable node).
+const screenReaderInstructions: ScreenReaderInstructions = {
+  draggable:
+    'Leertaste hebt den Termin auf. Pfeiltasten verschieben ihn während des Ziehens. ' +
+    'Leertaste legt ihn an der neuen Position ab, Escape bricht den Vorgang ab.',
+};
+
+const announcements: Announcements = {
+  onDragStart() {
+    return 'Termin aufgenommen.';
+  },
+  onDragOver({ over }) {
+    return over ? 'Termin befindet sich über einem Ablagebereich.' : 'Termin befindet sich über keinem Ablagebereich.';
+  },
+  onDragEnd({ over }) {
+    return over ? 'Termin wurde abgelegt.' : 'Termin wurde nicht abgelegt.';
+  },
+  onDragCancel() {
+    return 'Verschieben abgebrochen.';
+  },
+};
+
 export function Editor({ onSwitchPlan }: Props) {
   const viewMode = useUiStore((s) => s.viewMode);
   const templatesSidebarOpen = useUiStore((s) => s.templatesSidebarOpen);
@@ -27,8 +52,12 @@ export function Editor({ onSwitchPlan }: Props) {
   const [draggedTemplateId, setDraggedTemplateId] = useState<string | null>(null);
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
   // Require a small drag distance so plain clicks (open/edit, arm template)
-  // are not swallowed by the pointer sensor.
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  // are not swallowed by the pointer sensor. KeyboardSensor gives Tab/Space/
+  // arrow-key/Escape drag-and-drop for keyboard-only users (WCAG 2.1.1).
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
 
   const draggedTemplate = draggedTemplateId
     ? doc?.templates.find((t) => t.id === draggedTemplateId) ?? null
@@ -62,6 +91,7 @@ export function Editor({ onSwitchPlan }: Props) {
       <EditorToolbar />
       <DndContext
         sensors={sensors}
+        accessibility={{ announcements, screenReaderInstructions }}
         onDragStart={onDragStart}
         onDragEnd={(e) => {
           handleEditorDragEnd(e);

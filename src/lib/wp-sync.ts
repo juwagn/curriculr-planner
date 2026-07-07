@@ -5,17 +5,10 @@ import type { WpSyncConfig, WpCalendarGroup } from './wp-sync-config';
 
 export type FetchLike = typeof fetch;
 
-export interface PushResult {
-  status: 'ok' | 'conflict' | 'error';
-  version?: number;
-  stage?: WpStage;
-  feedUrl?: string;
-  serverDoc?: PlannerDocument;
-  serverVersion?: number;
-  authorName?: string;
-  savedAt?: string;
-  message?: string;
-}
+export type PushResult =
+  | { status: 'ok'; version?: number; stage?: WpStage; feedUrl?: string }
+  | { status: 'conflict'; serverVersion: number; serverDoc: PlannerDocument; authorName?: string; savedAt?: string }
+  | { status: 'error'; message?: string };
 
 const NOT_REACHABLE = 'WordPress nicht erreichbar — Internet/Adresse prüfen.';
 const BAD_TOKEN     = 'App-Token ungültig oder abgelaufen — bitte neu anmelden.';
@@ -72,7 +65,12 @@ export async function pushDoc(
     if (res.status === 409) {
       const data = await res.json();
       const parsed = PlannerDocumentSchema.safeParse(migrate(data.doc));
-      if (!parsed.success) return { status: 'error', message: 'Ungültiger Server-Dokument-Stand (409).' };
+      if (!parsed.success) {
+        return {
+          status: 'error',
+          message: 'Der auf WordPress gespeicherte Plan ist beschädigt. Bitte erneut senden oder Administrator kontaktieren.',
+        };
+      }
       return {
         status: 'conflict',
         serverVersion: data.serverVersion,
@@ -112,7 +110,14 @@ export async function fetchDoc(
     if (res.status === 401 || res.status === 403) return { exists: false, message: BAD_TOKEN };
     if (!res.ok) return { exists: false, message: `Server antwortete mit ${res.status}.` };
     const data = await res.json();
-    return { exists: true, version: data.version, doc: data.doc, stage: data.stage };
+    const parsed = PlannerDocumentSchema.safeParse(migrate(data.doc));
+    if (!parsed.success) {
+      return {
+        exists: true,
+        message: 'Der auf WordPress gespeicherte Plan ist beschädigt.',
+      };
+    }
+    return { exists: true, version: data.version, doc: parsed.data, stage: data.stage };
   } catch (err) {
     const msg = err instanceof Error ? err.message : NOT_REACHABLE;
     return { exists: false, message: msg === BAD_URL ? msg : NOT_REACHABLE };

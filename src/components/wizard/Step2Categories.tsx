@@ -184,7 +184,7 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
         <div
           role="alert"
           className="p-3 rounded-[var(--radius-default)] text-[13px]"
-          style={{ background: '#FEE2E2', color: 'var(--color-status-red)' }}
+          style={{ background: 'var(--color-danger-bg)', color: 'var(--color-status-red)' }}
         >
           {error}
         </div>

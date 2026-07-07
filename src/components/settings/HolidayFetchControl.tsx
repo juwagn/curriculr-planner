@@ -96,7 +96,7 @@ export function HolidayFetchControl({ stateCode, from, to, holidays, onApply }: 
         <div
           role="alert"
           className="rounded-[var(--radius-default)] p-2 text-[13px]"
-          style={{ background: '#FEE2E2', color: 'var(--color-status-red)' }}
+          style={{ background: 'var(--color-danger-bg)', color: 'var(--color-status-red)' }}
         >
           {error}
         </div>

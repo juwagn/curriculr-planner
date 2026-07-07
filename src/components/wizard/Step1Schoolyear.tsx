@@ -169,7 +169,7 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
           role="alert"
           className="p-3 rounded-[var(--radius-default)] text-[13px]"
           style={{
-            background: '#FEE2E2',
+            background: 'var(--color-danger-bg)',
             color: 'var(--color-status-red)'
           }}
         >

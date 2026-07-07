@@ -98,12 +98,12 @@ is coerced to `'table'` on load (`stores/ui.ts`).
 Undo/Redo (`useUndoRedo` hook + toolbar; Ctrl+Z / Ctrl+Shift+Z).
 
 ### Auth + Sync (M1–M6)
-- `stores/auth.ts` — Zustand store for IServ SSO session. Holds app-token in RAM only (never persisted). `AppTokenClaims` type in `src/lib/wp-auth.ts`.
-- `stores/wpSyncStore.ts` — push/pull/stage state. `pull()` returns `'error'` on non-404 failures (401/403). Conflict on push surfaces `ConflictInfo` (who saved, when).
+- `stores/auth.ts` — Zustand store for IServ SSO session. Holds app-token in RAM + sessionStorage (Tab-gebunden, bei Tab-Schluss gelöscht; nie localStorage). `AppTokenClaims` type in `src/lib/wp-auth.ts`.
+- `stores/wpSync.ts` — push/pull/stage state. `pull()` returns `'error'` on non-404 failures (401/403). Conflict on push surfaces `ConflictInfo` (who saved, when).
 - `src/lib/wp-auth.ts` — `exchangeCodeForToken()` (code→app-token via WP `/auth/token`) + `isAppTokenClaims` type guard.
 - `src/lib/wp-sync.ts` — all WP REST calls send `Authorization: Bearer <app-token>`. `fetchLatestRevision()` polls for presence (60s interval via `usePresence` hook).
 - `vite.config.ts` — CSP meta tag injected at build time. Update if new external origins are added.
-- `src/components/settings/PrivacyTab.tsx` — Datenschutz + Vibecoding disclosure (legally required, do not remove).
+- `src/components/settings/InfoTab.tsx` — Datenschutz-Abschnitt in InfoTab — legally required, do not remove.
 
 ### Path alias
 `@/*` → `src/*` (configured in `vite.config.ts`, `vitest.config.ts`,

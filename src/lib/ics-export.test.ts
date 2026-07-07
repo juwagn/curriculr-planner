@@ -75,4 +75,43 @@ describe('buildIcs', () => {
     const ics = buildIcs(doc);
     expect(ics).toMatch(/DESCRIPTION:Line 1\\nLine 2\\, with comma\\nGruppen: A\\, B/);
   });
+
+  it('strips CR characters and escapes CRLF as a single \\n', () => {
+    const doc = createEmptyDoc('Plan', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    doc.events.push({
+      id: 'e5',
+      title: 'a\r\nb',
+      start: '2026-09-15',
+      end: '2026-09-15',
+      allDay: true,
+      categoryId: doc.categories[0].id,
+      groups: []
+    });
+    const ics = buildIcs(doc);
+    const summaryLine = ics.split('\r\n').find((l) => l.startsWith('SUMMARY:'));
+    expect(summaryLine).toBe('SUMMARY:a\\nb');
+    expect(summaryLine).not.toContain('\r');
+  });
+
+  it('folds long lines to max 75 octets without splitting UTF-8 sequences', () => {
+    const doc = createEmptyDoc('Plan', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    const title = 'ü'.repeat(80); // 160 bytes in UTF-8
+    doc.events.push({
+      id: 'e6',
+      title,
+      start: '2026-09-15',
+      end: '2026-09-15',
+      allDay: true,
+      categoryId: doc.categories[0].id,
+      groups: []
+    });
+    const ics = buildIcs(doc);
+    const encoder = new TextEncoder();
+    for (const physicalLine of ics.split('\r\n')) {
+      expect(encoder.encode(physicalLine).length).toBeLessThanOrEqual(75);
+    }
+    // Unfolding (removing CRLF + leading space) restores the original line.
+    const unfolded = ics.replace(/\r\n /g, '');
+    expect(unfolded).toContain(`SUMMARY:${title}`);
+  });
 });

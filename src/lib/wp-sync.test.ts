@@ -56,6 +56,7 @@ describe('wp-sync client', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', token, f);
     expect(r.status).toBe('conflict');
+    if (r.status !== 'conflict') throw new Error('expected conflict');
     expect(r.serverVersion).toBe(5);
     expect(r.serverDoc).toMatchObject({ version: 5 });
   });
@@ -73,6 +74,7 @@ describe('wp-sync client', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', token, f);
     expect(r.status).toBe('conflict');
+    if (r.status !== 'conflict') throw new Error('expected conflict');
     expect(r.authorName).toBe('Max Mustermann');
     expect(r.savedAt).toBe('2026-01-01 12:00:00');
   });
@@ -82,6 +84,8 @@ describe('wp-sync client', () => {
     const f = (async () => fakeRes(409, { error: 'conflict', serverVersion: 5, doc: serverDoc })) as unknown as typeof fetch;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = await pushDoc(cfg, 'sj', {} as any, 1, 'entwurf', token, f);
+    expect(r.status).toBe('conflict');
+    if (r.status !== 'conflict') throw new Error('expected conflict');
     expect(r.authorName).toBeUndefined();
     expect(r.savedAt).toBeUndefined();
   });
@@ -107,6 +111,33 @@ describe('wp-sync client', () => {
     const r = await fetchDoc(cfg, 'sj', token, f);
     expect(r.exists).toBe(false);
     expect(r.message).toMatch(/ungültig/i);
+  });
+
+  it('fetchDoc with invalid server doc returns exists:true, no doc, and a message', async () => {
+    const f = (async () => fakeRes(200, { version: 7, stage: 'oeffentlich', doc: { b: 2 } })) as unknown as typeof fetch;
+    const r = await fetchDoc(cfg, 'sj_2026_27', token, f);
+    expect(r.exists).toBe(true);
+    expect(r.doc).toBeUndefined();
+    expect(r.message).toBeTruthy();
+  });
+
+  it('fetchDoc migrates an older-schema server doc', async () => {
+    // version 3 doc with a holiday missing `type` — migrate() backfills it (v3→v4)
+    // and bumps the version forward to the current schema (v5).
+    const sy = {
+      id: 'sy1', label: 'Test', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15',
+      holidays: [{ id: 'h1', label: 'Sommerferien', start: '2026-07-01', end: '2026-08-01' }],
+      quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
+    };
+    const oldDoc = {
+      version: 3, schoolyear: sy, categories: [], events: [], annotations: [], availableGroups: [],
+      ignoredConflicts: [], templates: [], meta: { name: 'Test', lastSaved: '2026-01-01T00:00:00Z' },
+    };
+    const f = (async () => fakeRes(200, { version: 7, stage: 'oeffentlich', doc: oldDoc })) as unknown as typeof fetch;
+    const r = await fetchDoc(cfg, 'sj_2026_27', token, f);
+    expect(r.exists).toBe(true);
+    expect(r.doc?.version).toBe(5);
+    expect(r.doc?.schoolyear.holidays[0].type).toBe('ferien');
   });
 
   describe('fetchLatestRevision', () => {

@@ -70,7 +70,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       return 'synced';
     } else if (res.status === 'conflict') {
       set({ syncState: 'conflict', message: 'WordPress hat eine neuere Version.',
-        conflict: { docId, serverVersion: res.serverVersion ?? 0, serverDoc: res.serverDoc as PlannerDocument,
+        conflict: { docId, serverVersion: res.serverVersion ?? 0, serverDoc: res.serverDoc,
           authorName: res.authorName, savedAt: res.savedAt } });
       return 'conflict';
     } else {
@@ -122,7 +122,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       set({
         syncState: 'idle',
         message: '',
-        pendingPull: { docId, doc: res.doc as PlannerDocument, version: wpVer, stage: res.stage ?? link.stage, knownVersion: link.knownVersion },
+        pendingPull: { docId, doc: res.doc, version: wpVer, stage: res.stage ?? link.stage, knownVersion: link.knownVersion },
       });
       return 'downgrade';
     }
@@ -160,7 +160,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       set({ syncState: 'error', message: res.message ?? 'Plan nicht auf WordPress gefunden.' });
       return 'error';
     }
-    const doc = res.doc as PlannerDocument;
+    const doc = res.doc;
     const docId = doc.schoolyear.id;
     const version = res.version ?? 0;
     const stage = res.stage ?? 'entwurf';

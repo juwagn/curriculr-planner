@@ -2,7 +2,7 @@ import type { PlannerDocument, PlanEvent } from '@/types';
 import { addDays, format, parseISO } from 'date-fns';
 
 function escapeText(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n');
+  return s.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\r/g, '').replace(/\n/g, '\\n');
 }
 
 function fmtDate(iso: string): string {
@@ -19,11 +19,29 @@ function nowStamp(): string {
   return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
 }
 
+// RFC 5545 line folding: max 75 octets per physical line, continuation lines
+// carry a leading space; UTF-8 multi-byte sequences are never split
+// (mirrors PHP gsh_tp_curriculr_ics_fold in the WordPress plugin).
 function fold(line: string): string {
-  if (line.length <= 75) return line;
+  const bytes = new TextEncoder().encode(line);
+  if (bytes.length <= 75) return line;
+  const decoder = new TextDecoder();
   const out: string[] = [];
-  for (let i = 0; i < line.length; i += 73) {
-    out.push((i === 0 ? '' : ' ') + line.slice(i, i + 73));
+  let i = 0;
+  let first = true;
+  while (i < bytes.length) {
+    const max = first ? 75 : 74; // continuation lines carry 1 leading space
+    let take = Math.min(max, bytes.length - i);
+    // Never cut inside a UTF-8 sequence: back off while the next byte
+    // is a continuation byte (10xxxxxx).
+    while (take > 0 && i + take < bytes.length && ((bytes[i + take] ?? 0) & 0xc0) === 0x80) {
+      take--;
+    }
+    if (take <= 0) take = max; // safety net (should never happen)
+    const chunk = decoder.decode(bytes.subarray(i, i + take));
+    out.push(first ? chunk : ' ' + chunk);
+    i += take;
+    first = false;
   }
   return out.join('\r\n');
 }

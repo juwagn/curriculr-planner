@@ -14,6 +14,11 @@ export default defineConfig(({ command }) => ({
       name: 'csp',
       transformIndexHtml(_, ctx) {
         if (ctx.server !== undefined) return []; // skip in dev
+        // VITE_WP_ORIGIN=https://schule.example.de setzen, um CSP zu härten.
+        const wpOrigin = process.env.VITE_WP_ORIGIN;
+        const connectSrc = wpOrigin
+          ? `connect-src 'self' https://openholidaysapi.org ${wpOrigin}`
+          : "connect-src 'self' https://openholidaysapi.org https:";
         return [
           {
             tag: 'meta',
@@ -24,7 +29,7 @@ export default defineConfig(({ command }) => ({
                 "script-src 'self'",
                 "style-src 'self' 'unsafe-inline'",
                 "img-src 'self' data:",
-                "connect-src 'self' https:",
+                connectSrc,
                 "font-src 'self'",
               ].join('; '),
             },

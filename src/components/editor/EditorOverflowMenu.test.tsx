@@ -12,6 +12,9 @@ vi.mock('sonner', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // jsdom has no concept of the `download` attribute — a real anchor.click()
+  // logs "Not implemented: navigation to another Document" for each export test.
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
   const doc = createEmptyDoc('Testplan', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
   usePlannerStore.setState({ doc });
   useUiStore.setState({ helpOpen: false, settingsModalOpen: false, printDialogOpen: false });

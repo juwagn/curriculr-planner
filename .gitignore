@@ -25,3 +25,5 @@ Thumbs.db
 *.curriculr.json
 Terminplan_*.xlsx
 live-logo.png
+
+.worktrees/

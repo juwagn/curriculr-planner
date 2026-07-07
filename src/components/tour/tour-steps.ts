@@ -55,19 +55,10 @@ export const TOUR_STEPS: DriveStep[] = [
     },
   },
   {
-    element: '[data-tour="export-btn"]',
+    element: '[data-tour="overflow-menu"]',
     popover: {
-      title: 'Exportieren',
-      description: 'Plan als ICS für Kalender-Apps, Excel für das Schulwebsite-Plugin oder JSON-Backup.',
-      side: 'bottom',
-      align: 'end',
-    },
-  },
-  {
-    element: '[data-tour="settings-btn"]',
-    popover: {
-      title: 'Einstellungen',
-      description: 'Kategorien, Gruppen, Schuljahr und Darstellung anpassen.',
+      title: 'Weitere Optionen',
+      description: 'Export (ICS, Excel, JSON-Backup, PDF), Hilfe und Einstellungen findest du hier gebündelt.',
       side: 'bottom',
       align: 'end',
     },

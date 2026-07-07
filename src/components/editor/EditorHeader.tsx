@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Settings as SettingsIcon, HelpCircle, CheckCircle2, Loader2, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Loader2, AlertTriangle } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
-import { useUiStore } from '@/stores/ui';
 import { useConflicts } from '@/hooks/useConflicts';
-import { ExportDropdown } from '@/components/export/ExportDropdown';
+import { EditorOverflowMenu } from './EditorOverflowMenu';
 import { ConflictPanel } from './ConflictPanel';
 import { StatusBar } from './StatusBar';
 import { useAuthStore } from '@/stores/auth';
@@ -19,8 +17,6 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
   const presence = usePresence(doc?.schoolyear.id);
   const savingState = usePlannerStore((s) => s.savingState);
-  const openSettings = useUiStore((s) => s.openSettings);
-  const openHelp = useUiStore((s) => s.openHelp);
   const conflicts = useConflicts();
   const [panelOpen, setPanelOpen] = useState(false);
   const hasError = conflicts.some((c) => c.severity === 'error');
@@ -50,6 +46,9 @@ export function EditorHeader({ onSwitchPlan }: Props) {
     error:  <><AlertTriangle className="w-3 h-3" aria-hidden="true" /> Fehler beim Speichern</>,
   }[savingState];
 
+  const presenceRel = presence?.authorName ? relativeTime(presence.savedAt) : '';
+  const saveStatusTitle = presenceRel ? `${presence!.authorName} hat ${presenceRel} gespeichert` : undefined;
+
   return (
     <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
       <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
@@ -63,17 +62,21 @@ export function EditorHeader({ onSwitchPlan }: Props) {
           {doc.meta.name} <span className="opacity-60">▼</span>
         </button>
         <div className="ml-auto flex items-center gap-3 text-xs">
-          <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5" title={saveStatusTitle}>
             {stateIndicator}
           </span>
-          {(() => {
-            const rel = presence?.authorName ? relativeTime(presence.savedAt) : '';
-            return rel ? (
-              <span className="px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[12px] opacity-70 whitespace-nowrap">
-                {presence!.authorName} hat {rel} gespeichert
-              </span>
-            ) : null;
-          })()}
+          {conflicts.length > 0 && (
+            <button
+              onClick={() => setPanelOpen((v) => !v)}
+              className="flex items-center gap-1 rounded-[var(--radius-block)] px-2.5 py-1.5 text-[12.5px] font-semibold"
+              style={{
+                background: hasError ? 'color-mix(in srgb, var(--color-danger) 10%, transparent)' : 'var(--color-gelb-100)',
+                color: hasError ? 'var(--color-danger)' : 'var(--color-warning)'
+              }}
+            >
+              ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
+            </button>
+          )}
           <StatusBar />
           {authStatus === 'authenticated' && authClaims && (
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[13px]">
@@ -89,40 +92,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               </button>
             </div>
           )}
-          {conflicts.length > 0 && (
-            <button
-              onClick={() => setPanelOpen((v) => !v)}
-              className="flex items-center gap-1 rounded-[var(--radius-block)] px-2.5 py-1.5 text-[12.5px] font-semibold"
-              style={{
-                background: hasError ? 'color-mix(in srgb, var(--color-danger) 10%, transparent)' : 'var(--color-gelb-100)',
-                color: hasError ? 'var(--color-danger)' : 'var(--color-warning)'
-              }}
-            >
-              ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
-            </button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={openHelp}
-            aria-label="Hilfe"
-            title="Hilfe"
-            className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
-          >
-            <HelpCircle className="w-4 h-4" />
-          </Button>
-          <Button
-            data-tour="settings-btn"
-            variant="ghost"
-            size="icon"
-            onClick={() => openSettings()}
-            aria-label="Einstellungen"
-            title="Einstellungen"
-            className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
-          >
-            <SettingsIcon className="w-4 h-4" />
-          </Button>
-          <ExportDropdown />
+          <EditorOverflowMenu />
         </div>
       </div>
       <ConflictPanel open={panelOpen} onClose={() => setPanelOpen(false)} />

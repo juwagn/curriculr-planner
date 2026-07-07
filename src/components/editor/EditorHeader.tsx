@@ -74,7 +74,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
                 color: hasError ? 'var(--color-danger)' : 'var(--color-warning)'
               }}
             >
-              ⚠ {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
+              <AlertTriangle className="w-3 h-3" aria-hidden="true" /> {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
             </button>
           )}
           <StatusBar />

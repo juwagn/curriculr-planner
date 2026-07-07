@@ -1,7 +1,10 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { Play, HardDrive, Globe, Plus, Trash2 } from 'lucide-react';
+import { Play, HardDrive, Globe, Plus, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
 import { storage, type DocSummary } from '@/lib/storage';
 import { parseIcs, mapToEvents, type ParsedEvent } from '@/lib/ics-import';
 import { createEmptyDoc, usePlannerStore } from '@/stores/planner';
@@ -55,6 +58,8 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
   const [wpMsg, setWpMsg] = useState<string | null>(null);
   const icsInputRef = useRef<HTMLInputElement>(null);
   const [icsParsed, setIcsParsed] = useState<ParsedEvent[] | null>(null);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
+  const [pendingJsonDoc, setPendingJsonDoc] = useState<PlannerDocument | null>(null);
 
   const authed = useAuthStore((s) => s.status === 'authenticated');
   const claims = useAuthStore((s) => s.claims);
@@ -126,6 +131,20 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
       setIcsParsed(events);
     } catch (e) {
       toast.error('ICS ungültig: ' + (e as Error).message);
+    }
+  };
+
+  const handleJsonFile = async (file: File) => {
+    try {
+      const doc = await storage.importJson(await file.text());
+      const existing = docs.find((d) => d.id === doc.schoolyear.id);
+      if (existing) {
+        setPendingJsonDoc(doc);
+      } else {
+        onImportJson(doc);
+      }
+    } catch (e) {
+      toast.error('Import fehlgeschlagen: ' + (e as Error).message);
     }
   };
 
@@ -219,6 +238,16 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                         <Button
                           size="icon"
                           variant="ghost"
+                          className="text-[var(--color-ink-500)] hover:text-[var(--color-marine-800)]"
+                          onClick={() => jsonInputRef.current?.click()}
+                          aria-label={`${d.name} mit JSON-Backup ersetzen`}
+                          title="Mit JSON-Backup ersetzen"
+                        >
+                          <Upload />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] hover:bg-red-50"
                           onClick={() => setConfirmDeleteLocalId(d.id)}
                           aria-label={`${d.name} löschen`}
@@ -286,6 +315,12 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                     Termine aus einer bestehenden Kalenderdatei (.ics) übernehmen.
                   </p>
                 </div>
+                <div className="space-y-1">
+                  <Button variant="outline" className="w-full" onClick={() => jsonInputRef.current?.click()}>JSON-Backup laden</Button>
+                  <p className="text-[12px] text-[var(--color-ink-500)] px-0.5">
+                    Vorhandenen Plan aus einer Backup-Datei (.json) einspielen.
+                  </p>
+                </div>
                 <div className="flex flex-col gap-1 pt-1 border-t border-[var(--color-ink-200)]">
                   <div className="flex gap-2">
                     <div className="flex-1 space-y-1">
@@ -322,6 +357,37 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
           </div>
         </div>
       </Card>
+
+      <input
+        ref={jsonInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleJsonFile(f); e.target.value = ''; }}
+      />
+
+      <Dialog open={pendingJsonDoc !== null} onOpenChange={(o) => { if (!o) setPendingJsonDoc(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bestehenden Plan überschreiben?</DialogTitle>
+          </DialogHeader>
+          <p className="text-[14px] text-[var(--color-ink-500)]">
+            Auf diesem Gerät liegt bereits ein Plan mit demselben Schuljahr
+            („{pendingJsonDoc?.meta.name}"). Die Backup-Datei überschreibt ihn unwiderruflich.
+          </p>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPendingJsonDoc(null)}>Abbrechen</Button>
+            <Button
+              onClick={() => {
+                if (pendingJsonDoc) onImportJson(pendingJsonDoc);
+                setPendingJsonDoc(null);
+              }}
+            >
+              Überschreiben
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <IcsImportDialog
         open={icsParsed !== null}

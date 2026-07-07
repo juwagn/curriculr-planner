@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { usePlannerStore } from '@/stores/planner';
 import { useAuthStore } from '@/stores/auth';
@@ -76,6 +76,17 @@ export function PublishTab() {
     };
     setConfig({ ...config, links: { ...config.links, [docId]: { ...base, ...patch } } });
   }
+
+  // Ohne diesen Effekt bleibt `link` undefined, bis die Nutzerin zufällig ein
+  // Gruppen-Checkbox oder "Erweitert"-Feld anfasst — bis dahin ist der
+  // "Kalender einrichten"-Button disabled und StatusBar zeigt dauerhaft
+  // "Nicht verbunden", obwohl Login + Verbindungstest bereits erfolgreich sind.
+  useEffect(() => {
+    if (docId && config.enabled && authStatus === 'authenticated' && !link) {
+      patchLink({});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docId, config.enabled, authStatus, link]);
 
   const calendarGroups: string[]              = link?.calendarGroups        ?? [];
   const provisionedCalendars: WpCalendarGroup[] = link?.provisionedCalendars ?? [];

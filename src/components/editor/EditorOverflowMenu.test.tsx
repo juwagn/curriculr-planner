@@ -1,14 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EditorOverflowMenu } from './EditorOverflowMenu';
 import { usePlannerStore, createEmptyDoc } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
+import { toast } from 'sonner';
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn() },
+}));
 
 beforeEach(() => {
+  vi.clearAllMocks();
   const doc = createEmptyDoc('Testplan', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
   usePlannerStore.setState({ doc });
-  useUiStore.setState({ helpOpen: false, settingsModalOpen: false });
+  useUiStore.setState({ helpOpen: false, settingsModalOpen: false, printDialogOpen: false });
 });
 
 async function openMenu() {
@@ -25,6 +31,24 @@ describe('EditorOverflowMenu', () => {
     expect(screen.getByText('PDF / Druck')).toBeInTheDocument();
     expect(screen.getByText('Hilfe')).toBeInTheDocument();
     expect(screen.getByText('Einstellungen')).toBeInTheDocument();
+  });
+
+  it('exports ICS on click', async () => {
+    await openMenu();
+    await userEvent.click(screen.getByText('ICS-Datei (.ics)'));
+    expect(toast.success).toHaveBeenCalledWith('ICS heruntergeladen');
+  });
+
+  it('exports JSON-Backup on click', async () => {
+    await openMenu();
+    await userEvent.click(screen.getByText('JSON-Backup (.json)'));
+    expect(toast.success).toHaveBeenCalledWith('Backup heruntergeladen');
+  });
+
+  it('exports Excel on click', async () => {
+    await openMenu();
+    await userEvent.click(screen.getByText('Excel-Konverter-Format (.xlsx)'));
+    expect(toast.success).toHaveBeenCalledWith('Excel heruntergeladen');
   });
 
   it('opens help on click', async () => {

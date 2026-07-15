@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { MoreVertical } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
+import { useWpSyncStore } from '@/stores/wpSync';
 import { storage } from '@/lib/storage';
 import { buildIcs, slugify } from '@/lib/ics-export';
 import { buildExcel } from '@/lib/excel-export';
@@ -21,10 +22,22 @@ function downloadBlob(filename: string, blob: Blob) {
 
 export function EditorOverflowMenu() {
   const doc = usePlannerStore((s) => s.doc);
+  const setDoc = usePlannerStore((s) => s.setDoc);
   const openHelp = useUiStore((s) => s.openHelp);
   const openSettings = useUiStore((s) => s.openSettings);
   const openPrintDialog = useUiStore((s) => s.openPrintDialog);
+  const wpEnabled = useWpSyncStore((s) => s.config.enabled);
+  const wpLink = useWpSyncStore((s) => (doc ? s.config.links[doc.schoolyear.id] : undefined));
+  const wpPull = useWpSyncStore((s) => s.pull);
   if (!doc) return null;
+
+  const pullFromWp = async () => {
+    const result = await wpPull(doc.schoolyear.id, setDoc);
+    if (result === 'pulled') toast.success('Aktueller Stand von WordPress geladen.');
+    else if (result === 'not-found') toast.info('Plan nicht auf WordPress gefunden.');
+    else if (result === 'error') toast.error(useWpSyncStore.getState().message || 'Laden fehlgeschlagen.');
+    // 'downgrade' → confirmation dialog in StatusBar takes over.
+  };
 
   const slug = slugify(doc.meta.name);
   const today = new Date().toISOString().slice(0, 10);
@@ -66,6 +79,12 @@ export function EditorOverflowMenu() {
         <DropdownMenuItem onClick={exportJson}>JSON-Backup (.json)</DropdownMenuItem>
         <DropdownMenuItem onClick={exportExcel}>Excel-Konverter-Format (.xlsx)</DropdownMenuItem>
         <DropdownMenuItem onClick={openPrintDialog}>PDF / Druck</DropdownMenuItem>
+        {wpEnabled && wpLink && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => void pullFromWp()}>Von WordPress laden</DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={openHelp}>Hilfe</DropdownMenuItem>
         <DropdownMenuItem onClick={() => openSettings()}>Einstellungen</DropdownMenuItem>

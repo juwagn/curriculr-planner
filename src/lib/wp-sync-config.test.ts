@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { loadWpConfig, saveWpConfig, EMPTY_CONFIG } from './wp-sync-config';
+import { loadWpConfig, saveWpConfig, sjKeyFromLabel, EMPTY_CONFIG } from './wp-sync-config';
 
 beforeEach(() => localStorage.clear());
 
@@ -24,5 +24,24 @@ describe('wp-sync-config', () => {
     expect(cfg.enabled).toBe(true);
     expect(cfg.baseUrl).toBe('');
     expect(cfg.links).toEqual({});
+  });
+});
+
+describe('sjKeyFromLabel', () => {
+  it('derives a stable key from the schoolyear label', () => {
+    expect(sjKeyFromLabel('2026/27')).toBe('sj_2026_27');
+  });
+  it('collapses whitespace and separators', () => {
+    expect(sjKeyFromLabel('Schuljahr  2026 / 27')).toBe('sj_schuljahr_2026_27');
+  });
+  it('transliterates German umlauts', () => {
+    expect(sjKeyFromLabel('Übergänge 25/26')).toBe('sj_uebergaenge_25_26');
+  });
+  it('strips leading/trailing separators', () => {
+    expect(sjKeyFromLabel('-2026/27-')).toBe('sj_2026_27');
+  });
+  it('returns empty string for empty/unusable labels', () => {
+    expect(sjKeyFromLabel('')).toBe('');
+    expect(sjKeyFromLabel('///')).toBe('');
   });
 });

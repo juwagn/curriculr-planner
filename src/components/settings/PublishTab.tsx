@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth';
 import { testConnection, postProfileMap } from '@/lib/wp-sync';
 import { startIservLogin, iservLogout } from '@/lib/wp-auth-actions';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
-import type { WpPlanLink, WpCalendarGroup } from '@/lib/wp-sync-config';
+import { sjKeyFromLabel, type WpPlanLink, type WpCalendarGroup } from '@/lib/wp-sync-config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,9 +43,9 @@ export function PublishTab() {
   const docId = doc?.schoolyear.id;
   const link  = docId ? config.links[docId] : undefined;
 
-  const suggestedSjKey = doc?.schoolyear.id
-    ? `sj_${doc.schoolyear.id.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`
-    : '';
+  // Key derives from the schoolyear LABEL (stable across browsers/devices),
+  // not the doc UUID — otherwise every colleague pushes to a private WP row.
+  const suggestedSjKey = doc?.schoolyear.label ? sjKeyFromLabel(doc.schoolyear.label) : '';
   const suggestedLabel = doc?.meta?.name ?? '';
 
   function handleLogin() {

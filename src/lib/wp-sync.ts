@@ -177,12 +177,13 @@ export async function fetchLatestRevision(
   schoolyearKey: string,
   token: string,
   fetchImpl: FetchLike = fetch,
-): Promise<LatestRevision | null> {
+): Promise<LatestRevision | null | 'unauthorized'> {
   try {
     const res = await fetchImpl(
       `${base(cfg)}/doc/${encodeURIComponent(schoolyearKey)}/revisions`,
       { headers: { Authorization: bearerHeader(token) } },
     );
+    if (res.status === 401 || res.status === 403) return 'unauthorized';
     if (!res.ok) return null;
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) return null;

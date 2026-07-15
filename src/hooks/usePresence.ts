@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { fetchLatestRevision, type LatestRevision } from '@/lib/wp-sync';
@@ -33,6 +34,14 @@ export function usePresence(docId: string | undefined): LatestRevision | null {
       const link = docId ? config.links[docId] : undefined;
       if (!config.enabled || !link || !currentToken) { setLatest(null); return; }
       const rev = await fetchLatestRevision(config, link.schoolyearKey, currentToken);
+      if (rev === 'unauthorized') {
+        // App-token expired (30 min TTL). Without this the poll dies silently
+        // and the user never learns why updates stopped arriving.
+        useAuthStore.getState().logout();
+        toast.warning('Sitzung abgelaufen — bitte erneut mit IServ anmelden.');
+        setLatest(null);
+        return;
+      }
       setLatest(rev);
     }
 

@@ -160,9 +160,14 @@ describe('wp-sync client', () => {
       expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBeNull();
     });
 
-    it('returns null on 401', async () => {
+    it("returns 'unauthorized' on 401 so the UI can surface an expired session", async () => {
       const f = (async () => fakeRes(401, {})) as unknown as typeof fetch;
-      expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBeNull();
+      expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBe('unauthorized');
+    });
+
+    it("returns 'unauthorized' on 403", async () => {
+      const f = (async () => fakeRes(403, {})) as unknown as typeof fetch;
+      expect(await fetchLatestRevision(cfg, 'sj_2026_27', token, f)).toBe('unauthorized');
     });
 
     it('returns null on network error', async () => {

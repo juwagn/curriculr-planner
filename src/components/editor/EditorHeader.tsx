@@ -8,6 +8,7 @@ import { StatusBar } from './StatusBar';
 import { useAuthStore } from '@/stores/auth';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { usePresence, relativeTime } from '@/hooks/usePresence';
+import { toast } from 'sonner';
 
 interface Props {
   onSwitchPlan(): void;
@@ -15,6 +16,7 @@ interface Props {
 
 export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
+  const setDoc = usePlannerStore((s) => s.setDoc);
   const presence = usePresence(doc?.schoolyear.id);
   const savingState = usePlannerStore((s) => s.savingState);
   const conflicts = useConflicts();
@@ -25,6 +27,9 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const authToken = useAuthStore((s) => s.token);
   const authLogout = useAuthStore((s) => s.logout);
   const wpBaseUrl = useWpSyncStore((s) => s.config.baseUrl);
+  const wpLinks = useWpSyncStore((s) => s.config.links);
+  const wpPull = useWpSyncStore((s) => s.pull);
+  const [pulling, setPulling] = useState(false);
 
   function handleLogout() {
     const currentToken = authToken;
@@ -48,6 +53,18 @@ export function EditorHeader({ onSwitchPlan }: Props) {
 
   const presenceRel = presence?.authorName ? relativeTime(presence.savedAt) : '';
   const saveStatusTitle = presenceRel ? `${presence!.authorName} hat ${presenceRel} gespeichert` : undefined;
+
+  // Server has a newer version than this browser knows → visible banner with pull CTA.
+  const link = wpLinks[doc.schoolyear.id];
+  const hasServerUpdate = !!presence && !!link && presence.version > link.knownVersion;
+
+  async function handlePullUpdate() {
+    setPulling(true);
+    const result = await wpPull(doc!.schoolyear.id, setDoc);
+    setPulling(false);
+    if (result === 'pulled') toast.success('Aktueller Stand von WordPress geladen.');
+    else if (result === 'error') toast.error(useWpSyncStore.getState().message || 'Laden fehlgeschlagen.');
+  }
 
   return (
     <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
@@ -95,6 +112,25 @@ export function EditorHeader({ onSwitchPlan }: Props) {
           <EditorOverflowMenu />
         </div>
       </div>
+      {hasServerUpdate && (
+        <div
+          className="px-6 py-2 flex items-center gap-3 text-[13px]"
+          style={{ background: 'var(--color-gelb-100)', color: 'var(--color-ink-900)' }}
+          role="status"
+        >
+          <span>
+            <strong>{presence!.authorName || 'Jemand'}</strong> hat
+            {presenceRel ? ` ${presenceRel}` : ''} eine neue Version gespeichert (v{presence!.version}).
+          </span>
+          <button
+            onClick={() => void handlePullUpdate()}
+            disabled={pulling}
+            className="font-semibold underline disabled:opacity-50"
+          >
+            {pulling ? 'Lädt…' : 'Jetzt aktualisieren'}
+          </button>
+        </div>
+      )}
       <ConflictPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
     </header>
   );

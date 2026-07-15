@@ -53,6 +53,21 @@ export const EMPTY_CONFIG: WpSyncConfig = {
   enabled: false, baseUrl: '', links: {},
 };
 
+/**
+ * Deterministic WP schoolyear key from the schoolyear label, e.g.
+ * '2026/27' → 'sj_2026_27'. Every browser derives the same key for the same
+ * schoolyear, so colleagues read/write the same wp_curriculr_docs row.
+ * Must stay within the REST route charset [a-z0-9_-] (see curriculr-data-layer.php).
+ */
+export function sjKeyFromLabel(label: string): string {
+  const slug = label
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return slug ? `sj_${slug}` : '';
+}
+
 function parseCalendarGroups(raw: unknown): string[] | undefined {
   if (!Array.isArray(raw)) return undefined;
   const groups = raw

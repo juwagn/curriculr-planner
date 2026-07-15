@@ -153,7 +153,7 @@ gsh_assert_true( isset( $by_id['c9'] ), 'new planner category created' );
 gsh_assert_true( ! isset( $by_id['bad'] ), 'invalid color skipped' );
 gsh_assert_true( gsh_tp_curriculr_sync_categories( array( 'meta' => array() ) ) === false, 'doc without categories -> no-op false' );
 
-echo "ALL PASS\n";
+gsh_test_done();
 ```
 
 - [ ] **Step 2: Test ausführen — muss fehlschlagen** (`gsh_tp_curriculr_sync_categories not defined`)
@@ -357,7 +357,7 @@ gsh_assert_eq( implode( '|', $out[0]['groups'] ), 'Eltern|Sek I', 'groups parsed
 gsh_assert_true( $out[1]['groups'] === array(), 'no X field -> empty groups' );
 gsh_assert_eq( $out[2]['groups'][0], 'A,B', 'escaped comma unescaped to single group' );
 
-echo "ALL PASS\n";
+gsh_test_done();
 ```
 
 - [ ] **Step 2: Test ausführen — muss fehlschlagen** (Funktion fehlt)

@@ -6,10 +6,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
 import { startIservLogin } from '@/lib/wp-auth-actions';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
+import { fetchLatestRevision, type LatestRevision } from '@/lib/wp-sync';
+import { relativeTime } from '@/hooks/usePresence';
 import { Button } from '@/components/ui/button';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { PublishDialog } from './PublishDialog';
 
@@ -55,8 +59,13 @@ export function StatusBar() {
     );
 
   const authStatus = useAuthStore((s) => s.status);
+  const authClaims = useAuthStore((s) => s.claims);
+  const token      = useAuthStore((s) => s.token);
 
   const [publishOpen, setPublishOpen] = useState(false);
+  const [pillOpen, setPillOpen]       = useState(false);
+  const [latest, setLatest]           = useState<LatestRevision | null>(null);
+  const [latestLoading, setLatestLoading] = useState(false);
 
   if (!doc) return null;
 
@@ -65,27 +74,77 @@ export function StatusBar() {
   const isEnabled      = config.enabled && !!link;
   const isAuthenticated = authStatus === 'authenticated';
 
+  async function handlePillOpenChange(open: boolean) {
+    setPillOpen(open);
+    if (!open || !link || !token) return;
+    setLatestLoading(true);
+    const rev = await fetchLatestRevision(config, link.schoolyearKey, token);
+    setLatestLoading(false);
+    setLatest(rev === 'unauthorized' ? null : rev);
+  }
+
+  const latestRel = latest ? relativeTime(latest.savedAt) : '';
+  const latestWhen = latest
+    ? (latestRel || new Date(latest.savedAt.replace(' ', 'T')).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))
+    : '';
+  const showOwnPush = !!link?.lastPushedAt && (!latest || latest.authorSub !== authClaims?.sub);
+
   return (
     <>
       <div className="flex items-center gap-3 text-xs">
         {isEnabled ? (
           <>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10">
-              <span
-                aria-hidden
-                className="inline-block size-2 rounded-full"
-                style={{ background: STAGE_COLOR[stage] }}
-              />
-              <span className="font-medium">{STAGE_LABELS[stage]}</span>
-              <span className="text-[11px] opacity-50 hidden sm:inline">
-                — {STAGE_DESCRIPTION[stage]}
-              </span>
-            </div>
-            {link.lastPushedAt && (
-              <span className="text-[11px] opacity-50 whitespace-nowrap hidden md:inline">
-                Gesendet: {formatPushedAt(link.lastPushedAt)}
-              </span>
-            )}
+            <Popover open={pillOpen} onOpenChange={(o) => void handlePillOpenChange(o)}>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 hover:bg-white/15 transition-colors" style={{ transitionDuration: 'var(--dur-state)' }}>
+                  <span
+                    aria-hidden
+                    className="inline-block size-2 rounded-full"
+                    style={{ background: STAGE_COLOR[stage] }}
+                  />
+                  <span className="font-medium">{STAGE_LABELS[stage]}</span>
+                  <span className="text-[11px] opacity-50 hidden sm:inline">
+                    — {STAGE_DESCRIPTION[stage]}
+                  </span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="text-[var(--color-ink-900)]">
+                <div className="flex items-center gap-1.5">
+                  <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: STAGE_COLOR[stage] }} />
+                  <span className="font-semibold text-[13px]">{STAGE_LABELS[stage]}</span>
+                </div>
+                <p className="text-[12px] text-[var(--color-ink-500)] -mt-1">{STAGE_DESCRIPTION[stage]}</p>
+                <div className="border-t border-[var(--color-ink-200)] pt-2 space-y-1">
+                  {latestLoading && <p className="text-[12px] text-[var(--color-ink-500)]">Lädt…</p>}
+                  {!latestLoading && latest && (
+                    <p className="text-[12px]">
+                      Zuletzt gespeichert von{' '}
+                      <strong className="font-semibold">{latest.authorName || 'Unbekannt'}</strong>
+                      {latestWhen && <>, {latestWhen}</>} · Version {latest.version}
+                    </p>
+                  )}
+                  {!latestLoading && !latest && (
+                    <p className="text-[12px] text-[var(--color-ink-500)]">Keine Speicherhistorie verfügbar.</p>
+                  )}
+                  {showOwnPush && (
+                    <p className="text-[12px] text-[var(--color-ink-500)]">
+                      Du hast zuletzt gesendet: {formatPushedAt(link!.lastPushedAt!)}
+                    </p>
+                  )}
+                </div>
+                {stage === 'oeffentlich' && link?.feedUrl && (
+                  <a
+                    href={link.feedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[12px] font-medium underline pt-1"
+                    style={{ color: 'var(--color-marine-500)' }}
+                  >
+                    <ExternalLink className="size-3" aria-hidden /> Live-Kalender öffnen
+                  </a>
+                )}
+              </PopoverContent>
+            </Popover>
             {isAuthenticated ? (
               <Button
                 size="sm"

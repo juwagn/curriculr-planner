@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { CheckCircle2, Loader2, AlertTriangle } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { CheckCircle2, Loader2, AlertTriangle, Pencil } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useConflicts } from '@/hooks/useConflicts';
 import { EditorOverflowMenu } from './EditorOverflowMenu';
@@ -17,6 +17,7 @@ interface Props {
 export function EditorHeader({ onSwitchPlan }: Props) {
   const doc = usePlannerStore((s) => s.doc);
   const setDoc = usePlannerStore((s) => s.setDoc);
+  const updateMeta = usePlannerStore((s) => s.updateMeta);
   const presence = usePresence(doc?.schoolyear.id);
   const savingState = usePlannerStore((s) => s.savingState);
   const conflicts = useConflicts();
@@ -30,6 +31,9 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   const wpLinks = useWpSyncStore((s) => s.config.links);
   const wpPull = useWpSyncStore((s) => s.pull);
   const [pulling, setPulling] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   function handleLogout() {
     const currentToken = authToken;
@@ -43,6 +47,22 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   }
 
   if (!doc) return null;
+
+  function startRename() {
+    setNameDraft(doc!.meta.name);
+    setRenaming(true);
+    // Input mounts this tick — focus/select next frame so it's actually in the DOM.
+    requestAnimationFrame(() => nameInputRef.current?.select());
+  }
+
+  function commitRename() {
+    const trimmed = nameDraft.trim();
+    if (trimmed && trimmed !== doc!.meta.name) {
+      updateMeta({ name: trimmed });
+      toast.success('Plan umbenannt');
+    }
+    setRenaming(false);
+  }
 
   const stateIndicator = {
     idle:   <><CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Gespeichert</>,
@@ -70,14 +90,41 @@ export function EditorHeader({ onSwitchPlan }: Props) {
     <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
       <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
         <img src={`${import.meta.env.BASE_URL}curriculr-logo.svg`} alt="Curriculr" className="h-6" />
-        <button
-          data-tour="plan-name"
-          onClick={onSwitchPlan}
-          className="text-[15px] font-semibold hover:opacity-80 flex items-center gap-1 transition-opacity"
-          style={{ transitionDuration: 'var(--dur-state)' }}
-        >
-          {doc.meta.name} <span className="opacity-60">▼</span>
-        </button>
+        {renaming ? (
+          <input
+            ref={nameInputRef}
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); commitRename(); }
+              else if (e.key === 'Escape') { e.preventDefault(); setRenaming(false); }
+            }}
+            aria-label="Plan umbenennen"
+            className="text-[15px] font-semibold bg-white/10 rounded px-1.5 py-0.5 outline-none ring-1 ring-white/30 focus:ring-white/60"
+            style={{ width: `${Math.max(nameDraft.length, 6)}ch` }}
+          />
+        ) : (
+          <div className="flex items-center gap-0.5">
+            <button
+              data-tour="plan-name"
+              onClick={onSwitchPlan}
+              className="text-[15px] font-semibold hover:opacity-80 flex items-center gap-1 transition-opacity"
+              style={{ transitionDuration: 'var(--dur-state)' }}
+            >
+              {doc.meta.name} <span className="opacity-60">▼</span>
+            </button>
+            <button
+              onClick={startRename}
+              aria-label="Plan umbenennen"
+              title="Plan umbenennen"
+              className="opacity-50 hover:opacity-100 transition-opacity p-1"
+              style={{ transitionDuration: 'var(--dur-state)' }}
+            >
+              <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
         <div className="ml-auto flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1.5" title={saveStatusTitle}>
             {stateIndicator}

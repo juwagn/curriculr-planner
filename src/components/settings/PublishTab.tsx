@@ -6,6 +6,7 @@ import { testConnection, postProfileMap } from '@/lib/wp-sync';
 import { startIservLogin, iservLogout } from '@/lib/wp-auth-actions';
 import { STAGE_LABELS, type WpStage } from '@/lib/wp-stage';
 import { sjKeyFromLabel, type WpPlanLink, type WpCalendarGroup } from '@/lib/wp-sync-config';
+import { missingGroupCalendars } from '@/lib/publish-helpers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -223,6 +224,16 @@ export function PublishTab() {
               Keine Gruppen definiert. Füge Gruppen unter Inhalt → Gruppen hinzu.
             </p>
           )}
+          {(() => {
+            const missing = missingGroupCalendars(availableGroups, provisionedCalendars);
+            if (provisionedCalendars.length === 0 || missing.length === 0) return null;
+            return (
+              <div className="rounded-md border border-[var(--color-warning)] bg-[var(--color-gelb-100)] p-3 text-[12px]">
+                ⚠ Ohne eigenen Kalender: <strong>{missing.join(', ')}</strong> — Häkchen oben setzen
+                und „Kalender einrichten" erneut ausführen.
+              </div>
+            );
+          })()}
           <div className="flex items-center gap-3">
             <Button
               onClick={onSendProfileMap}
@@ -265,6 +276,20 @@ export function PublishTab() {
                 </div>
               );
               })}
+              <ol className="mt-2 space-y-1 text-[12px] text-[var(--color-ink-500)] list-decimal list-inside border-t border-[var(--color-marine-200)] pt-2">
+                <li>Feed-Link oben mit „Kopieren" in die Zwischenablage holen.</li>
+                <li>In IServ: Kalender → Zahnrad → „Kalender abonnieren" → Link einfügen.</li>
+                <li>Fertig — der Plan erscheint bei allen, die den Kalender abonniert haben.</li>
+              </ol>
+              <p className="text-[11px] text-[var(--color-ink-500)]">
+                Anleitung für Handy &amp; IServ zum Weitergeben:{' '}
+                <a
+                  href="https://github.com/juwagn/curriculr-planner/blob/main/docs/kalender-abo-anleitung.md"
+                  target="_blank" rel="noopener noreferrer" className="underline"
+                >
+                  kalender-abo-anleitung.md
+                </a>
+              </p>
             </div>
           )}
           <details className="text-[12px]">

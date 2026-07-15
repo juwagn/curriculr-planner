@@ -21,7 +21,6 @@ export function relativeTime(raw: string): string {
 export function usePresence(docId: string | undefined): LatestRevision | null {
   const [latest, setLatest] = useState<LatestRevision | null>(null);
   const token = useAuthStore((s) => s.token);
-  const currentSub = useAuthStore((s) => s.claims?.sub);
 
   useEffect(() => {
     if (!docId || !token) {
@@ -50,6 +49,9 @@ export function usePresence(docId: string | undefined): LatestRevision | null {
     return () => clearInterval(id);
   }, [docId, token]);
 
-  if (latest && currentSub && latest.authorSub === currentSub) return null;
+  // Deliberately not filtered by authorSub: the same account editing from a
+  // second browser/device must still surface as "server has a newer version"
+  // — the caller compares presence.version against the local knownVersion,
+  // so a save from *this* browser never trips it (knownVersion is already current).
   return latest;
 }

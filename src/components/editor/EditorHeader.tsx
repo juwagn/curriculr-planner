@@ -71,8 +71,12 @@ export function EditorHeader({ onSwitchPlan }: Props) {
     error:  <><AlertTriangle className="w-3 h-3" aria-hidden="true" /> Fehler beim Speichern</>,
   }[savingState];
 
+  // A save shows as "Du" when it carries this account's sub — covers editing
+  // the same plan from a second browser/device under one IServ login.
+  const isOwnAccount = !!presence && presence.authorSub === authClaims?.sub;
+  const presenceLabel = presence ? (isOwnAccount ? 'Du (anderes Gerät)' : presence.authorName || 'Jemand') : '';
   const presenceRel = presence?.authorName ? relativeTime(presence.savedAt) : '';
-  const saveStatusTitle = presenceRel ? `${presence!.authorName} hat ${presenceRel} gespeichert` : undefined;
+  const saveStatusTitle = presenceRel ? `${presenceLabel} hat ${presenceRel} gespeichert` : undefined;
 
   // Server has a newer version than this browser knows → visible banner with pull CTA.
   const link = wpLinks[doc.schoolyear.id];
@@ -166,7 +170,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
           role="status"
         >
           <span>
-            <strong>{presence!.authorName || 'Jemand'}</strong> hat
+            <strong>{presenceLabel}</strong> hat
             {presenceRel ? ` ${presenceRel}` : ''} eine neue Version gespeichert (v{presence!.version}).
           </span>
           <button

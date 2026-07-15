@@ -82,11 +82,12 @@ describe('usePresence', () => {
     expect(result.current?.authorSub).toBe('other');
   });
 
-  it('returns null when latest revision is own save', async () => {
+  it('returns the latest revision even when it was saved by the current user — a different browser/device under the same account must still surface as an update', async () => {
     mockFetch.mockResolvedValueOnce({ version: 5, authorName: 'Ich', authorSub: 'me', savedAt: '2026-06-01 10:00:00' });
     const { result } = renderHook(() => usePresence('sy1'));
     await act(async () => { await Promise.resolve(); });
-    expect(result.current).toBeNull();
+    expect(result.current?.authorSub).toBe('me');
+    expect(result.current?.version).toBe(5);
   });
 
   it('polls again after 60 seconds', async () => {

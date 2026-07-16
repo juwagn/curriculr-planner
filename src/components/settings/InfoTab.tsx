@@ -1,5 +1,5 @@
 const REPO_URL    = 'https://github.com/juwagn/curriculr-planner';
-const APP_VERSION = '1.15.0';
+const APP_VERSION = '1.15.1';
 
 type ChangelogEntry = { version: string; date: string; highlights: string[] };
 

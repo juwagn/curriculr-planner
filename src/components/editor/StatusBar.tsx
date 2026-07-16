@@ -103,6 +103,9 @@ export function StatusBar() {
                     style={{ background: STAGE_COLOR[stage] }}
                   />
                   <span className="font-medium">{STAGE_LABELS[stage]}</span>
+                  {link.knownVersion > 0 && (
+                    <span className="text-[11px] opacity-70 tabular-nums">· v{link.knownVersion}</span>
+                  )}
                   <span className="text-[11px] opacity-50 hidden sm:inline">
                     — {STAGE_DESCRIPTION[stage]}
                   </span>

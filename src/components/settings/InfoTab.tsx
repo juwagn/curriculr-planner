@@ -5,6 +5,50 @@ type ChangelogEntry = { version: string; date: string; highlights: string[] };
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.15.0',
+    date: '15.07.2026',
+    highlights: [
+      'Warnbox im Veröffentlichen-Tab, wenn Planner-Gruppen noch keinen eigenen WordPress-Kalender haben, plus IServ-Abo-Checkliste',
+      'Neue Anleitung zum Kalender-Abonnieren (IServ, iPhone, Android)',
+      'Zusammenspiel mit WordPress-Plugin 4.33.0: Kategorien- und Gruppen-Synchronisation, Gruppen-Filter im Terminplan',
+    ],
+  },
+  {
+    version: '1.14.1',
+    date: '15.07.2026',
+    highlights: [
+      'Update-Banner erschien nicht, wenn derselbe Account von einem anderen Gerät/Browser aus gespeichert hatte — zeigt jetzt korrekt „Du (anderes Gerät)" an',
+    ],
+  },
+  {
+    version: '1.14.0',
+    date: '15.07.2026',
+    highlights: [
+      'Veröffentlichungsstatus-Pille zeigt in einem Popover, wer zuletzt gespeichert/veröffentlicht hat (Autor, Version, Zeitpunkt) plus Link zum Live-Kalender',
+      'Plan direkt im Editor-Header umbenennbar (Stift-Symbol neben dem Plan-Namen)',
+    ],
+  },
+  {
+    version: '1.13.0',
+    date: '15.07.2026',
+    highlights: [
+      'Schuljahr-Schlüssel wird deterministisch aus dem Schuljahr-Label abgeleitet statt aus der zufälligen Geräte-ID — Kolleg:innen landen zuverlässig auf demselben WordPress-Dokument',
+      'WordPress-Planliste im Plan-Wechsler: Server-Pläne direkt öffnen',
+      'Update-Banner mit Direkt-Laden-Button, wenn der Server eine neuere Version hat',
+      'Sichtbare Warnung bei abgelaufener Anmeldesitzung, statt stillem Verstummen',
+    ],
+  },
+  {
+    version: '1.12.0',
+    date: '07.07.2026',
+    highlights: [
+      'Server-Antwort beim Laden wird jetzt validiert (Zod-Schema) statt ungeprüft übernommen',
+      'Tastatur-Bedienung für Drag-and-Drop (WCAG 2.1.1) mit deutschen Screenreader-Ansagen',
+      'ICS-Export: byte-genaue RFC-5545-Zeilenfaltung',
+      'Datenschutz-Hinweis zu OpenHolidays in den Info-Tab ergänzt',
+    ],
+  },
+  {
     version: '1.11.0',
     date: '01.07.2026',
     highlights: [

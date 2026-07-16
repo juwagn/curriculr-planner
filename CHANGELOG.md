@@ -5,6 +5,93 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.15.0] – 2026-07-15 — „Kategorien- & Gruppen-Sync mit WordPress"
+
+### Hinzugefügt
+- **Warnbox im Veröffentlichen-Tab**, wenn Planner-Gruppen noch keinen eigenen WordPress-Kalender haben, plus IServ-Abo-Checkliste.
+- **Anleitung zum Kalender-Abonnieren** (IServ, iPhone, Android) unter `docs/kalender-abo-anleitung.md`.
+
+### Geändert
+- Zusammenspiel mit WordPress-Plugin 4.33.0: Kategorien- und Gruppen-Synchronisation, Gruppen-Filter im Terminplan.
+
+---
+
+## [1.14.1] – 2026-07-15
+
+### Behoben
+- Update-Banner erschien nicht, wenn derselbe Account von einem anderen Gerät/Browser aus gespeichert hatte — zeigt jetzt korrekt „Du (anderes Gerät)" an.
+
+---
+
+## [1.14.0] – 2026-07-15 — „Veröffentlichungs-Popover & Plan umbenennen"
+
+### Hinzugefügt
+- **Veröffentlichungsstatus-Pille** zeigt in einem Popover, wer zuletzt gespeichert/veröffentlicht hat (Autor, Version, Zeitpunkt) plus Link zum Live-Kalender.
+- **Plan umbenennen** direkt im Editor-Header (Stift-Symbol neben dem Plan-Namen).
+
+---
+
+## [1.13.0] – 2026-07-15 — „Gemeinsamer Schuljahr-Schlüssel"
+
+### Geändert
+- Schuljahr-Schlüssel wird deterministisch aus dem Schuljahr-Label abgeleitet statt aus der zufälligen Geräte-ID — Kolleg:innen landen zuverlässig auf demselben WordPress-Dokument statt versehentlich getrennter Kopien.
+
+### Hinzugefügt
+- **WordPress-Planliste im Plan-Wechsler**: Server-Pläne direkt öffnen, nicht nur über den Willkommens-Bildschirm.
+- **Update-Banner** mit Direkt-Laden-Button, wenn der Server eine neuere Version hat.
+- Sichtbare Warnung bei abgelaufener Anmeldesitzung, statt stillem Verstummen.
+
+---
+
+## [1.12.0] – 2026-07-07 — „Sync-Absicherung & Tastatur-Bedienung"
+
+### Geändert
+- Server-Antwort beim Laden wird validiert (Zod-Schema) statt ungeprüft übernommen; `PushResult` als discriminated union.
+- CSP `connect-src` fest verdrahtet (openholidaysapi.org + optionaler WP-Origin).
+
+### Hinzugefügt
+- **Tastatur-Bedienung** für Drag-and-Drop (WCAG 2.1.1) mit deutschen Screenreader-Ansagen.
+
+### Behoben
+- ICS-Export: CR wird entfernt, byte-genaue RFC-5545-Zeilenfaltung.
+- Datenschutz-Hinweis zu OpenHolidays im Info-Tab ergänzt.
+
+---
+
+## [1.11.0] – 2026-07-01 — „Navigations- und Veröffentlichungs-Redesign"
+
+### Hinzugefügt
+- **Neue Navigationsstruktur**: 7 Tabs in 3 Gruppen (Inhalt / Ausgabe / Info).
+- **StatusBar**: Veröffentlichungs-Stufe und letzter Push immer sichtbar im Editor.
+- **Veröffentlichen-Dialog** mit Sichtbarkeits-Auswahl (Entwurf / Intern / Öffentlich).
+- Veröffentlichung & Export: WordPress, Kalender-Einrichtung, Export und Import in einem Tab.
+
+### Geändert
+- Stage-Begriff „Genehmigt" umbenannt in „Intern" (beschreibt Sichtbarkeit, nicht Prozess).
+
+---
+
+## [1.10.0] – 2026-06-30 — „Gruppen-Kalender Provisioning"
+
+### Hinzugefügt
+- **Gruppen-Kalender einrichten**: pro Gruppe eigener ICS-Feed-Link für IServ-Abo.
+
+### Geändert
+- Kalender-Konfiguration nur bei angemeldeter WordPress-Verbindung sichtbar.
+
+---
+
+## [1.9.0] – 2026-06-20 — „Willkommensseite & WordPress-Direktladen"
+
+### Hinzugefügt
+- **Willkommensseite neu gestaltet**: BrandPanel mit Login, Zwei-Spalten-Auswahl (Neuer Plan / aus WordPress laden).
+- Plan direkt von WordPress laden möglich, ohne vorherigen lokalen Plan.
+
+### Behoben
+- Ganztägige Termine per Tages-Klick zeigen keine falsche Uhrzeit mehr.
+
+---
+
 ## [1.8.0] – 2026-06-13 — „Design-Vereinheitlichung Phase 1"
 
 ### Behoben
@@ -176,6 +263,15 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
   Wochentabelle, Kategorien/Gruppen, Notizen, Export als ICS / JSON / Excel.
 - MIT-Lizenz.
 
+[1.15.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.15.0
+[1.14.1]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.14.1
+[1.14.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.14.0
+[1.13.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.13.0
+[1.12.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.12.0
+[1.11.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.11.0
+[1.10.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.10.0
+[1.9.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.9.0
+[1.8.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.8.0
 [1.7.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.7.0
 [1.6.0]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.6.0
 [1.5.1]: https://github.com/juwagn/curriculr-planner/releases/tag/v1.5.1

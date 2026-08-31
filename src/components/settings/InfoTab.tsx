@@ -1,9 +1,18 @@
 const REPO_URL    = 'https://github.com/juwagn/curriculr-planner';
-const APP_VERSION = '1.15.1';
+const APP_VERSION = '1.16.0';
 
 type ChangelogEntry = { version: string; date: string; highlights: string[] };
 
 const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.16.0',
+    date: '31.08.2026',
+    highlights: [
+      'WordPress- und Kiosk-Anmerkungen bleiben auch hinter vollständigen Ferienwochen in der richtigen Woche',
+      'Mehrere Anmerkungen pro Schulwoche einzeln bearbeiten, löschen, verschieben und per Drag-and-Drop sortieren',
+      'Anmerkungs-Schema v6 mit stabilem Wochenmontag, Legacy-Migration sowie aktualisierten Druck- und Excel-Ausgaben',
+    ],
+  },
   {
     version: '1.15.0',
     date: '15.07.2026',

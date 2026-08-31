@@ -147,8 +147,8 @@ describe('suggestQuarterBoundaries', () => {
     const doc = {
       schoolyear: sy,
       annotations: [
-        { schoolweek: q1Week.index, text: 'Ende 1. Quartal', updatedAt: '' },
-        { schoolweek: q2Week.index, text: 'foo Ende 2. Quartal bar', updatedAt: '' }
+        { id: 'q1', weekStart: q1Week.startDate, text: 'Ende 1. Quartal', order: 0, updatedAt: '' },
+        { id: 'q2', weekStart: q2Week.startDate, text: 'foo Ende 2. Quartal bar', order: 0, updatedAt: '' }
       ]
     } as unknown as PlannerDocument;
     const out = suggestQuarterBoundaries(doc);
@@ -160,7 +160,7 @@ describe('suggestQuarterBoundaries', () => {
   it('returns all nulls when no matching annotations exist', () => {
     const doc = {
       schoolyear: sy,
-      annotations: [{ schoolweek: 5, text: 'Elternabend', updatedAt: '' }]
+      annotations: [{ id: 'note', weekStart: '2026-10-05', text: 'Elternabend', order: 0, updatedAt: '' }]
     } as unknown as PlannerDocument;
     const out = suggestQuarterBoundaries(doc);
     expect(out).toEqual([null, null, null]);

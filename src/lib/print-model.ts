@@ -3,6 +3,7 @@ import { de } from 'date-fns/locale';
 import { computeWeekRows, getQuarterRange, getQuarterForDate, isHoliday } from './schoolweeks';
 import type { PlannerDocument } from '@/types';
 import type { WeekRow } from './schoolweeks';
+import { annotationsForWeek } from './annotations';
 
 export type PrintScope = 'currentQuarter' | 'allQuarters';
 
@@ -101,14 +102,17 @@ function buildSection(
       cells[dayIdx].ferien = hol?.type === 'ferien';
     }
 
-    const annotation = doc.annotations.find((a) => a.schoolweek === row.index);
+    const annotation = annotationsForWeek(doc.annotations, row.startDate)
+      .map((item) => item.text)
+      .filter((text) => text.trim().length > 0)
+      .join('\n');
 
     return {
       type: 'week',
       swIndex: row.index.toString().padStart(2, '0'),
       dateRange: `${fmtDot(row.startDate)}–${fmtDot(row.endDate)}`,
       cells,
-      annotation: annotation?.text
+      annotation: annotation || undefined
     } satisfies PrintWeekRow;
   });
 

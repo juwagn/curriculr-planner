@@ -49,8 +49,12 @@ export interface PlanEvent {
 }
 
 export interface WeekAnnotation {
-  schoolweek: number;
+  id: UUID;
+  /** Monday of the annotated school week; stable across holiday weeks. */
+  weekStart: ISODate;
   text: string;
+  /** Stable order inside one week. */
+  order: number;
   updatedAt: string;
 }
 
@@ -66,7 +70,7 @@ export interface EventTemplate {
 }
 
 export interface PlannerDocument {
-  version: 5;
+  version: 6;
   schoolyear: Schoolyear;
   categories: Category[];
   events: PlanEvent[];

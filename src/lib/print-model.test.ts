@@ -4,7 +4,7 @@ import type { PlannerDocument } from '@/types';
 
 // Minimal fixture document covering two school weeks + one holiday week
 const DOC: PlannerDocument = {
-  version: 5,
+  version: 6,
   schoolyear: {
     id: 'sy1',
     label: '2025/26',
@@ -31,7 +31,7 @@ const DOC: PlannerDocument = {
     { id: 'e3', title: 'Projekttage', start: '2025-09-01', end: '2025-09-03', allDay: true, categoryId: 'cat1', groups: [] }
   ],
   annotations: [
-    { schoolweek: 0, text: 'Begrüßungswoche', updatedAt: '2025-01-01T00:00:00Z' }
+    { id: 'note-1', weekStart: '2025-09-01', text: 'Begrüßungswoche', order: 0, updatedAt: '2025-01-01T00:00:00Z' }
   ],
   availableGroups: [],
   ignoredConflicts: [],

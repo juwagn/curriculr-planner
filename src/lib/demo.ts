@@ -43,7 +43,7 @@ export function createDemoDoc(): PlannerDocument {
   ];
 
   return {
-    version: 5,
+    version: 6,
     schoolyear: {
       id: 'demo-2026-27',
       label: '2026/27',
@@ -63,8 +63,8 @@ export function createDemoDoc(): PlannerDocument {
     categories: CATEGORIES,
     events,
     annotations: [
-      { schoolweek: 0, text: 'Schuljahresbeginn – Klassenleitungen organisieren', updatedAt: now },
-      { schoolweek: 5, text: 'Elternabende laufen', updatedAt: now }
+      { id: 'demo-note-1', weekStart: '2026-08-10', text: 'Schuljahresbeginn – Klassenleitungen organisieren', order: 0, updatedAt: now },
+      { id: 'demo-note-2', weekStart: '2026-09-14', text: 'Elternabende laufen', order: 0, updatedAt: now }
     ],
     availableGroups: ['Kollegium', 'Eltern', 'Klassen 5-7', 'Klassen 8-10', 'Sek I', 'Sek II'],
     ignoredConflicts: [],

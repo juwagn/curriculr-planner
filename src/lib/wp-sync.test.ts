@@ -58,7 +58,7 @@ describe('wp-sync client', () => {
     expect(r.status).toBe('conflict');
     if (r.status !== 'conflict') throw new Error('expected conflict');
     expect(r.serverVersion).toBe(5);
-    expect(r.serverDoc).toMatchObject({ version: 5 });
+    expect(r.serverDoc).toMatchObject({ version: 6 });
   });
 
   it('pushDoc 409 with invalid server doc returns error', async () => {
@@ -97,13 +97,13 @@ describe('wp-sync client', () => {
 
   it('fetchDoc 200 returns doc and version', async () => {
     const sy = { id: 'sy1', label: 'Test', firstSchoolDay: '2026-08-01', firstTeachingDay: '2026-08-03', lastSchoolDay: '2027-07-15', holidays: [], quarterBoundaries: ['2026-10-01', '2026-12-15', '2027-03-01'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' };
-    const wpDoc = { version: 5, schoolyear: sy, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Test', lastSaved: '2026-01-01T00:00:00Z' } };
+    const wpDoc = { version: 6, schoolyear: sy, categories: [], events: [], annotations: [], availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Test', lastSaved: '2026-01-01T00:00:00Z' } };
     const f = (async () => fakeRes(200, { version: 7, stage: 'oeffentlich', doc: wpDoc })) as unknown as typeof fetch;
     const r = await fetchDoc(cfg, 'sj_2026_27', token, f);
     expect(r.exists).toBe(true);
     expect(r.version).toBe(7);
     expect(r.stage).toBe('oeffentlich');
-    expect(r.doc).toMatchObject({ version: 5 });
+    expect(r.doc).toMatchObject({ version: 6 });
   });
 
   it('fetchDoc 401 returns BAD_TOKEN message', async () => {
@@ -136,7 +136,7 @@ describe('wp-sync client', () => {
     const f = (async () => fakeRes(200, { version: 7, stage: 'oeffentlich', doc: oldDoc })) as unknown as typeof fetch;
     const r = await fetchDoc(cfg, 'sj_2026_27', token, f);
     expect(r.exists).toBe(true);
-    expect(r.doc?.version).toBe(5);
+    expect(r.doc?.version).toBe(6);
     expect(r.doc?.schoolyear.holidays[0].type).toBe('ferien');
   });
 

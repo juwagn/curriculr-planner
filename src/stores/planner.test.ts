@@ -103,12 +103,31 @@ describe('usePlannerStore', () => {
     expect(usePlannerStore.getState().doc?.events).toHaveLength(0);
   });
 
-  it('sets annotation for schoolweek', () => {
+  it('adds and moves annotations by Monday week start', () => {
     const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
     usePlannerStore.getState().setDoc(doc);
-    usePlannerStore.getState().setAnnotation(2, 'FK-Woche');
-    const ann = usePlannerStore.getState().doc?.annotations.find((a) => a.schoolweek === 2);
-    expect(ann?.text).toBe('FK-Woche');
+    const first = usePlannerStore.getState().addAnnotation('2026-09-07', 'FK-Woche');
+    const second = usePlannerStore.getState().addAnnotation('2026-09-07', 'Elternabend');
+    usePlannerStore.getState().moveAnnotation(first, '2026-09-14');
+    usePlannerStore.getState().reorderAnnotations('2026-09-07', [second]);
+    const annotations = usePlannerStore.getState().doc?.annotations ?? [];
+    expect(annotations.find((annotation) => annotation.id === first)).toMatchObject({ weekStart: '2026-09-14', text: 'FK-Woche' });
+    expect(annotations.find((annotation) => annotation.id === second)).toMatchObject({ weekStart: '2026-09-07', order: 0 });
+  });
+
+  it('normalizes order after deletion and does not create duplicates when adding again', () => {
+    const doc = createEmptyDoc('Test', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    usePlannerStore.getState().setDoc(doc);
+    const first = usePlannerStore.getState().addAnnotation('2026-09-07', 'Erste');
+    const middle = usePlannerStore.getState().addAnnotation('2026-09-07', 'Mitte');
+    const last = usePlannerStore.getState().addAnnotation('2026-09-07', 'Letzte');
+    usePlannerStore.getState().deleteAnnotation(middle);
+    const added = usePlannerStore.getState().addAnnotation('2026-09-07', 'Neu');
+    const notes = usePlannerStore.getState().doc!.annotations
+      .filter((annotation) => annotation.weekStart === '2026-09-07')
+      .sort((left, right) => left.order - right.order);
+    expect(notes.map((annotation) => annotation.id)).toEqual([first, last, added]);
+    expect(notes.map((annotation) => annotation.order)).toEqual([0, 1, 2]);
   });
 
   it('createEmptyDoc produces 7 default categories', () => {

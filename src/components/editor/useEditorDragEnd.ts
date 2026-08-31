@@ -7,15 +7,27 @@ const TEMPLATE_PREFIX = 'template:';
 
 /**
  * Shared drag-end handler for the editor views (WeekTable + YearGrid). Handles
- * three drag sources, all dropping onto day cells (`data.type === 'cell'`):
+ * drag sources. Events/templates drop onto day cells (`data.type === 'cell'`);
+ * annotations drop onto week cells/cards:
  *  - template chips from TemplatesSidebar → create event from template
  *  - resize-end handles → extend an event's end date
  *  - event blocks → move an event (preserving its span)
+ *  - annotation cards → move or place one note before another note
  */
 export function handleEditorDragEnd(e: DragEndEvent): void {
   const { active, over } = e;
   if (!over) return;
-  const overData = over.data.current as { type?: string; iso?: string } | undefined;
+  const overData = over.data.current as { type?: string; iso?: string; weekStart?: string; annotationId?: string } | undefined;
+  const activeData = active.data.current as { type?: string; eventId?: string; annotationId?: string } | undefined;
+
+  if (activeData?.type === 'annotation') {
+    if (overData?.weekStart && activeData.annotationId) {
+      const beforeId = overData.type === 'annotation-card' ? overData.annotationId : undefined;
+      usePlannerStore.getState().moveAnnotation(activeData.annotationId, overData.weekStart, beforeId);
+    }
+    return;
+  }
+
   if (overData?.type !== 'cell' || !overData.iso) return;
   const dropIso = overData.iso;
 
@@ -30,7 +42,6 @@ export function handleEditorDragEnd(e: DragEndEvent): void {
     return;
   }
 
-  const activeData = active.data.current as { type?: string; eventId?: string } | undefined;
   const doc = usePlannerStore.getState().doc;
   if (!doc) return;
   const updateEvent = usePlannerStore.getState().updateEvent;

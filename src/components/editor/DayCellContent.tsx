@@ -1,6 +1,7 @@
 import { format, getDay, parseISO } from 'date-fns';
 import { findSchoolweek, type SchoolweekRange } from '@/lib/schoolweeks';
 import type { WeekAnnotation } from '@/types';
+import { annotationsForWeek } from '@/lib/annotations';
 
 interface Props {
   date: Date;
@@ -23,8 +24,8 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
     return <span className="text-[13px] tabular-nums">{dayNum}</span>;
   }
 
-  const annotation = annotations.find((a) => a.schoolweek === sw.index);
-  const hasNote = !!annotation && annotation.text.trim().length > 0;
+  const notes = annotationsForWeek(annotations, sw.startDate).filter((annotation) => annotation.text.trim().length > 0);
+  const hasNote = notes.length > 0;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -50,9 +51,9 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
             : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-500)] hover:bg-[var(--color-paper-bg)]/60'
         }`}
         style={{ transitionDuration: 'var(--dur-state)' }}
-        title={hasNote ? `SW ${sw.index}: ${annotation!.text.slice(0, 50)}` : `Anmerkung zu SW ${sw.index} hinzufügen`}
+        title={hasNote ? `SW ${sw.index}: ${notes.length} Anmerkung${notes.length === 1 ? '' : 'en'}` : `Anmerkung zu SW ${sw.index} hinzufügen`}
       >
-        📝
+        {hasNote ? notes.length : '📝'}
       </button>
     </span>
   );

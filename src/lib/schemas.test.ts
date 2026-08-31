@@ -66,7 +66,7 @@ describe('PlanEventSchema', () => {
 describe('PlannerDocumentSchema', () => {
   it('accepts complete document', () => {
     const doc = {
-      version: 5,
+      version: 6,
       schoolyear: {
         id: 'sy',
         label: '2026/27',
@@ -108,7 +108,7 @@ describe('migrate v1 -> v2 -> v3', () => {
 
   it('chains v1 all the way to v4 (adds ignoredConflicts + templates)', () => {
     const migrated = migrate(v1Doc);
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(6);
     expect(migrated.ignoredConflicts).toEqual([]);
     expect(migrated.templates).toEqual([]);
   });
@@ -116,7 +116,7 @@ describe('migrate v1 -> v2 -> v3', () => {
   it('migrates a v2 doc to v4', () => {
     const v2 = { ...v1Doc, version: 2, ignoredConflicts: ['x'] };
     const migrated = migrate(v2);
-    expect(migrated.version).toBe(5);
+    expect(migrated.version).toBe(6);
     expect(migrated.ignoredConflicts).toEqual(['x']);
     expect(migrated.templates).toEqual([]);
   });
@@ -143,14 +143,14 @@ describe('migrate v2 → v3', () => {
   it('adds templates: [] to a v2 doc and chains to v4', () => {
     const v2 = { version: 2, ignoredConflicts: [] };
     const out = migrate(v2);
-    expect(out.version).toBe(5);
+    expect(out.version).toBe(6);
     expect(out.templates).toEqual([]);
   });
 
   it('chains v1 → v4 (ignoredConflicts AND templates added)', () => {
     const v1 = { version: 1 };
     const out = migrate(v1);
-    expect(out.version).toBe(5);
+    expect(out.version).toBe(6);
     expect(out.ignoredConflicts).toEqual([]);
     expect(out.templates).toEqual([]);
   });
@@ -158,7 +158,7 @@ describe('migrate v2 → v3', () => {
   it('leaves an existing templates array untouched when migrating v3 → v4', () => {
     const v3 = { version: 3, ignoredConflicts: [], templates: [{ id: 't1' }] };
     const out = migrate(v3);
-    expect(out.version).toBe(5);
+    expect(out.version).toBe(6);
     expect(out.templates).toEqual([{ id: 't1' }]);
   });
 });
@@ -190,12 +190,58 @@ describe('migrate v3 → v4', () => {
 
   it('bumps version to 4 and defaults holiday.type to ferien', () => {
     const out = migrate(v3Doc) as typeof v3Doc & { version: number };
-    expect(out.version).toBe(5);
+    expect(out.version).toBe(6);
     expect((out.schoolyear.holidays[0] as unknown as { type: string }).type).toBe('ferien');
   });
 
   it('migrated doc passes the current schema', () => {
     const out = migrate(v3Doc);
     expect(() => PlannerDocumentSchema.parse(out)).not.toThrow();
+  });
+});
+
+describe('migrate v5 → v6 annotations', () => {
+  it('maps v4 indices directly across the later SW00 exception and into v6', () => {
+    const doc = migrate({
+      version: 4,
+      schoolyear: {
+        id: 'sy', label: '2026/27', firstSchoolDay: '2026-08-24', firstTeachingDay: '2026-08-24', lastSchoolDay: '2026-09-11',
+        holidays: [{ id: 'summer', label: 'Sommerferien', start: '2026-08-24', end: '2026-08-28', type: 'ferien' }],
+        quarterBoundaries: ['2026-09-11', '2026-09-11', '2026-09-11'], createdAt: '', updatedAt: ''
+      },
+      categories: [], events: [], annotations: [{ schoolweek: 0, text: 'Erste freie Woche', updatedAt: '' }],
+      availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Plan', lastSaved: '' }
+    });
+    expect(doc).toMatchObject({ version: 6, annotations: [{ weekStart: '2026-08-31', text: 'Erste freie Woche' }] });
+  });
+
+  it('maps legacy SW 11 behind two full autumn holiday weeks to 2026-11-23', () => {
+    const doc = migrate({
+      version: 5,
+      schoolyear: {
+        id: 'sy', label: '2026/27', firstSchoolDay: '2026-08-24', firstTeachingDay: '2026-08-24', lastSchoolDay: '2027-07-16',
+        holidays: [{ id: 'autumn', label: 'Herbstferien', start: '2026-10-19', end: '2026-10-30', type: 'ferien' }],
+        quarterBoundaries: ['2026-10-30', '2027-01-29', '2027-04-09'], createdAt: '', updatedAt: ''
+      },
+      categories: [], events: [], annotations: [{ schoolweek: 11, text: 'TaTü', updatedAt: 'now' }],
+      availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Plan', lastSaved: '' }
+    });
+    expect(doc).toMatchObject({ version: 6, annotations: [{ weekStart: '2026-11-23', text: 'TaTü', order: 0 }] });
+  });
+
+  it('keeps partial holiday weeks and the full first week as valid school weeks', () => {
+    const doc = migrate({
+      version: 5,
+      schoolyear: {
+        id: 'sy', label: '2026/27', firstSchoolDay: '2026-08-24', firstTeachingDay: '2026-08-24', lastSchoolDay: '2026-09-18',
+        holidays: [
+          { id: 'summer', label: 'Sommerferien', start: '2026-08-24', end: '2026-08-28', type: 'ferien' },
+          { id: 'partial', label: 'Brückentage', start: '2026-09-09', end: '2026-09-11', type: 'ferien' }
+        ], quarterBoundaries: ['2026-09-18', '2026-09-18', '2026-09-18'], createdAt: '', updatedAt: ''
+      },
+      categories: [], events: [], annotations: [{ schoolweek: 0, text: 'Start', updatedAt: '' }, { schoolweek: 2, text: 'Teilferien', updatedAt: '' }],
+      availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Plan', lastSaved: '' }
+    });
+    expect(doc).toMatchObject({ annotations: [{ weekStart: '2026-08-24' }, { weekStart: '2026-09-07' }] });
   });
 });

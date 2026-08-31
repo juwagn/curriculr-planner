@@ -1,14 +1,16 @@
 import { useMemo, useState, useRef, useLayoutEffect } from 'react';
-import { useDroppable } from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore, type Density } from '@/stores/ui';
 import { computeWeekRows, getQuarterForDate, isHoliday, type WeekRow } from '@/lib/schoolweeks';
-import type { Category, PlanEvent } from '@/types';
+import type { Category, PlanEvent, WeekAnnotation } from '@/types';
 import { useConflicts, conflictsByEvent } from '@/hooks/useConflicts';
 import type { Conflict } from '@/lib/conflicts';
 import { EventBlock } from './EventBlock';
 import { NotePopover } from './NotePopover';
+import { annotationsForWeek } from '@/lib/annotations';
+import { GripVertical } from 'lucide-react';
 
 const DAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr'];
 const HOLIDAY_ROW_HEIGHT = 56;
@@ -119,16 +121,53 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeig
   );
 }
 
+interface AnnotationCardProps {
+  annotation: WeekAnnotation;
+  weekStart: string;
+  onClick(id: string): void;
+}
+
+function AnnotationCard({ annotation, weekStart, onClick }: AnnotationCardProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `annotation:${annotation.id}`,
+    data: { type: 'annotation', annotationId: annotation.id }
+  });
+  const { isOver, setNodeRef: setDropRef } = useDroppable({
+    id: `annotation-card:${annotation.id}`,
+    data: { type: 'annotation-card', annotationId: annotation.id, weekStart }
+  });
+  return (
+    <div ref={setDropRef} className={isOver ? 'rounded-[var(--radius-block)] ring-2 ring-[var(--color-marine-800)]' : undefined}>
+      <div ref={setNodeRef} style={{ transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined, opacity: isDragging ? 0.45 : undefined }}
+        className="flex min-h-9 items-start rounded-[var(--radius-block)] border border-[var(--color-gelb-200)] bg-[var(--color-gelb-100)] text-[12px] text-[var(--color-ink-900)] shadow-sm">
+      <button type="button" aria-label="Anmerkung ziehen" {...attributes} {...listeners}
+        onClick={(event) => event.stopPropagation()}
+        className="flex min-h-9 w-9 shrink-0 cursor-grab touch-none items-center justify-center text-[var(--color-ink-500)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--color-marine-800)] active:cursor-grabbing">
+        <GripVertical className="h-4 w-4" aria-hidden="true" />
+      </button>
+      <button type="button" onClick={(event) => { event.stopPropagation(); onClick(annotation.id); }}
+        className="min-h-9 min-w-0 flex-1 whitespace-pre-line px-1.5 py-1 text-left leading-[1.35] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--color-marine-800)]">
+        {annotation.text}
+      </button>
+      </div>
+    </div>
+  );
+}
+
 interface AnnotationCellProps {
-  text: string;
+  weekStart: string;
+  annotations: WeekAnnotation[];
   onClick(): void;
+  onEdit(id: string): void;
   rowHeight: number;
 }
 
-function AnnotationCell({ text, onClick, rowHeight }: AnnotationCellProps) {
-  const hasNote = text.trim().length > 0;
+function AnnotationCell({ weekStart, annotations, onClick, onEdit, rowHeight }: AnnotationCellProps) {
+  const { isOver, setNodeRef } = useDroppable({ id: `annotation-cell:${weekStart}`, data: { type: 'annotation-cell', weekStart } });
+  const hasNote = annotations.some((annotation) => annotation.text.trim().length > 0);
   return (
     <td
+      ref={setNodeRef}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
@@ -136,10 +175,10 @@ function AnnotationCell({ text, onClick, rowHeight }: AnnotationCellProps) {
       className={`group align-top border-b border-[var(--color-ink-200)] px-2 py-1.5 cursor-pointer text-[13px] leading-[1.5] text-[var(--color-ink-900)] transition-colors ${
         hasNote ? 'bg-[var(--color-gelb-100)]' : 'bg-[var(--color-paper-card)] hover:bg-[var(--color-paper-bg)]/60'
       }`}
-      style={{ width: 180, minHeight: rowHeight, height: rowHeight, transitionDuration: 'var(--dur-state)', transitionTimingFunction: 'var(--ease-state)' }}
+      style={{ width: 180, minHeight: rowHeight, height: rowHeight, transitionDuration: 'var(--dur-state)', transitionTimingFunction: 'var(--ease-state)', ...(isOver ? { boxShadow: 'inset 0 0 0 2px var(--color-marine-800)' } : {}) }}
     >
       {hasNote ? (
-        <div className="whitespace-pre-line">{text}</div>
+        <div className="flex flex-col gap-1">{annotations.filter((annotation) => annotation.text.trim().length > 0).map((annotation) => <AnnotationCard key={annotation.id} annotation={annotation} weekStart={weekStart} onClick={onEdit} />)}</div>
       ) : (
         <span className="text-[11px] text-[var(--color-ink-500)] opacity-0 group-hover:opacity-100 transition-opacity">
           📝 Notiz hinzufügen
@@ -154,6 +193,7 @@ export function WeekTable() {
   const currentQuarter = useUiStore((s) => s.currentQuarter);
   const density = useUiStore((s) => s.density);
   const [notePopoverSw, setNotePopoverSw] = useState<number | null>(null);
+  const [notePopoverId, setNotePopoverId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoHeight, setAutoHeight] = useState<number>(110);
 
@@ -354,7 +394,7 @@ export function WeekTable() {
                   </tr>
                 );
               }
-              const annotation = doc.annotations.find((a) => a.schoolweek === row.index);
+              const annotations = annotationsForWeek(doc.annotations, row.startDate);
               return (
                 <tr key={`sw-${row.index}`} className="hover:bg-[var(--color-paper-bg)]/40 transition-colors" style={{ height: rowHeight, transitionDuration: 'var(--dur-state)' }}>
                   <td className="bg-[var(--color-paper-bg)]/60 border-r border-b border-[var(--color-ink-200)] text-center align-middle text-[15px] font-bold tabular-nums text-[var(--color-ink-900)]">
@@ -384,8 +424,10 @@ export function WeekTable() {
                     );
                   })}
                   <AnnotationCell
-                    text={annotation?.text ?? ''}
-                    onClick={() => setNotePopoverSw(row.index)}
+                    weekStart={row.startDate}
+                    annotations={annotations}
+                    onClick={() => { setNotePopoverId(null); setNotePopoverSw(row.index); }}
+                    onEdit={(id) => { setNotePopoverId(id); setNotePopoverSw(row.index); }}
                     rowHeight={rowHeight}
                   />
                 </tr>
@@ -396,13 +438,13 @@ export function WeekTable() {
       </div>
       </div>
       <NotePopover
-        schoolweek={notePopoverSw}
         week={
           popoverWeek && popoverWeek.kind === 'schoolweek'
             ? { index: popoverWeek.index, startDate: popoverWeek.startDate, endDate: popoverWeek.endDate }
             : null
         }
-        onClose={() => setNotePopoverSw(null)}
+        annotationId={notePopoverId}
+        onClose={() => { setNotePopoverSw(null); setNotePopoverId(null); }}
       />
     </>
   );

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { storage } from '@/lib/storage';
 import { useHistoryStore } from './history';
-import type { PlannerDocument, PlanEvent, Category, EventTemplate, UUID, ISODate } from '@/types';
+import type { PlannerDocument, PlanEvent, Category, EventTemplate, WeekAnnotation, UUID, ISODate } from '@/types';
+import { annotationsForWeek, mondayOfWeek } from '@/lib/annotations';
 
 const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: ['konferenz', 'fk'] },
@@ -28,7 +29,7 @@ export function createEmptyDoc(
 ): PlannerDocument {
   const now = new Date().toISOString();
   return {
-    version: 5,
+    version: 6,
     schoolyear: {
       id: uid(),
       label,
@@ -65,8 +66,11 @@ interface PlannerState {
   updateEvent(id: UUID, patch: Partial<PlanEvent>): void;
   deleteEvent(id: UUID): void;
 
-  setAnnotation(schoolweek: number, text: string): void;
-  deleteAnnotation(schoolweek: number): void;
+  addAnnotation(weekStart: ISODate, text: string): UUID;
+  updateAnnotation(id: UUID, patch: Pick<WeekAnnotation, 'text'>): void;
+  deleteAnnotation(id: UUID): void;
+  moveAnnotation(id: UUID, weekStart: ISODate, beforeId?: UUID): void;
+  reorderAnnotations(weekStart: ISODate, annotationIds: UUID[]): void;
 
   updateSchoolyear(patch: Partial<PlannerDocument['schoolyear']>): void;
   updateCategories(cats: Category[]): void;
@@ -87,7 +91,7 @@ interface PlannerState {
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
-let lastAnnoWeek: number | null = null;
+let lastAnnotationId: string | null = null;
 
 function debouncedSave(get: () => PlannerState) {
   if (saveTimer) clearTimeout(saveTimer);
@@ -108,7 +112,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
   setDoc(doc) {
     set({ doc });
     useHistoryStore.getState().reset();
-    lastAnnoWeek = null;
+    lastAnnotationId = null;
   },
 
   async loadDoc(id) {
@@ -134,7 +138,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc) return;
     snapshot(get);
-    lastAnnoWeek = null;
+    lastAnnotationId = null;
     set({ doc: { ...doc, events: [...doc.events, e] } });
     debouncedSave(get);
   },
@@ -143,7 +147,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc || list.length === 0) return;
     snapshot(get);
-    lastAnnoWeek = null;
+    lastAnnotationId = null;
     set({ doc: { ...doc, events: [...doc.events, ...list] } });
     debouncedSave(get);
   },
@@ -152,7 +156,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc) return;
     snapshot(get);
-    lastAnnoWeek = null;
+    lastAnnotationId = null;
     set({
       doc: {
         ...doc,
@@ -166,35 +170,124 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const doc = get().doc;
     if (!doc) return;
     snapshot(get);
-    lastAnnoWeek = null;
+    lastAnnotationId = null;
     set({ doc: { ...doc, events: doc.events.filter((e) => e.id !== id) } });
     debouncedSave(get);
   },
 
-  setAnnotation(schoolweek, text) {
+  addAnnotation(weekStart, text) {
+    const doc = get().doc;
+    if (!doc) return '';
+    snapshot(get);
+    lastAnnotationId = null;
+    const normalizedWeekStart = mondayOfWeek(weekStart);
+    const currentWeek = annotationsForWeek(doc.annotations, normalizedWeekStart);
+    const normalizedExisting = new Map(currentWeek.map((item, order) => [item.id, order]));
+    const annotation: WeekAnnotation = {
+      id: uid(), weekStart: normalizedWeekStart, text,
+      order: currentWeek.length,
+      updatedAt: new Date().toISOString()
+    };
+    set({
+      doc: {
+        ...doc,
+        annotations: [...doc.annotations.map((item) =>
+          item.weekStart === normalizedWeekStart
+            ? { ...item, order: normalizedExisting.get(item.id) ?? item.order }
+            : item
+        ), annotation]
+      }
+    });
+    debouncedSave(get);
+    return annotation.id;
+  },
+
+  updateAnnotation(id, patch) {
     const doc = get().doc;
     if (!doc) return;
-    if (schoolweek !== lastAnnoWeek) {
+    if (lastAnnotationId !== id) {
       snapshot(get);
-      lastAnnoWeek = schoolweek;
+      lastAnnotationId = id;
     }
-    const updatedAt = new Date().toISOString();
-    const existing = doc.annotations.find((a) => a.schoolweek === schoolweek);
-    const annotations = existing
-      ? doc.annotations.map((a) => (a.schoolweek === schoolweek ? { ...a, text, updatedAt } : a))
-      : [...doc.annotations, { schoolweek, text, updatedAt }];
-    set({ doc: { ...doc, annotations } });
+    set({ doc: { ...doc, annotations: doc.annotations.map((annotation) => annotation.id === id ? { ...annotation, ...patch, updatedAt: new Date().toISOString() } : annotation) } });
     debouncedSave(get);
   },
 
-  deleteAnnotation(schoolweek) {
+  deleteAnnotation(id) {
     const doc = get().doc;
     if (!doc) return;
     snapshot(get);
-    lastAnnoWeek = null;
-    set({
-      doc: { ...doc, annotations: doc.annotations.filter((a) => a.schoolweek !== schoolweek) }
+    lastAnnotationId = null;
+    const removed = doc.annotations.find((annotation) => annotation.id === id);
+    const remaining = doc.annotations.filter((annotation) => annotation.id !== id);
+    const ranks = removed
+      ? new Map(annotationsForWeek(remaining, removed.weekStart).map((item, order) => [item.id, order]))
+      : new Map<string, number>();
+    set({ doc: { ...doc, annotations: remaining.map((item) =>
+      removed && item.weekStart === removed.weekStart
+        ? { ...item, order: ranks.get(item.id) ?? item.order }
+        : item
+    ) } });
+    debouncedSave(get);
+  },
+
+  moveAnnotation(id, weekStart, beforeId) {
+    const doc = get().doc;
+    if (!doc) return;
+    const normalizedWeekStart = mondayOfWeek(weekStart);
+    const annotation = doc.annotations.find((item) => item.id === id);
+    if (!annotation || (annotation.weekStart === normalizedWeekStart && !beforeId)) return;
+    if (beforeId === id) return;
+    snapshot(get);
+    lastAnnotationId = null;
+    const now = new Date().toISOString();
+    const sourceWeekStart = annotation.weekStart;
+    const withoutActive = doc.annotations.filter((item) => item.id !== id);
+    const source = annotationsForWeek(withoutActive, sourceWeekStart);
+    const target = sourceWeekStart === normalizedWeekStart
+      ? source
+      : annotationsForWeek(withoutActive, normalizedWeekStart);
+    const beforeIndex = beforeId ? target.findIndex((item) => item.id === beforeId) : -1;
+    const targetWithActive = [...target];
+    targetWithActive.splice(beforeIndex >= 0 ? beforeIndex : targetWithActive.length, 0, {
+      ...annotation,
+      weekStart: normalizedWeekStart,
+      updatedAt: now
     });
+    const sourceRanks = new Map(source.map((item, order) => [item.id, order]));
+    const targetRanks = new Map(targetWithActive.map((item, order) => [item.id, order]));
+    set({
+      doc: {
+        ...doc,
+        annotations: doc.annotations.map((item) => {
+          if (targetRanks.has(item.id)) {
+            return {
+              ...item,
+              weekStart: normalizedWeekStart,
+              order: targetRanks.get(item.id) ?? item.order,
+              updatedAt: item.id === id ? now : item.updatedAt
+            };
+          }
+          if (sourceWeekStart !== normalizedWeekStart && sourceRanks.has(item.id)) {
+            return { ...item, order: sourceRanks.get(item.id) ?? item.order };
+          }
+          return item;
+        })
+      }
+    });
+    debouncedSave(get);
+  },
+
+  reorderAnnotations(weekStart, annotationIds) {
+    const doc = get().doc;
+    if (!doc) return;
+    const normalizedWeekStart = mondayOfWeek(weekStart);
+    const known = new Set(annotationsForWeek(doc.annotations, normalizedWeekStart).map((item) => item.id));
+    if (annotationIds.length !== known.size || annotationIds.some((id) => !known.has(id))) return;
+    snapshot(get);
+    lastAnnotationId = null;
+    const ranks = new Map(annotationIds.map((id, order) => [id, order]));
+    set({ doc: { ...doc, annotations: doc.annotations.map((item) => item.weekStart === normalizedWeekStart ? { ...item, order: ranks.get(item.id) ?? item.order, updatedAt: new Date().toISOString() } : item) } });
     debouncedSave(get);
   },
 
@@ -303,7 +396,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
       groups: [...t.defaultGroups]
     };
     snapshot(get);
-    lastAnnoWeek = null;
+    lastAnnotationId = null;
     set({ doc: { ...doc, events: [...doc.events, event] } });
     debouncedSave(get);
     return id;
@@ -315,7 +408,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const prev = useHistoryStore.getState().undo(doc);
     if (prev) {
       set({ doc: prev });
-      lastAnnoWeek = null;
+      lastAnnotationId = null;
       debouncedSave(get);
     }
   },
@@ -326,7 +419,7 @@ export const usePlannerStore = create<PlannerState>((set, get) => ({
     const next = useHistoryStore.getState().redo(doc);
     if (next) {
       set({ doc: next });
-      lastAnnoWeek = null;
+      lastAnnotationId = null;
       debouncedSave(get);
     }
   }

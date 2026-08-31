@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { parseISO, startOfWeek, addDays, isWithinInterval } from 'date-fns';
+import { parseISO, startOfWeek, addDays, isWithinInterval, format } from 'date-fns';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD required');
 const isoTime = z.string().regex(/^\d{2}:\d{2}$/, 'HH:mm required');
@@ -58,8 +58,10 @@ export const PlanEventSchema = z
   });
 
 export const WeekAnnotationSchema = z.object({
-  schoolweek: z.number().int().nonnegative(),
+  id: z.string().min(1),
+  weekStart: isoDate,
   text: z.string(),
+  order: z.number().int().nonnegative(),
   updatedAt: z.string()
 });
 
@@ -80,7 +82,7 @@ export const EventTemplateSchema = z
   });
 
 export const PlannerDocumentSchema = z.object({
-  version: z.literal(5),
+  version: z.literal(6),
   schoolyear: SchoolyearSchema,
   categories: z.array(CategorySchema),
   events: z.array(PlanEventSchema),
@@ -96,10 +98,38 @@ export const PlannerDocumentSchema = z.object({
   })
 });
 
+function legacyWeekStart(
+  sy: { firstSchoolDay: string; lastSchoolDay: string; holidays: Array<{ start: string; end: string }> },
+  schoolweek: number
+): string | null {
+  const start = startOfWeek(parseISO(sy.firstSchoolDay), { weekStartsOn: 1 });
+  const last = parseISO(sy.lastSchoolDay);
+  let index = 0;
+  let cursor = start;
+  let isFirstWeek = true;
+  while (cursor <= last) {
+    let holidayDays = 0;
+    for (let day = 0; day < 5; day++) {
+      const current = addDays(cursor, day);
+      if (sy.holidays.some((holiday) => isWithinInterval(current, { start: parseISO(holiday.start), end: parseISO(holiday.end) }))) {
+        holidayDays++;
+      }
+    }
+    if (isFirstWeek || holidayDays < 5) {
+      if (index === schoolweek) return format(cursor, 'yyyy-MM-dd');
+      index++;
+    }
+    isFirstWeek = false;
+    cursor = addDays(cursor, 7);
+  }
+  return null;
+}
+
 /**
- * Build a mapping from old schoolweek indices (threshold < 3) to new (threshold < 5).
- * Weeks with 3–4 holiday days were excluded from the old scheme but are included in the
- * new scheme, shifting every subsequent old index forward by the count of such weeks.
+ * Map v4 indices directly from the historical `< 3` rule to today's rule:
+ * the first week is always SW 00, subsequent weeks need fewer than five
+ * holiday days. The SW00 exception was introduced without a v5 schema bump,
+ * so it must be part of this v4 migration rather than inferred later.
  */
 function buildAnnotationRemap(
   sy: { firstSchoolDay: string; lastSchoolDay: string; holidays: Array<{ start: string; end: string }> }
@@ -108,8 +138,9 @@ function buildAnnotationRemap(
   const last = parseISO(sy.lastSchoolDay);
   const remap = new Map<number, number>();
   let oldIdx = 0;
-  let offset = 0;
+  let newIdx = 0;
   let cursor = start;
+  let isFirstWeek = true;
   while (cursor <= last) {
     let hdays = 0;
     for (let i = 0; i < 5; i++) {
@@ -118,13 +149,18 @@ function buildAnnotationRemap(
         hdays++;
       }
     }
-    if (hdays < 3) {
-      remap.set(oldIdx, oldIdx + offset);
-      oldIdx++;
-    } else if (hdays < 5) {
-      // Week newly included in new scheme — shifts all subsequent old indices
-      offset++;
+    const includedByOldRule = hdays < 3;
+    const includedByCurrentRule = isFirstWeek || hdays < 5;
+    if (includedByOldRule && includedByCurrentRule) {
+      remap.set(oldIdx, newIdx);
     }
+    if (includedByOldRule) {
+      oldIdx++;
+    }
+    if (includedByCurrentRule) {
+      newIdx++;
+    }
+    isFirstWeek = false;
     cursor = addDays(cursor, 7);
   }
   return remap;
@@ -153,9 +189,7 @@ export function migrate(raw: unknown): Record<string, unknown> {
   }
   if (doc.version === 4) {
     doc.version = 5;
-    // Re-index annotations: the computeSchoolweeks threshold changed from < 3 to < 5.
-    // Weeks with 3–4 holiday days were excluded (no index) in the old scheme but are
-    // now included, shifting all subsequent schoolweek indices. Remap stored values.
+    // Re-index v4 annotations directly to the current schoolweek semantics.
     const sy = doc.schoolyear as {
       firstSchoolDay?: string; lastSchoolDay?: string;
       holidays?: Array<{ start: string; end: string }>
@@ -173,6 +207,32 @@ export function migrate(raw: unknown): Record<string, unknown> {
         }
       }
     }
+  }
+  if (doc.version === 5) {
+    doc.version = 6;
+    // v5 did not record whether it predated 5fde477 (SW00 holiday exception).
+    // Treat persisted v5 indices as the then-current v5 representation; a
+    // heuristic could silently move valid notes and is therefore unsafe.
+    const sy = doc.schoolyear as {
+      firstSchoolDay?: string; lastSchoolDay?: string;
+      holidays?: Array<{ start: string; end: string }>;
+    } | undefined;
+    const annotations = Array.isArray(doc.annotations) ? doc.annotations : [];
+    doc.annotations = annotations.flatMap((annotation, index) => {
+      if (typeof annotation !== 'object' || annotation === null) return [];
+      const legacy = annotation as { schoolweek?: unknown; text?: unknown; updatedAt?: unknown };
+      if (typeof legacy.schoolweek !== 'number' || !Number.isInteger(legacy.schoolweek) || legacy.schoolweek < 0) return [];
+      if (!sy?.firstSchoolDay || !sy.lastSchoolDay || !Array.isArray(sy.holidays)) return [];
+      const weekStart = legacyWeekStart(sy as { firstSchoolDay: string; lastSchoolDay: string; holidays: Array<{ start: string; end: string }> }, legacy.schoolweek);
+      if (!weekStart) return [];
+      return [{
+        id: `migrated-annotation-${index}-${legacy.schoolweek}`,
+        weekStart,
+        text: typeof legacy.text === 'string' ? legacy.text : '',
+        order: index,
+        updatedAt: typeof legacy.updatedAt === 'string' ? legacy.updatedAt : ''
+      }];
+    });
   }
   return doc;
 }

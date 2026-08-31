@@ -1,6 +1,7 @@
 import { utils, write } from 'xlsx';
 import type { PlannerDocument } from '@/types';
 import { computeSchoolweeks } from './schoolweeks';
+import { annotationsForWeek } from './annotations';
 
 export function buildExcel(doc: PlannerDocument): ArrayBuffer {
   const wb = utils.book_new();
@@ -23,9 +24,12 @@ export function buildExcel(doc: PlannerDocument): ArrayBuffer {
     const swEvents = doc.events
       .filter((e) => e.start >= w.startDate && e.start <= w.endDate)
       .sort((a, b) => a.start.localeCompare(b.start));
-    const annotation = doc.annotations.find((a) => a.schoolweek === w.index);
+    const annotation = annotationsForWeek(doc.annotations, w.startDate)
+      .map((item) => item.text)
+      .filter((text) => text.trim().length > 0)
+      .join('\n');
     const swLabel = `SW ${w.index.toString().padStart(2, '0')} · ${w.startDate} – ${w.endDate}`;
-    planRows.push([swLabel, '', '', '', '', '', '', '', '', '', annotation?.text ?? '']);
+    planRows.push([swLabel, '', '', '', '', '', '', '', '', '', annotation]);
     for (const e of swEvents) {
       const cat = doc.categories.find((c) => c.id === e.categoryId);
       planRows.push([

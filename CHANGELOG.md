@@ -5,6 +5,19 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.16.0] – 2026-08-31
+
+### Behoben
+- **Anmerkungen auf WordPress- und Kiosk-Seiten** bleiben auch hinter vollständigen Ferienwochen taggenau in der richtigen Woche.
+
+### Hinzugefügt
+- Mehrere Anmerkungen pro Schulwoche können einzeln bearbeitet, gelöscht, verschoben und per Drag-and-Drop sortiert werden.
+
+### Geändert
+- Anmerkungs-Schema v6 speichert den stabilen Wochenmontag und migriert bisherige Pläne; Druck- und Excel-Ausgaben berücksichtigen mehrere Anmerkungen.
+
+---
+
 ## [1.15.0] – 2026-07-15 — „Kategorien- & Gruppen-Sync mit WordPress"
 
 ### Hinzugefügt

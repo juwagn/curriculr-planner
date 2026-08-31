@@ -4,6 +4,7 @@ import { usePlannerStore } from '@/stores/planner';
 import { computeSchoolweeks } from '@/lib/schoolweeks';
 import { NotePopover } from './NotePopover';
 import { X } from 'lucide-react';
+import { annotationsForWeek } from '@/lib/annotations';
 
 export function NotesSidebar() {
   const open = useUiStore((s) => s.notesSidebarOpen);
@@ -34,8 +35,8 @@ export function NotesSidebar() {
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {sorted.map((w) => {
-            const ann = doc.annotations.find((a) => a.schoolweek === w.index);
-            const has = !!ann && ann.text.trim().length > 0;
+            const annotations = annotationsForWeek(doc.annotations, w.startDate).filter((item) => item.text.trim().length > 0);
+            const has = annotations.length > 0;
             return (
               <button
                 key={w.index}
@@ -50,8 +51,8 @@ export function NotesSidebar() {
                 <div className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-marine-800)] tabular-nums">
                   SW {w.index.toString().padStart(2, '0')} · {w.startDate.slice(5)} – {w.endDate.slice(5)}
                 </div>
-                <div className={`text-[13px] mt-1 ${has ? 'text-[var(--color-ink-900)]' : 'italic text-[var(--color-ink-500)]'}`}>
-                  {has ? ann!.text : 'Keine Anmerkung'}
+                <div className={`mt-1 whitespace-pre-line text-[13px] ${has ? 'text-[var(--color-ink-900)]' : 'italic text-[var(--color-ink-500)]'}`}>
+                  {has ? annotations.map((item) => item.text).join('\n') : 'Keine Anmerkung'}
                 </div>
               </button>
             );
@@ -59,7 +60,6 @@ export function NotesSidebar() {
         </div>
       </aside>
       <NotePopover
-        schoolweek={editSw}
         week={editSw !== null ? sorted.find((w) => w.index === editSw) ?? null : null}
         onClose={() => setEditSw(null)}
       />

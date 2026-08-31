@@ -1,13 +1,14 @@
 import { useMemo, type MouseEvent } from 'react';
-import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, getDay, parseISO } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
-import { isHoliday } from '@/lib/schoolweeks';
+import { computeSchoolweeks, findSchoolweek, isHoliday } from '@/lib/schoolweeks';
 import { pastelize } from '@/lib/colors';
 import type { PlanEvent, Category } from '@/types';
+import { annotationsForWeek } from '@/lib/annotations';
 
 const FERIEN_HATCH =
   'repeating-linear-gradient(45deg, var(--color-ferien-a) 0 3px, var(--color-ferien-b) 3px 6px)';
@@ -59,9 +60,10 @@ interface GridCellProps {
   color?: string;
   title: string;
   categories: Category[];
+  noteCount: number;
 }
 
-function GridCell({ iso, events, holiday, feiertag, color, title, categories }: GridCellProps) {
+function GridCell({ iso, events, holiday, feiertag, color, title, categories, noteCount }: GridCellProps) {
   const openCreateEvent = useUiStore((s) => s.openCreateEvent);
   const openEditEvent = useUiStore((s) => s.openEditEvent);
   const { isOver, setNodeRef } = useDroppable({ id: `cell:${iso}`, data: { type: 'cell', iso } });
@@ -130,6 +132,11 @@ function GridCell({ iso, events, holiday, feiertag, color, title, categories }: 
       {events.length > 1 && (
         <span className="pointer-events-none absolute left-0 top-0 rounded-br bg-[var(--color-marine-800)] px-[3px] text-[10px] font-semibold leading-tight text-[var(--color-paper-card)]">
           {events.length}
+        </span>
+      )}
+      {noteCount > 0 && (
+        <span className="pointer-events-none absolute bottom-0 left-0 rounded-tr bg-[var(--color-gelb-500)] px-[3px] text-[10px] font-semibold leading-tight text-[var(--color-ink-900)]" title={`${noteCount} Anmerkung${noteCount === 1 ? '' : 'en'} in dieser Schulwoche`}>
+          📝{noteCount > 1 ? noteCount : ''}
         </span>
       )}
       {hasEvent && (
@@ -201,6 +208,7 @@ export function YearGrid() {
   );
 
   const events = doc?.events;
+  const weeks = useMemo(() => (doc ? computeSchoolweeks(doc.schoolyear) : []), [doc]);
   const eventsByDate = useMemo(() => {
     const map = new Map<string, PlanEvent[]>();
     if (!events) return map;
@@ -278,6 +286,10 @@ export function YearGrid() {
                   const holiday = isHoliday(iso, doc.schoolyear.holidays);
                   const first = evs[0];
                   const color = first ? doc.categories.find((c) => c.id === first.categoryId)?.color : undefined;
+                  const week = findSchoolweek(iso, weeks);
+                  const noteCount = week && getDay(parseISO(iso)) === 1
+                    ? annotationsForWeek(doc.annotations, week.startDate).filter((annotation) => annotation.text.trim().length > 0).length
+                    : 0;
                   return (
                     <GridCell
                       key={d}
@@ -288,6 +300,7 @@ export function YearGrid() {
                       color={color}
                       title={evs.map((e) => e.title).join(', ') || holiday?.label || iso}
                       categories={doc.categories}
+                      noteCount={noteCount}
                     />
                   );
                 })}

@@ -75,8 +75,8 @@ Pure, framework-agnostic, TDD'd:
   OpenHolidays, maps to `Holiday[]` with `type`/`source`. `mergeFetchedHolidays`
   protects manual entries on re-fetch. Bundesländer as a static `GERMAN_STATES`
   list. UI entry: `HolidayFetchControl` (wizard step 1 + Settings → Schuljahr).
-- `schemas.ts` — Zod for `PlannerDocument` (version literal `4` — bump on
-  breaking shape changes and migrate; `migrate` chains v1→v2→v3→v4). `Holiday`
+- `schemas.ts` — Zod for `PlannerDocument` (version literal `6` — bump on
+  breaking shape changes and migrate; `migrate` chains v1→…→v6). `Holiday`
   carries `type: 'ferien' | 'feiertag'` + optional `source`; `Schoolyear` has an
   optional `stateCode`.
 

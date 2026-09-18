@@ -5,6 +5,13 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.17.0] – 2026-09-18
+
+### Hinzugefügt
+- **Sa/So-Spalte in der Wochentabelle:** Termine am Wochenende (z. B. Tag der offenen Tür am Samstag) sind jetzt sichtbar und per Klick bearbeitbar. Klick in eine leere Sa/So-Zelle legt einen Termin am Samstag an, Ziehen auf die Zelle verschiebt einen Termin auf Samstag. Ferienwochen mit Wochenend-Terminen werden aufgeklappt statt als Banner gezeigt.
+
+---
+
 ## [1.16.0] – 2026-08-31
 
 ### Behoben

@@ -121,6 +121,109 @@ function DayCell({ mondayIso, dayIdx, events, categoryById, conflictMap, rowHeig
   );
 }
 
+interface WeekendCellProps {
+  mondayIso: string;
+  eventsByDate: Map<string, PlanEvent[]>;
+  categoryById: Map<string, Category>;
+  conflictMap: Map<string, Conflict[]>;
+  rowHeight: number;
+  ferien?: boolean;
+}
+
+/**
+ * Narrow Sa/So column: weekend events (e.g. Tag der offenen Tür) stay visible
+ * and editable. Each event appears once, under the first weekend day it
+ * touches; clicks on empty space create an event on Saturday, drops move the
+ * dragged event to Saturday.
+ */
+function WeekendCell({ mondayIso, eventsByDate, categoryById, conflictMap, rowHeight, ferien }: WeekendCellProps) {
+  const sat = dayIso(mondayIso, 5);
+  const sun = dayIso(mondayIso, 6);
+  const openCreate = useUiStore((s) => s.openCreateEvent);
+  const openEdit = useUiStore((s) => s.openEditEvent);
+  const { isOver, setNodeRef } = useDroppable({
+    id: `cell:${sat}`,
+    data: { type: 'cell', iso: sat }
+  });
+
+  const seen = new Set<string>();
+  const groups: { iso: string; events: PlanEvent[] }[] = [];
+  for (const iso of [sat, sun]) {
+    const events = (eventsByDate.get(iso) ?? []).filter((ev) => !seen.has(ev.id));
+    events.forEach((ev) => seen.add(ev.id));
+    if (events.length > 0) groups.push({ iso, events });
+  }
+
+  const handleCellClick = () => {
+    const armed = useUiStore.getState().armedTemplateId;
+    if (armed) {
+      const newId = usePlannerStore.getState().createEventFromTemplate(armed, sat);
+      if (newId) {
+        openEdit(newId);
+        useUiStore.getState().armTemplate(null);
+      }
+      return;
+    }
+    openCreate(sat);
+  };
+
+  return (
+    <td
+      ref={setNodeRef}
+      onClick={handleCellClick}
+      aria-label={`Termin am Wochenende ${fmtDot(sat)}–${fmtDot(sun)} anlegen`}
+      className={`group align-top border-r border-b border-[var(--color-ink-200)] px-1.5 py-1.5 cursor-pointer relative transition-colors ${
+        isOver ? 'bg-[var(--color-marine-100)]/60' : 'bg-[var(--color-paper-bg)]/70 hover:bg-[var(--color-paper-bg)]'
+      }`}
+      style={{
+        minHeight: rowHeight,
+        height: rowHeight,
+        transitionDuration: 'var(--dur-state)',
+        transitionTimingFunction: 'var(--ease-state)',
+        ...(ferien && !isOver ? { backgroundColor: 'var(--color-ferien-b)' } : {})
+      }}
+    >
+      <div className="flex flex-col gap-1">
+        {groups.map(({ iso, events }) => (
+          <div key={iso} className="flex flex-col gap-1">
+            <span className="text-[10.5px] font-semibold uppercase tracking-wide tabular-nums text-[var(--color-ink-500)]">
+              {iso === sat ? 'Sa' : 'So'} {fmtDot(iso)}
+            </span>
+            {events.map((ev) => {
+              const cat = categoryById.get(ev.categoryId);
+              if (!cat) return null;
+              const evConflicts = conflictMap.get(ev.id) ?? [];
+              const severity = evConflicts.some((c) => c.severity === 'error')
+                ? 'error'
+                : evConflicts.length > 0
+                  ? 'warning'
+                  : undefined;
+              const isStart = ev.start >= sat;
+              const isEnd = ev.end <= sun;
+              const pos = isStart && isEnd ? 'single' : isStart ? 'start' : isEnd ? 'end' : 'middle';
+              return (
+                <EventBlock
+                  key={ev.id}
+                  event={ev}
+                  category={cat}
+                  onClick={() => openEdit(ev.id)}
+                  conflictSeverity={severity}
+                  segmentPosition={pos}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      {groups.length === 0 && (
+        <span className="absolute bottom-1 left-2 text-[11px] text-[var(--color-ink-500)] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
+          + Sa/So
+        </span>
+      )}
+    </td>
+  );
+}
+
 interface AnnotationCardProps {
   annotation: WeekAnnotation;
   weekStart: string;
@@ -233,8 +336,9 @@ export function WeekTable() {
 
   // Only EMPTY holiday weeks render as the compact banner; holiday weeks with
   // events use a full-height day-cell row, so they count toward the tall rows.
+  // Mo–So: weekend events also keep a holiday week expanded.
   const rowHasEvents = (row: WeekRow) =>
-    DAY_LABELS.some((_d, dayIdx) => (eventsByDate.get(dayIso(row.startDate, dayIdx)) ?? []).length > 0);
+    [0, 1, 2, 3, 4, 5, 6].some((dayIdx) => (eventsByDate.get(dayIso(row.startDate, dayIdx)) ?? []).length > 0);
   const bannerCount = filteredRows.filter((r) => r.kind === 'holiday' && !rowHasEvents(r)).length;
   const tallRowCount = filteredRows.length - bannerCount;
 
@@ -292,6 +396,7 @@ export function WeekTable() {
             <col />
             <col />
             <col />
+            <col style={{ width: 130 }} />
             <col style={{ width: 180 }} />
           </colgroup>
           <thead className="sticky top-0 z-10">
@@ -310,6 +415,9 @@ export function WeekTable() {
                   {d}
                 </th>
               ))}
+              <th className="py-2.5 pl-2 text-left uppercase border-r border-white/15">
+                Sa/So
+              </th>
               <th className="py-2.5 pl-2 text-left uppercase">
                 Anmerkungen
               </th>
@@ -322,9 +430,7 @@ export function WeekTable() {
                 // in den Ferien) is rendered with normal day cells + Ferien tint so
                 // those events stay visible and editable. Empty holiday weeks stay
                 // collapsed as the compact striped banner.
-                const hasEvents = DAY_LABELS.some(
-                  (_d, dayIdx) => (eventsByDate.get(dayIso(row.startDate, dayIdx)) ?? []).length > 0
-                );
+                const hasEvents = rowHasEvents(row);
                 if (hasEvents) {
                   return (
                     <tr key={`h-${i}-${row.startDate}`} className="transition-colors" style={{ height: rowHeight }}>
@@ -364,6 +470,14 @@ export function WeekTable() {
                           />
                         );
                       })}
+                      <WeekendCell
+                        mondayIso={row.startDate}
+                        eventsByDate={eventsByDate}
+                        categoryById={categoryById}
+                        conflictMap={conflictMap}
+                        rowHeight={rowHeight}
+                        ferien={isHoliday(dayIso(row.startDate, 5), doc.schoolyear.holidays)?.type === 'ferien'}
+                      />
                       <td
                         className="border-b border-[var(--color-ink-200)]"
                         style={{ width: 180, backgroundColor: 'var(--color-ferien-b)' }}
@@ -381,7 +495,7 @@ export function WeekTable() {
                       {fmtDot(row.startDate)}–{fmtDot(row.endDate)}
                     </td>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="border-b border-[var(--color-ink-200)] text-center italic font-semibold text-[13px] tracking-wide text-[var(--color-ink-900)]"
                       style={{
                         backgroundImage:
@@ -423,6 +537,14 @@ export function WeekTable() {
                       />
                     );
                   })}
+                  <WeekendCell
+                    mondayIso={row.startDate}
+                    eventsByDate={eventsByDate}
+                    categoryById={categoryById}
+                    conflictMap={conflictMap}
+                    rowHeight={rowHeight}
+                    ferien={isHoliday(dayIso(row.startDate, 5), doc.schoolyear.holidays)?.type === 'ferien'}
+                  />
                   <AnnotationCell
                     weekStart={row.startDate}
                     annotations={annotations}

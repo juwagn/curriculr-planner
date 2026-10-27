@@ -16,6 +16,7 @@ import { IcsImportDialog } from '@/components/import/IcsImportDialog';
 import { toast } from 'sonner';
 import { buildIcs, slugify } from '@/lib/ics-export';
 import { buildExcel } from '@/lib/excel-export';
+import { TriangleAlert } from 'lucide-react';
 
 function downloadBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
@@ -144,7 +145,7 @@ export function PublishTab() {
 
       {/* WordPress-Verbindung */}
       <section className="space-y-4">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           WordPress-Verbindung
         </h3>
         <p className="text-[13px] text-[var(--color-ink-500)]">
@@ -171,7 +172,7 @@ export function PublishTab() {
             <div className="space-y-2">
               <p className="text-[13px]">
                 Angemeldet als <strong>{claims.name}</strong>
-                <span className="ml-2 text-[11px] text-[var(--color-ink-500)]">({claims.groups.join(', ')})</span>
+                <span className="ml-2 text-[12px] text-[var(--color-ink-500)]">({claims.groups.join(', ')})</span>
               </p>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" onClick={onTest} disabled={testState.busy}>Verbindung testen</Button>
@@ -186,7 +187,7 @@ export function PublishTab() {
                 Mit IServ anmelden
               </Button>
               {!config.baseUrl && (
-                <p className="text-[11px] text-[var(--color-warning)]">Zuerst WordPress-Adresse eintragen.</p>
+                <p className="text-[12px] text-[var(--color-warning)]">Zuerst WordPress-Adresse eintragen.</p>
               )}
             </div>
           )}
@@ -196,7 +197,7 @@ export function PublishTab() {
       {/* Kalender einrichten */}
       {doc && config.enabled && authStatus === 'authenticated' && (
         <section className="space-y-4 border-t pt-4">
-          <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+          <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
             Kalender einrichten
           </h3>
           <p className="text-[13px] font-medium text-[var(--color-ink-900)]">
@@ -205,7 +206,7 @@ export function PublishTab() {
           <div className="rounded-md bg-[var(--color-marine-100)] border border-[var(--color-marine-500)] p-3 space-y-1">
             <p className="text-[12px] text-[var(--color-ink-500)]">
               WordPress legt automatisch einen <strong>Haupt-Kalender mit allen Terminen</strong> an.
-              Zusätzlich kannst du separate Kalender je Gruppe einrichten.
+              Zusätzlich können separate Kalender je Gruppe eingerichtet werden.
             </p>
           </div>
           <div className="flex items-center gap-2 opacity-60">
@@ -221,7 +222,7 @@ export function PublishTab() {
             ))
           ) : (
             <p className="text-[12px] text-[var(--color-ink-500)]">
-              Keine Gruppen definiert. Füge Gruppen unter Inhalt → Gruppen hinzu.
+              Keine Gruppen definiert. Gruppen unter Inhalt → Gruppen hinzufügen.
             </p>
           )}
           {(() => {
@@ -229,7 +230,7 @@ export function PublishTab() {
             if (provisionedCalendars.length === 0 || missing.length === 0) return null;
             return (
               <div className="rounded-md border border-[var(--color-warning)] bg-[var(--color-gelb-100)] p-3 text-[12px]">
-                ⚠ Ohne eigenen Kalender: <strong>{missing.join(', ')}</strong> — Häkchen oben setzen
+                <TriangleAlert className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />Ohne eigenen Kalender: <strong>{missing.join(', ')}</strong> — Häkchen oben setzen
                 und „Kalender einrichten" erneut ausführen.
               </div>
             );
@@ -241,7 +242,7 @@ export function PublishTab() {
             >
               {pmStatus === 'sending' ? 'Einrichten…' : 'Kalender einrichten →'}
             </Button>
-            {pmStatus === 'ok'    && <p className="text-[12px] text-[var(--color-status-green)]">✓ Eingerichtet</p>}
+            {pmStatus === 'ok'    && <p className="text-[12px] text-[var(--color-status-green)]">Eingerichtet</p>}
             {pmStatus === 'error' && <p className="text-[12px] text-[var(--color-danger)]">Fehler beim Einrichten</p>}
           </div>
           {provisionedCalendars.length > 0 && (
@@ -265,7 +266,7 @@ export function PublishTab() {
                           void navigator.clipboard.writeText(feedUrl);
                           toast.success('Link kopiert');
                         }}
-                        className="shrink-0 text-[11px] px-1.5 py-0.5 rounded border border-[var(--color-ink-300)] hover:bg-[var(--color-paper-bg)]"
+                        className="shrink-0 text-[12px] px-1.5 py-0.5 rounded border border-[var(--color-ink-300)] hover:bg-[var(--color-paper-bg)]"
                       >
                         Kopieren
                       </button>
@@ -281,7 +282,7 @@ export function PublishTab() {
                 <li>In IServ: Kalender → Zahnrad → „Kalender abonnieren" → Link einfügen.</li>
                 <li>Fertig — der Plan erscheint bei allen, die den Kalender abonniert haben.</li>
               </ol>
-              <p className="text-[11px] text-[var(--color-ink-500)]">
+              <p className="text-[12px] text-[var(--color-ink-500)]">
                 Anleitung für Handy &amp; IServ zum Weitergeben:{' '}
                 <a
                   href="https://github.com/juwagn/curriculr-planner/blob/main/docs/kalender-abo-anleitung.md"
@@ -304,7 +305,7 @@ export function PublishTab() {
                   placeholder="sj_2026_27"
                   onChange={(e) => patchLink({ schoolyearKey: e.target.value })}
                 />
-                <p className="text-[11px] text-[var(--color-ink-500)] mt-1">
+                <p className="text-[12px] text-[var(--color-ink-500)] mt-1">
                   Identifiziert das Schuljahr in WordPress eindeutig. Wird automatisch vorgeschlagen.
                 </p>
               </div>
@@ -328,7 +329,7 @@ export function PublishTab() {
 
       {/* Export */}
       <section className="space-y-3 border-t pt-4">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Export
         </h3>
         <p className="text-[13px] text-[var(--color-ink-500)]">
@@ -343,15 +344,15 @@ export function PublishTab() {
           </Button>
         </div>
         <p className="text-[12px] text-[var(--color-ink-500)]">
-          Keine IServ-SSO-Anbindung? Lade das „JSON-Backup" (Export-Menü oben rechts) herunter und
-          trage es im WordPress-Backend unter Einstellungen → Schul-Terminplan → Schuljahre in der
-          Karte des jeweiligen Schuljahres hoch.
+          Keine IServ-SSO-Anbindung? Das „JSON-Backup" (Export-Menü oben rechts) herunterladen und
+          im WordPress-Backend unter Einstellungen → Schul-Terminplan → Schuljahre in der
+          Karte des jeweiligen Schuljahres hochladen.
         </p>
       </section>
 
       {/* Import */}
       <section className="space-y-3 border-t pt-4">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Import
         </h3>
         <p className="text-[13px] text-[var(--color-ink-500)]">

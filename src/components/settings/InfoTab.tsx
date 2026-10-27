@@ -26,7 +26,7 @@ const CHANGELOG: ChangelogEntry[] = [
     version: '1.14.1',
     date: '15.07.2026',
     highlights: [
-      'Update-Banner erschien nicht, wenn derselbe Account von einem anderen Gerät/Browser aus gespeichert hatte — zeigt jetzt korrekt „Du (anderes Gerät)" an',
+      'Update-Banner erschien nicht, wenn derselbe Account von einem anderen Gerät/Browser aus gespeichert hatte — zeigt jetzt korrekt „Ihr anderes Gerät" an',
     ],
   },
   {
@@ -163,7 +163,7 @@ export function InfoTab() {
       {/* Über */}
       <div className="space-y-4">
         <div className="space-y-1">
-          <h3 className="text-[15px] font-semibold text-[var(--color-marine-800)]">Curriculr Planner</h3>
+          <h3 className="text-[15px] font-semibold text-[var(--color-marine-800)]">Curricu:lr Planer</h3>
           <p>Version: <span className="tabular-nums">{APP_VERSION}</span></p>
           <p className="text-[var(--color-ink-500)]">Standalone-Tool zur Erstellung des Jahresterminplans.</p>
         </div>

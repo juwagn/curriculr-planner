@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { useUiStore } from '@/stores/ui';
+import { Play } from 'lucide-react';
 
 type Section = 'start' | 'events' | 'views' | 'templates' | 'export';
 
 const NAV_ITEMS: { id: Section; label: string }[] = [
-  { id: 'start', label: '🚀 Erste Schritte' },
-  { id: 'events', label: '📅 Termine & Kategorien' },
-  { id: 'views', label: '👁 Ansichten' },
-  { id: 'templates', label: '📋 Vorlagen' },
-  { id: 'export', label: '📤 Export & Backup' },
+  { id: 'start', label: 'Erste Schritte' },
+  { id: 'events', label: 'Termine & Kategorien' },
+  { id: 'views', label: 'Ansichten' },
+  { id: 'templates', label: 'Vorlagen' },
+  { id: 'export', label: 'Export & Backup' },
 ];
 
 export function HelpModal() {
@@ -67,12 +68,11 @@ export function HelpModal() {
             <div className="p-3 border-t border-[var(--color-ink-200)]">
               <button
                 onClick={handleStartTour}
-                className="w-full rounded-[var(--radius-default)] py-2 text-[12px] font-bold text-center"
-                style={{ background: 'var(--color-gelb-500)', color: 'var(--color-ink-900)' }}
+                className="flex min-h-9 w-full items-center justify-center gap-1.5 rounded-[var(--radius-default)] bg-[var(--color-marine-800)] py-2 text-[13px] font-semibold text-[var(--cl-on-primary)] hover:bg-[var(--color-marine-700)]"
               >
-                ▶ Geführte Tour starten
+                <Play className="h-4 w-4" aria-hidden="true" /> Geführte Tour starten
               </button>
-              <p className="text-center text-[10px] text-[var(--color-ink-400)] mt-1">~2 Minuten</p>
+              <p className="text-center text-[12px] text-[var(--color-ink-400)] mt-1">~2 Minuten</p>
             </div>
           </div>
 
@@ -101,7 +101,7 @@ function HelpSection({ title, children }: { title: string; children: React.React
 
 function HelpTag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-block bg-[var(--color-paper-bg)] border border-[var(--color-ink-200)] rounded px-1 font-mono text-[10px] text-[var(--color-ink-700)]">
+    <span className="inline-block bg-[var(--color-paper-bg)] border border-[var(--color-ink-200)] rounded px-1 font-mono text-[12px] text-[var(--color-ink-700)]">
       {children}
     </span>
   );
@@ -110,23 +110,23 @@ function HelpTag({ children }: { children: React.ReactNode }) {
 function SectionStart() {
   return (
     <div data-testid="section-start">
-      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">🚀 Erste Schritte</h2>
-      <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Wie du deinen ersten Jahresplan anlegst und loslegst.</p>
+      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">Erste Schritte</h2>
+      <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Den ersten Jahresplan anlegen und loslegen.</p>
 
       <HelpSection title="1. Schuljahr einrichten">
-        Beim ersten Start führt dich der Einrichtungs-Assistent durch Schuljahrbeginn, Ferienzeiten und Kategorien.
-        Du kannst diese Angaben jederzeit unter <HelpTag>Einstellungen → Schuljahr</HelpTag> ändern.
+        Beim ersten Start führt der Einrichtungsassistent durch Schuljahrbeginn, Ferienzeiten und Kategorien.
+        Diese Angaben lassen sich jederzeit unter <HelpTag>Einstellungen → Schuljahr</HelpTag> ändern.
       </HelpSection>
 
       <HelpSection title="2. Ersten Termin anlegen">
-        Klicke auf <HelpTag>+ Termin</HelpTag> in der Werkzeugleiste.
-        Vergib einen Titel, wähle Kategorie und Datum. Mehrtägige Termine: Enddatum setzen.
+        In der Werkzeugleiste <HelpTag>Termin anlegen</HelpTag> wählen.
+        Titel vergeben, Kategorie und Datum festlegen. Mehrtägige Termine: Enddatum setzen.
         Klick auf einen bestehenden Termin öffnet ihn zum Bearbeiten.
       </HelpSection>
 
       <HelpSection title="3. Termin verschieben">
         Termine lassen sich per <strong>Drag & Drop</strong> in der Wochentabelle verschieben.
-        Ziehe am rechten Rand eines Termins, um die Dauer zu verlängern oder zu kürzen.
+        Am rechten Rand eines Termins ziehen, um die Dauer zu verlängern oder zu kürzen.
       </HelpSection>
 
       <HelpSection title="4. Plan exportieren">
@@ -137,16 +137,16 @@ function SectionStart() {
       </HelpSection>
 
       <div className="mt-5 bg-[var(--color-paper-bg)] border border-[var(--color-ink-200)] rounded-[var(--radius-default)] p-3">
-        <p className="text-[11px] font-semibold text-[var(--color-ink-500)] mb-2">⌨ Tastaturkürzel</p>
+        <p className="text-[12px] font-semibold text-[var(--color-ink-500)] mb-2">⌨ Tastaturkürzel</p>
         <div className="flex flex-wrap gap-4">
-          <span className="text-[11px] text-[var(--color-ink-400)]">
-            <kbd className="bg-white border border-[var(--color-ink-200)] rounded px-1 font-mono text-[10px]">Strg+Z</kbd> Rückgängig
+          <span className="text-[12px] text-[var(--color-ink-400)]">
+            <kbd className="bg-white border border-[var(--color-ink-200)] rounded px-1 font-mono text-[12px]">Strg+Z</kbd> Rückgängig
           </span>
-          <span className="text-[11px] text-[var(--color-ink-400)]">
-            <kbd className="bg-white border border-[var(--color-ink-200)] rounded px-1 font-mono text-[10px]">Strg+⇧+Z</kbd> Wiederholen
+          <span className="text-[12px] text-[var(--color-ink-400)]">
+            <kbd className="bg-white border border-[var(--color-ink-200)] rounded px-1 font-mono text-[12px]">Strg+⇧+Z</kbd> Wiederholen
           </span>
-          <span className="text-[11px] text-[var(--color-ink-400)]">
-            <kbd className="bg-white border border-[var(--color-ink-200)] rounded px-1 font-mono text-[10px]">Esc</kbd> Dialog schließen
+          <span className="text-[12px] text-[var(--color-ink-400)]">
+            <kbd className="bg-white border border-[var(--color-ink-200)] rounded px-1 font-mono text-[12px]">Esc</kbd> Dialog schließen
           </span>
         </div>
       </div>
@@ -157,7 +157,7 @@ function SectionStart() {
 function SectionEvents() {
   return (
     <div data-testid="section-events">
-      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">📅 Termine & Kategorien</h2>
+      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">Termine & Kategorien</h2>
       <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Termine anlegen, bearbeiten und strukturieren.</p>
 
       <HelpSection title="Termin-Formular">
@@ -190,13 +190,14 @@ function SectionEvents() {
 function SectionViews() {
   return (
     <div data-testid="section-views">
-      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">👁 Ansichten</h2>
-      <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Zwei Wege, deinen Plan zu sehen.</p>
+      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">Ansichten</h2>
+      <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Zwei Wege, den Plan anzusehen.</p>
 
       <HelpSection title="Wochen-Tabelle (Standard)">
         Zeigt ein Quartal als Tabelle: Zeilen = Schulwochen, Spalten = Montag bis Freitag.
         Ferienwochen erscheinen als eigene Zeile ohne Schulwochennummer.
         Wechsel zwischen Q1–Q4 über die Quartals-Tabs in der Werkzeugleiste.
+        Unter 1024 Pixel Breite (Tablet, Smartphone) erscheint stattdessen eine Wochenliste: je Schulwoche eine Karte mit den Terminen.
       </HelpSection>
 
       <HelpSection title="Jahresübersicht">
@@ -216,7 +217,7 @@ function SectionViews() {
 function SectionTemplates() {
   return (
     <div data-testid="section-templates">
-      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">📋 Vorlagen</h2>
+      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">Vorlagen</h2>
       <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Wiederkehrende Termine als Vorlage speichern und schnell platzieren.</p>
 
       <HelpSection title="Vorlage erstellen">
@@ -225,8 +226,8 @@ function SectionTemplates() {
       </HelpSection>
 
       <HelpSection title="Vorlage per Drag & Drop platzieren">
-        Öffne die Vorlagen-Sidebar über <HelpTag>Vorlagen</HelpTag> in der Werkzeugleiste.
-        Ziehe eine Vorlage auf die gewünschte Zelle in der Wochentabelle — Termin wird mit dem Datum der Zelle angelegt.
+        Die Vorlagen-Sidebar über <HelpTag>Vorlagen</HelpTag> in der Werkzeugleiste öffnen.
+        Eine Vorlage auf die gewünschte Zelle der Wochentabelle ziehen — der Termin wird mit dem Datum der Zelle angelegt.
       </HelpSection>
 
       <HelpSection title="Vorlage per Klick platzieren">
@@ -246,7 +247,7 @@ function SectionTemplates() {
 function SectionExport() {
   return (
     <div data-testid="section-export">
-      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">📤 Export & Backup</h2>
+      <h2 className="text-[16px] font-bold text-[var(--color-marine-800)] mb-1">Export & Backup</h2>
       <p className="text-[12px] text-[var(--color-ink-400)] mb-5">Plan in verschiedene Formate exportieren und sichern.</p>
 
       <HelpSection title="ICS — Kalender-Export">

@@ -66,7 +66,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
         lastPushedAt: new Date().toISOString(),
       };
       get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
-      set({ syncState: 'synced', message: '✓ An WordPress gesendet', conflict: null });
+      set({ syncState: 'synced', message: 'An WordPress gesendet', conflict: null });
       return 'synced';
     } else if (res.status === 'conflict') {
       set({ syncState: 'conflict', message: 'WordPress hat eine neuere Version.',
@@ -103,7 +103,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       set({ syncState: 'error', message: 'Dieser Plan ist nicht mit WordPress verknüpft.' });
       return 'error';
     }
-    set({ syncState: 'sending', message: 'Lade von WordPress…' });
+    set({ syncState: 'sending', message: 'Wird von WordPress geladen…' });
     const res = await fetchDoc(config, link.schoolyearKey, token);
     if (!res.exists) {
       if (res.message) {
@@ -129,7 +129,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     const newLink: WpPlanLink = { ...link, knownVersion: wpVer, stage: res.stage ?? link.stage };
     get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
     setDocFn(res.doc);
-    set({ syncState: 'synced', message: '✓ Stand von WordPress geladen', conflict: null });
+    set({ syncState: 'synced', message: 'Stand von WordPress geladen', conflict: null });
     return 'pulled';
   },
 
@@ -142,7 +142,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       get().setConfig({ ...config, links: { ...config.links, [pendingPull.docId]: newLink } });
     }
     setDocFn(pendingPull.doc);
-    set({ pendingPull: null, syncState: 'synced', message: '✓ Stand von WordPress geladen', conflict: null });
+    set({ pendingPull: null, syncState: 'synced', message: 'Stand von WordPress geladen', conflict: null });
   },
 
   cancelPull() { set({ pendingPull: null, syncState: 'idle', message: '' }); },
@@ -154,7 +154,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       set({ syncState: 'error', message: 'Nicht angemeldet — bitte mit IServ anmelden.' });
       return 'error';
     }
-    set({ syncState: 'sending', message: `Lade „${name}" von WordPress…` });
+    set({ syncState: 'sending', message: `„${name}" wird von WordPress geladen…` });
     const res = await fetchDoc(config, sj, token);
     if (!res.exists || !res.doc) {
       set({ syncState: 'error', message: res.message ?? 'Plan nicht auf WordPress gefunden.' });
@@ -174,7 +174,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
     };
     get().setConfig({ ...config, enabled: true, links: { ...config.links, [docId]: link } });
     setDocFn(doc);
-    set({ syncState: 'synced', message: '✓ Von WordPress geladen', conflict: null });
+    set({ syncState: 'synced', message: 'Von WordPress geladen', conflict: null });
     return 'loaded';
   },
 }));

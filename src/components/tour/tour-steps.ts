@@ -3,8 +3,8 @@ import type { DriveStep } from 'driver.js';
 export const TOUR_STEPS: DriveStep[] = [
   {
     popover: {
-      title: 'Willkommen im Curriculr Planner',
-      description: 'Wir zeigen dir die wichtigsten Funktionen in ca. 2 Minuten.',
+      title: 'Willkommen im Curricu:lr Planer',
+      description: 'Die wichtigsten Funktionen in etwa zwei Minuten im Überblick.',
       side: 'bottom',
       align: 'center',
     },
@@ -12,8 +12,8 @@ export const TOUR_STEPS: DriveStep[] = [
   {
     element: '[data-tour="plan-name"]',
     popover: {
-      title: 'Dein Jahresplan',
-      description: 'Klick öffnet die Planübersicht — du kannst mehrere Pläne gleichzeitig verwalten.',
+      title: 'Ihr Jahresplan',
+      description: 'Ein Klick öffnet die Planübersicht. Mehrere Pläne lassen sich parallel verwalten.',
       side: 'bottom',
       align: 'start',
     },
@@ -58,7 +58,7 @@ export const TOUR_STEPS: DriveStep[] = [
     element: '[data-tour="overflow-menu"]',
     popover: {
       title: 'Weitere Optionen',
-      description: 'Export (ICS, Excel, JSON-Backup, PDF), Hilfe und Einstellungen findest du hier gebündelt.',
+      description: 'Export (ICS, Excel, JSON-Backup, PDF), Hilfe und Einstellungen sind hier gebündelt.',
       side: 'bottom',
       align: 'end',
     },

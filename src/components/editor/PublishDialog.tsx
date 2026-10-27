@@ -16,7 +16,7 @@ interface Props {
 }
 
 const STAGE_DESCRIPTION: Record<WpStage, string> = {
-  entwurf:     'Nur für dich sichtbar',
+  entwurf:     'Nur für Sie sichtbar',
   genehmigt:   'Kollegium sieht die Entwurf-Vorschau',
   oeffentlich: 'Erscheint auf der Schulwebsite',
 };

@@ -1,7 +1,7 @@
 import { useMemo, type MouseEvent } from 'react';
 import { addDays, differenceInCalendarDays, format, getDay, parseISO } from 'date-fns';
 import { useDroppable } from '@dnd-kit/core';
-import { Plus } from 'lucide-react';
+import { Plus, StickyNote } from 'lucide-react';
 import { Tooltip as TooltipPrimitive } from 'radix-ui';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
@@ -10,6 +10,7 @@ import { pastelize } from '@/lib/colors';
 import type { PlanEvent, Category } from '@/types';
 import { annotationsForWeek } from '@/lib/annotations';
 
+// taste-skill-ignore: Ferien-Schraffur ist eine Datenmarkierung
 const FERIEN_HATCH =
   'repeating-linear-gradient(45deg, var(--color-ferien-a) 0 3px, var(--color-ferien-b) 3px 6px)';
 
@@ -130,13 +131,13 @@ function GridCell({ iso, events, holiday, feiertag, color, title, categories, no
         />
       )}
       {events.length > 1 && (
-        <span className="pointer-events-none absolute left-0 top-0 rounded-br bg-[var(--color-marine-800)] px-[3px] text-[10px] font-semibold leading-tight text-[var(--color-paper-card)]">
+        <span className="pointer-events-none absolute left-0 top-0 rounded-br bg-[var(--color-marine-800)] px-[3px] text-[12px] font-semibold leading-tight text-[var(--color-paper-card)]">
           {events.length}
         </span>
       )}
       {noteCount > 0 && (
-        <span className="pointer-events-none absolute bottom-0 left-0 rounded-tr bg-[var(--color-gelb-500)] px-[3px] text-[10px] font-semibold leading-tight text-[var(--color-ink-900)]" title={`${noteCount} Anmerkung${noteCount === 1 ? '' : 'en'} in dieser Schulwoche`}>
-          📝{noteCount > 1 ? noteCount : ''}
+        <span className="pointer-events-none absolute bottom-0 left-0 rounded-tr bg-[var(--color-gelb-500)] px-[3px] text-[12px] font-semibold leading-tight text-[var(--color-ink-900)]" title={`${noteCount} Anmerkung${noteCount === 1 ? '' : 'en'} in dieser Schulwoche`}>
+          <StickyNote className="inline h-3 w-3" aria-hidden="true" />{noteCount > 1 ? noteCount : ''}
         </span>
       )}
       {hasEvent && (
@@ -162,16 +163,16 @@ function GridCell({ iso, events, holiday, feiertag, color, title, categories, no
         <TooltipPrimitive.Content
           side="top"
           sideOffset={4}
-          className="z-50 rounded-lg px-3 py-2 text-xs text-white shadow-lg"
-          style={{ background: 'var(--color-marine-900)', maxWidth: 240 }}
+          className="z-50 rounded-lg border border-[var(--cl-line)] px-3 py-2 text-xs shadow-[var(--cl-shadow-float)]"
+          style={{ background: 'var(--cl-surface)', color: 'var(--cl-ink-900)', maxWidth: 240 }}
         >
-          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-gelb-500)]">
+          <p className="mb-1.5 text-[12px] font-semibold text-[var(--cl-ink-500)]">
             {formatIsoDate(iso)}
           </p>
           {events.map((ev, i) => {
             const cat = categories.find((c) => c.id === ev.categoryId);
             return (
-              <div key={ev.id} className={i > 0 ? 'mt-1.5 border-t border-white/10 pt-1.5' : ''}>
+              <div key={ev.id} className={i > 0 ? 'mt-1.5 border-t border-[var(--cl-line)] pt-1.5' : ''}>
                 <div className="flex items-center gap-1.5">
                   {cat && (
                     <span
@@ -183,8 +184,8 @@ function GridCell({ iso, events, holiday, feiertag, color, title, categories, no
                 </div>
                 {cat && (
                   <span
-                    className="ml-3.5 mt-0.5 inline-block rounded px-1 py-px text-[9px] font-semibold"
-                    style={{ background: pastelize(cat.color), color: cat.color }}
+                    className="ml-3.5 mt-0.5 inline-block rounded-[var(--radius-input)] px-1.5 py-px text-[12px] font-medium"
+                    style={{ background: pastelize(cat.color), color: 'var(--cl-on-gold)' }}
                   >
                     {cat.label}
                   </span>
@@ -192,7 +193,7 @@ function GridCell({ iso, events, holiday, feiertag, color, title, categories, no
               </div>
             );
           })}
-          <TooltipPrimitive.Arrow className="fill-[var(--color-marine-900)]" />
+          <TooltipPrimitive.Arrow className="fill-[var(--cl-surface)]" />
         </TooltipPrimitive.Content>
       </TooltipPrimitive.Portal>
     </TooltipPrimitive.Root>

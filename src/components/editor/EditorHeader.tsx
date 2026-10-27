@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { CheckCircle2, Loader2, AlertTriangle, Pencil } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Loader2, AlertTriangle, Pencil, X } from 'lucide-react';
 import { usePlannerStore } from '@/stores/planner';
 import { useConflicts } from '@/hooks/useConflicts';
 import { EditorOverflowMenu } from './EditorOverflowMenu';
@@ -66,16 +66,16 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   }
 
   const stateIndicator = {
-    idle:   <><CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Gespeichert</>,
-    saving: <><Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" /> Speichert…</>,
-    saved:  <><CheckCircle2 className="w-3 h-3" aria-hidden="true" /> Gespeichert</>,
-    error:  <><AlertTriangle className="w-3 h-3" aria-hidden="true" /> Fehler beim Speichern</>,
+    idle:   <><CheckCircle2 className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden="true" /><span className="sr-only sm:not-sr-only">Gespeichert</span></>,
+    saving: <><Loader2 className="h-4 w-4 sm:h-3 sm:w-3 animate-spin" aria-hidden="true" /><span className="sr-only sm:not-sr-only">Speichert…</span></>,
+    saved:  <><CheckCircle2 className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden="true" /><span className="sr-only sm:not-sr-only">Gespeichert</span></>,
+    error:  <><AlertTriangle className="h-4 w-4 sm:h-3 sm:w-3" aria-hidden="true" /><span>Fehler beim Speichern</span></>,
   }[savingState];
 
-  // A save shows as "Du" when it carries this account's sub — covers editing
+  // A save shows as "Ihr anderes Gerät" when it carries this account's sub — covers editing
   // the same plan from a second browser/device under one IServ login.
   const isOwnAccount = !!presence && presence.authorSub === authClaims?.sub;
-  const presenceLabel = presence ? (isOwnAccount ? 'Du (anderes Gerät)' : presence.authorName || 'Jemand') : '';
+  const presenceLabel = presence ? (isOwnAccount ? 'Ihr anderes Gerät' : presence.authorName || 'Jemand') : '';
   const presenceRel = presence?.authorName ? relativeTime(presence.savedAt) : '';
   const saveStatusTitle = presenceRel ? `${presenceLabel} hat ${presenceRel} gespeichert` : undefined;
 
@@ -92,8 +92,8 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   }
 
   return (
-    <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
-      <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
+    <header className="relative border-b border-[var(--cl-line)] bg-[var(--cl-surface)] text-[var(--cl-ink-900)]">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 md:px-6" style={{ minHeight: 56 }}>
         <Logo className="h-6 w-auto shrink-0" />
         {renaming ? (
           <input
@@ -106,58 +106,58 @@ export function EditorHeader({ onSwitchPlan }: Props) {
               else if (e.key === 'Escape') { e.preventDefault(); setRenaming(false); }
             }}
             aria-label="Plan umbenennen"
-            className="text-[15px] font-semibold bg-white/10 rounded px-1.5 py-0.5 outline-none ring-1 ring-white/30 focus:ring-white/60"
+            className="h-11 rounded-[var(--radius-input)] border border-[var(--cl-border)] bg-[var(--cl-surface)] px-2 text-[15px] font-semibold outline-none focus-visible:shadow-[var(--cl-focus-ring)] lg:h-9"
             style={{ width: `${Math.max(nameDraft.length, 6)}ch` }}
           />
         ) : (
-          <div className="flex items-center gap-0.5">
+          <h1 className="m-0 flex min-w-0 items-center gap-0.5 text-[15px] font-semibold">
             <button
               data-tour="plan-name"
               onClick={onSwitchPlan}
-              className="text-[15px] font-semibold hover:opacity-80 flex items-center gap-1 transition-opacity"
-              style={{ transitionDuration: 'var(--dur-state)' }}
+              className="flex min-h-11 min-w-0 items-center gap-1 rounded-[var(--radius-input)] px-1 text-[15px] font-semibold hover:bg-[var(--cl-bg)] lg:min-h-9"
+              aria-label={`Plan wechseln, aktuell ${doc.meta.name}`}
             >
-              {doc.meta.name} <span className="opacity-60">▼</span>
+              <span className="truncate">{doc.meta.name}</span>
+              <ChevronDown className="h-4 w-4 shrink-0 text-[var(--cl-ink-500)]" aria-hidden="true" />
             </button>
             <button
               onClick={startRename}
               aria-label="Plan umbenennen"
               title="Plan umbenennen"
-              className="opacity-50 hover:opacity-100 transition-opacity p-1"
-              style={{ transitionDuration: 'var(--dur-state)' }}
+              className="flex size-11 items-center justify-center rounded-[var(--radius-input)] text-[var(--cl-ink-500)] hover:bg-[var(--cl-bg)] hover:text-[var(--cl-ink-900)] lg:size-9"
             >
-              <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+              <Pencil className="h-4 w-4" aria-hidden="true" />
             </button>
-          </div>
+          </h1>
         )}
-        <div className="ml-auto flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5" title={saveStatusTitle}>
+        <div className="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs sm:ml-auto sm:w-auto sm:justify-end">
+          <span className="flex items-center gap-1.5 text-[var(--cl-ink-500)]" role="status" title={saveStatusTitle}>
             {stateIndicator}
           </span>
           {conflicts.length > 0 && (
             <button
               onClick={() => setPanelOpen((v) => !v)}
-              className="flex items-center gap-1 rounded-[var(--radius-block)] px-2.5 py-1.5 text-[12.5px] font-semibold"
+              className="flex min-h-11 items-center gap-1.5 rounded-[var(--radius-input)] border px-3 text-[13px] font-semibold lg:min-h-9"
               style={{
-                background: hasError ? 'color-mix(in srgb, var(--color-danger) 10%, transparent)' : 'var(--color-gelb-100)',
-                color: hasError ? 'var(--color-danger)' : 'var(--color-warning)'
+                background: hasError ? 'var(--cl-danger-bg)' : 'var(--cl-warning-bg)',
+                borderColor: hasError ? 'var(--cl-danger)' : 'var(--cl-warning)',
+                color: hasError ? 'var(--cl-danger)' : 'var(--cl-warning)'
               }}
             >
-              <AlertTriangle className="w-3 h-3" aria-hidden="true" /> {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" /> {conflicts.length} {conflicts.length === 1 ? 'Konflikt' : 'Konflikte'}
             </button>
           )}
           <StatusBar />
           {authStatus === 'authenticated' && authClaims && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 text-[13px]">
+            <div className="flex items-center gap-1 rounded-[var(--radius-pill)] bg-[var(--cl-bg)] pl-3 text-[13px]">
               <span>{authClaims.name}</span>
               <button
                 onClick={handleLogout}
                 aria-label="Abmelden"
                 title="Abmelden"
-                className="opacity-60 hover:opacity-100 transition-opacity"
-                style={{ transitionDuration: 'var(--dur-state)' }}
+                className="flex size-11 items-center justify-center rounded-full text-[var(--cl-ink-500)] hover:text-[var(--cl-ink-900)] lg:size-9"
               >
-                ✕
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           )}
@@ -166,8 +166,8 @@ export function EditorHeader({ onSwitchPlan }: Props) {
       </div>
       {hasServerUpdate && (
         <div
-          className="px-6 py-2 flex items-center gap-3 text-[13px]"
-          style={{ background: 'var(--color-gelb-100)', color: 'var(--color-ink-900)' }}
+          className="flex flex-wrap items-center gap-3 border-t border-[var(--cl-gold-500)] px-4 py-2 text-[13px] md:px-6"
+          style={{ background: 'var(--cl-gold-100)', color: 'var(--cl-ink-900)' }}
           role="status"
         >
           <span>
@@ -177,7 +177,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
           <button
             onClick={() => void handlePullUpdate()}
             disabled={pulling}
-            className="font-semibold underline disabled:opacity-50"
+            className="min-h-11 font-semibold underline disabled:opacity-50 lg:min-h-9"
           >
             {pulling ? 'Lädt…' : 'Jetzt aktualisieren'}
           </button>

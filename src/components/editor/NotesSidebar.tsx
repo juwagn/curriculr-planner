@@ -48,7 +48,7 @@ export function NotesSidebar() {
                 }`}
                 style={{ transitionDuration: 'var(--dur-state)' }}
               >
-                <div className="text-[12px] font-semibold uppercase tracking-wider text-[var(--color-marine-800)] tabular-nums">
+                <div className="text-[12px] font-semibold text-[var(--color-marine-800)] tabular-nums">
                   SW {w.index.toString().padStart(2, '0')} · {w.startDate.slice(5)} – {w.endDate.slice(5)}
                 </div>
                 <div className={`mt-1 whitespace-pre-line text-[13px] ${has ? 'text-[var(--color-ink-900)]' : 'italic text-[var(--color-ink-500)]'}`}>

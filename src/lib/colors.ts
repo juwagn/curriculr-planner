@@ -13,7 +13,7 @@ export const CATEGORY_PALETTE = [
   '#D98B5F', // Terrakotta/Apricot
   '#D46A6A', // Dusty Coral
   '#B66A9E', // Mauve/Beere
-  '#7C72C4', // Gedämpftes Violett
+  '#8C7B4F', // Oliv/Khaki
   '#647488'  // Schiefer-Grau
 ] as const;
 

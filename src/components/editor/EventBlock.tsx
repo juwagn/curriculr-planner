@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { pastelize } from '@/lib/colors';
+import { TriangleAlert } from 'lucide-react';
 import type { Category, PlanEvent } from '@/types';
 
 interface Props {
@@ -61,7 +62,7 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
       }}
       {...listeners}
       {...attributes}
-      className="relative w-full text-left rounded-[var(--radius-block)] pl-2 pr-3 py-1 leading-snug transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-[0.5px] cursor-grab active:cursor-grabbing focus:outline-none focus-visible:ring-3 focus-visible:ring-[var(--color-marine-800)]/50"
+      className="relative w-full text-left rounded-[var(--radius-block)] pl-2 pr-3 py-1 leading-snug transition-all cursor-grab active:cursor-grabbing focus:outline-none focus-visible:shadow-[var(--cl-focus-ring)]"
       style={{
         backgroundColor: bg === '#FFFFFF' ? baseBg : bg,
         borderLeft: showLeftBorder ? `3px solid ${category.color}` : 'none',
@@ -70,8 +71,10 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
         borderTopRightRadius: roundRight ? undefined : 0,
         borderBottomRightRadius: roundRight ? undefined : 0,
         opacity: isDragging ? 0.4 : 1,
-        fontSize: '13px',
-        wordBreak: 'break-word',
+        fontSize: '15px',
+        color: 'var(--cl-on-gold)',
+        overflowWrap: 'break-word',
+        hyphens: 'auto',
         transitionDuration: 'var(--dur-state)',
         transitionTimingFunction: 'var(--ease-state)'
       }}
@@ -80,13 +83,12 @@ export function EventBlock({ event, category, onClick, conflictSeverity, segment
       {showContent ? (
         <>
           {conflictSeverity && (
-            <span
+            <TriangleAlert
+              role="img"
               aria-label={conflictSeverity === 'error' ? 'Konflikt' : 'Warnung'}
-              className="mr-1 align-middle"
+              className="mr-1 inline h-3.5 w-3.5 align-text-bottom"
               style={{ color: conflictSeverity === 'error' ? 'var(--color-danger)' : 'var(--color-warning)' }}
-            >
-              ⚠
-            </span>
+            />
           )}
           {timeLabel && (
             <span className="font-bold tabular-nums mr-1">{timeLabel}</span>

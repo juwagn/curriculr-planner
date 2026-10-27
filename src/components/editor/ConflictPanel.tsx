@@ -4,6 +4,8 @@ import { useConflicts } from '@/hooks/useConflicts';
 import { getQuarterForDate } from '@/lib/schoolweeks';
 import { Button } from '@/components/ui/button';
 
+import { TriangleAlert, X } from 'lucide-react';
+
 interface Props {
   open: boolean;
   onClose(): void;
@@ -27,18 +29,18 @@ export function ConflictPanel({ open, onClose }: Props) {
   };
 
   return (
-    <div className="absolute right-4 top-14 z-30 w-96 max-h-[70vh] overflow-auto rounded-[var(--radius-default)] border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] p-3 shadow-[var(--shadow-modal)]">
+    <div className="absolute right-4 top-14 z-30 w-[calc(100vw-2rem)] max-w-96 max-h-[70vh] overflow-auto rounded-[var(--radius-default)] border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] p-3 shadow-[var(--shadow-modal)]">
       <div className="flex items-center justify-between mb-2">
         <div className="text-[13px] font-semibold text-[var(--color-marine-800)]">
           Konflikte ({conflicts.length})
         </div>
-        <button onClick={onClose} className="text-[var(--color-ink-500)] text-[13px]">
-          ✕
+        <button onClick={onClose} aria-label="Konflikte schließen" className="flex size-11 items-center justify-center rounded-[var(--radius-input)] text-[var(--color-ink-500)] hover:bg-[var(--cl-bg)] lg:size-9">
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
       {conflicts.length === 0 && (
         <div className="text-[12px] text-[var(--color-ink-500)] py-4 text-center">
-          Keine Konflikte 🎉
+          Keine Konflikte
         </div>
       )}
       <ul className="space-y-2">
@@ -51,12 +53,12 @@ export function ConflictPanel({ open, onClose }: Props) {
               className="rounded-[var(--radius-block)] p-2.5"
               style={{
                 background: isError
-                  ? 'color-mix(in srgb, var(--color-danger) 8%, var(--color-paper-card))'
-                  : 'var(--color-gelb-100)'
+                  ? 'var(--cl-danger-bg)'
+                  : 'var(--cl-warning-bg)'
               }}
             >
               <div className="flex items-start gap-1.5">
-                <span style={{ color: accent }}>⚠</span>
+                <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: accent }} aria-hidden="true" />
                 <span className="text-[12.5px] text-[var(--color-ink-900)] leading-snug flex-1">
                   {c.message}
                 </span>

@@ -35,12 +35,12 @@ export function PrintDialog() {
         <DialogTitle>Als PDF drucken</DialogTitle>
         <div className="mt-4 space-y-5">
           <div className="space-y-2">
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-[var(--color-ink-500)]">Umfang</p>
+            <p className="text-[12px] font-semibold text-[var(--color-ink-500)]">Umfang</p>
             {radioRow('Aktuelles Quartal', scope === 'currentQuarter', () => setScope('currentQuarter'))}
             {radioRow('Ganzes Schuljahr (Q1–4)', scope === 'allQuarters', () => setScope('allQuarters'))}
           </div>
           <div className="space-y-2">
-            <p className="text-[12px] font-semibold uppercase tracking-wide text-[var(--color-ink-500)]">Format</p>
+            <p className="text-[12px] font-semibold text-[var(--color-ink-500)]">Format</p>
             {radioRow('Hochformat (A4)', orientation === 'portrait', () => setOrientation('portrait'))}
             {radioRow('Querformat (A4)', orientation === 'landscape', () => setOrientation('landscape'))}
           </div>

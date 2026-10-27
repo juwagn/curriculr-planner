@@ -2,6 +2,7 @@ import { format, getDay, parseISO } from 'date-fns';
 import { findSchoolweek, type SchoolweekRange } from '@/lib/schoolweeks';
 import type { WeekAnnotation } from '@/types';
 import { annotationsForWeek } from '@/lib/annotations';
+import { StickyNote } from 'lucide-react';
 
 interface Props {
   date: Date;
@@ -45,7 +46,7 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
       <button
         onClick={handleClick}
         onMouseDown={handleMouseDown}
-        className={`inline-flex items-center justify-center w-5 h-5 rounded-[var(--radius-block)] text-[11px] cursor-pointer transition-colors ${
+        className={`inline-flex items-center justify-center w-5 h-5 rounded-[var(--radius-block)] text-[12px] cursor-pointer transition-colors ${
           hasNote
             ? 'bg-[var(--color-gelb-500)] text-[var(--color-ink-900)]'
             : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-500)] hover:bg-[var(--color-paper-bg)]/60'
@@ -53,7 +54,7 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
         style={{ transitionDuration: 'var(--dur-state)' }}
         title={hasNote ? `SW ${sw.index}: ${notes.length} Anmerkung${notes.length === 1 ? '' : 'en'}` : `Anmerkung zu SW ${sw.index} hinzufügen`}
       >
-        {hasNote ? notes.length : '📝'}
+        {hasNote ? notes.length : <StickyNote className="h-3 w-3" aria-hidden="true" />}
       </button>
     </span>
   );

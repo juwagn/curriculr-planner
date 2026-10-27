@@ -24,7 +24,7 @@ const STAGE_COLOR: Record<WpStage, string> = {
 };
 
 const STAGE_DESCRIPTION: Record<WpStage, string> = {
-  entwurf:     'Nur für dich sichtbar',
+  entwurf:     'Nur für Sie sichtbar',
   genehmigt:   'Kollegium sieht die Entwurf-Vorschau',
   oeffentlich: 'Erscheint auf der Schulwebsite',
 };
@@ -91,12 +91,12 @@ export function StatusBar() {
 
   return (
     <>
-      <div className="flex items-center gap-3 text-xs">
+      <div className="flex flex-wrap items-center gap-3 text-xs">
         {isEnabled ? (
           <>
             <Popover open={pillOpen} onOpenChange={(o) => void handlePillOpenChange(o)}>
               <PopoverTrigger asChild>
-                <button className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--radius-pill)] bg-white/10 hover:bg-white/15 transition-colors" style={{ transitionDuration: 'var(--dur-state)' }}>
+                <button className="flex min-h-11 items-center gap-1.5 rounded-[var(--radius-pill)] border border-[var(--cl-line)] px-3 py-1 transition-colors hover:bg-[var(--cl-bg)] lg:min-h-9" style={{ transitionDuration: 'var(--dur-state)' }}>
                   <span
                     aria-hidden
                     className="inline-block size-2 rounded-full"
@@ -104,9 +104,9 @@ export function StatusBar() {
                   />
                   <span className="font-medium">{STAGE_LABELS[stage]}</span>
                   {link.knownVersion > 0 && (
-                    <span className="text-[11px] opacity-70 tabular-nums">· v{link.knownVersion}</span>
+                    <span className="text-[12px] text-[var(--cl-ink-500)] tabular-nums">· v{link.knownVersion}</span>
                   )}
-                  <span className="text-[11px] opacity-50 hidden sm:inline">
+                  <span className="text-[12px] text-[var(--cl-ink-500)] hidden lg:inline">
                     — {STAGE_DESCRIPTION[stage]}
                   </span>
                 </button>
@@ -131,7 +131,7 @@ export function StatusBar() {
                   )}
                   {showOwnPush && (
                     <p className="text-[12px] text-[var(--color-ink-500)]">
-                      Du hast zuletzt gesendet: {formatPushedAt(link!.lastPushedAt!)}
+                      Sie haben zuletzt gesendet: {formatPushedAt(link!.lastPushedAt!)}
                     </p>
                   )}
                 </div>
@@ -151,16 +151,18 @@ export function StatusBar() {
             {isAuthenticated ? (
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => setPublishOpen(true)}
-                className="bg-white/15 hover:bg-white/25 text-[var(--color-paper-card)] border border-white/20 text-[12px] px-3 py-1 h-auto"
+                className="h-11 px-3 text-[13px] lg:h-9"
               >
                 Veröffentlichen
               </Button>
             ) : (
               <Button
                 size="sm"
+                variant="outline"
                 onClick={() => startIservLogin(config.baseUrl)}
-                className="bg-white/15 hover:bg-white/25 text-[var(--color-paper-card)] border border-white/20 text-[12px] px-3 py-1 h-auto"
+                className="h-11 px-3 text-[13px] lg:h-9"
               >
                 Mit IServ anmelden
               </Button>
@@ -169,7 +171,7 @@ export function StatusBar() {
         ) : (
           <button
             onClick={() => openSettings('publish')}
-            className="text-[11px] opacity-40 hover:opacity-70 transition-opacity underline"
+            className="min-h-11 px-1 text-[12px] text-[var(--cl-ink-500)] underline hover:text-[var(--cl-ink-900)] lg:min-h-9"
             style={{ transitionDuration: 'var(--dur-state)' }}
           >
             Nicht verbunden
@@ -187,7 +189,7 @@ export function StatusBar() {
           </DialogHeader>
           <p className="text-[14px] text-[var(--color-ink-500)]">
             WordPress hat Version {pendingPull?.version}, aber hier ist bereits Version{' '}
-            {pendingPull?.knownVersion} bekannt. Dein aktueller lokaler Stand wird überschrieben.
+            {pendingPull?.knownVersion} bekannt. Ihr aktueller lokaler Stand wird überschrieben.
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => cancelPull()}>Abbrechen</Button>
@@ -210,7 +212,7 @@ export function StatusBar() {
               <> Gespeichert von{' '}
                 <strong className="font-semibold text-[var(--color-ink-900)]">{conflict.authorName}</strong>.
               </>
-            )}{' '}Was möchtest du tun?
+            )}{' '}Was möchten Sie tun?
           </p>
           <DialogFooter className="gap-2">
             <Button
@@ -224,7 +226,7 @@ export function StatusBar() {
             <Button
               onClick={() => {
                 void keepLocal(doc).then((r) => {
-                  if (r === 'synced') toast.success('Dein Stand wurde gesendet.');
+                  if (r === 'synced') toast.success('Ihr Stand wurde gesendet.');
                   else toast.error(useWpSyncStore.getState().message || 'Fehler beim Senden.');
                 });
               }}

@@ -9,7 +9,7 @@ const DEFAULT_CATEGORIES: Omit<Category, 'id'>[] = [
   { label: 'Elternabend', color: '#2F9E8F', slug: 'elternabend', keywords: ['elternabend', 'eltern'] },
   { label: 'Wandertag', color: '#D9A23B', slug: 'wandertag', keywords: ['wandertag', 'ausflug'] },
   { label: 'Prüfung', color: '#D46A6A', slug: 'pruefung', keywords: ['prüfung', 'klausur', 'abitur'] },
-  { label: 'Sonderveranstaltung', color: '#7C72C4', slug: 'sonder', keywords: ['fest', 'feier'] },
+  { label: 'Sonderveranstaltung', color: '#8C7B4F', slug: 'sonder', keywords: ['fest', 'feier'] },
   { label: 'Schließtag', color: '#647488', slug: 'schliesstag', keywords: ['schließ', 'frei'] },
   { label: 'Sondertag', color: '#D98B5F', slug: 'sondertag', keywords: [] }
 ];

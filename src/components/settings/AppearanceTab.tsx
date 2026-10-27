@@ -40,7 +40,7 @@ export function AppearanceTab() {
     <div className="space-y-6">
       {/* Darstellung */}
       <div className="space-y-3">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Zeilen-Dichte (Tabellen-Ansicht)
         </h3>
         <p className="text-[12px] text-[var(--color-ink-500)]">
@@ -76,7 +76,7 @@ export function AppearanceTab() {
 
       {/* Ausdruck */}
       <div className="space-y-4 pt-2 border-t border-[var(--color-ink-200)]">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Ausdruck
         </h3>
         <div className="space-y-1.5">

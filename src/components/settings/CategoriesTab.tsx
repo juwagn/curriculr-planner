@@ -15,6 +15,7 @@ import { CATEGORY_PALETTE } from '@/lib/colors';
 import { slugify as deriveSlug } from '@/lib/slugify';
 import type { Category } from '@/types';
 import { toast } from 'sonner';
+import { X } from 'lucide-react';
 
 function nextPaletteColor(used: string[]): string {
   const taken = new Set(used.map((c) => c.toUpperCase()));
@@ -92,7 +93,7 @@ export function CategoriesTab() {
     <div className="space-y-3">
       <table className="w-full text-[13px]">
         <thead>
-          <tr className="text-[12px] text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+          <tr className="text-[12px] text-[var(--color-ink-500)]">
             <th className="text-left py-2 font-semibold">Label</th>
             <th className="text-left font-semibold pl-2">Farbe</th>
             <th className="text-left font-semibold pl-2">Stichwörter</th>
@@ -127,7 +128,7 @@ export function CategoriesTab() {
                   className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] transition-colors px-1"
                   style={{ transitionDuration: 'var(--dur-state)' }}
                 >
-                  ✕
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               </td>
             </tr>

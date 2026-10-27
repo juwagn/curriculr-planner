@@ -4,7 +4,7 @@ import { useUiStore } from '@/stores/ui';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { format, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Undo2, Redo2, LayoutTemplate, StickyNote } from 'lucide-react';
+import { Undo2, Redo2, LayoutTemplate, Plus, StickyNote } from 'lucide-react';
 import { getQuarterRange } from '@/lib/schoolweeks';
 
 export function EditorToolbar() {
@@ -27,77 +27,58 @@ export function EditorToolbar() {
     return `${format(parseISO(r.startDate), 'MMM yyyy', { locale: de })} – ${format(parseISO(r.endDate), 'MMM yyyy', { locale: de })}`;
   };
 
+  const tabClass = (active: boolean) =>
+    `relative -mb-px flex min-h-11 min-w-11 items-center justify-center border-b-2 px-3 text-[15px] font-semibold transition-colors lg:min-h-9 ${
+      active
+        ? 'border-[var(--cl-marine-800)] text-[var(--cl-marine-800)]'
+        : 'border-transparent text-[var(--cl-ink-500)] hover:text-[var(--cl-ink-900)]'
+    }`;
+
   return (
-    <div className="bg-[var(--color-paper-card)] border-b border-[var(--color-ink-200)] px-6 py-2 flex items-center gap-2">
-      <div
-        data-tour="view-toggle"
-        className="flex items-center rounded-[var(--radius-pill)] overflow-hidden mr-3"
-        style={{ background: 'var(--color-paper-bg)' }}
-      >
-        <button
-          onClick={() => setViewMode('table')}
-          aria-pressed={viewMode === 'table'}
-          className="px-3 py-1 text-sm font-semibold transition-colors"
-          style={{
-            background: viewMode === 'table' ? 'var(--color-marine-800)' : 'transparent',
-            color: viewMode === 'table' ? 'var(--color-paper-card)' : 'var(--color-ink-500)',
-            transitionDuration: 'var(--dur-state)',
-          }}
-        >
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-[var(--cl-line)] bg-[var(--cl-surface)] px-4 md:px-6">
+      <div data-tour="view-toggle" role="group" aria-label="Ansicht" className="mr-3 flex items-center">
+        <button onClick={() => setViewMode('table')} aria-pressed={viewMode === 'table'} className={tabClass(viewMode === 'table')}>
           Tabelle
         </button>
-        <button
-          onClick={() => setViewMode('year')}
-          aria-pressed={viewMode === 'year'}
-          className="px-3 py-1 text-sm font-semibold transition-colors"
-          style={{
-            background: viewMode === 'year' ? 'var(--color-marine-800)' : 'transparent',
-            color: viewMode === 'year' ? 'var(--color-paper-card)' : 'var(--color-ink-500)',
-            transitionDuration: 'var(--dur-state)',
-          }}
-        >
+        <button onClick={() => setViewMode('year')} aria-pressed={viewMode === 'year'} className={tabClass(viewMode === 'year')}>
           Schuljahr
         </button>
       </div>
       {viewMode === 'table' ? (
-        <div data-tour="quarter-tabs" className="flex items-center gap-2">
+        <div data-tour="quarter-tabs" role="group" aria-label="Quartal" className="flex items-center">
           {[1, 2, 3, 4].map((q) => (
             <button
               key={q}
               onClick={() => setQuarter(q as 1 | 2 | 3 | 4)}
-              className="px-4 py-1.5 rounded-[var(--radius-pill)] text-sm font-semibold transition-colors"
-              style={{
-                background: currentQuarter === q ? 'var(--color-marine-800)' : 'var(--color-paper-bg)',
-                color: currentQuarter === q ? 'var(--color-paper-card)' : 'var(--color-ink-500)',
-                transitionDuration: 'var(--dur-state)',
-                transitionTimingFunction: 'var(--ease-state)'
-              }}
+              aria-pressed={currentQuarter === q}
+              className={tabClass(currentQuarter === q)}
             >
               Q{q}
             </button>
           ))}
-          <span className="ml-3 text-sm text-[var(--color-ink-500)] tabular-nums">{fmtRange(currentQuarter - 1)}</span>
+          <span className="ml-3 hidden text-[13px] text-[var(--cl-ink-500)] tabular-nums sm:inline">{fmtRange(currentQuarter - 1)}</span>
         </div>
       ) : (
-        <span className="text-sm font-semibold text-[var(--color-ink-900)]">Jahresübersicht</span>
+        <span className="text-[15px] font-semibold text-[var(--cl-ink-900)]">Jahresübersicht</span>
       )}
-      <div className="ml-auto flex items-center gap-2">
-        <Button variant="ghost" size="icon-sm" disabled={!canUndo} onClick={undo} aria-label="Rückgängig" title="Rückgängig (Strg+Z)">
+      <div className="ml-auto flex flex-wrap items-center gap-2 py-2">
+        <Button variant="ghost" size="icon-sm" className="size-11 lg:size-9" disabled={!canUndo} onClick={undo} aria-label="Rückgängig" title="Rückgängig (Strg+Z)">
           <Undo2 />
         </Button>
-        <Button variant="ghost" size="icon-sm" disabled={!canRedo} onClick={redo} aria-label="Wiederholen" title="Wiederholen (Strg+Umschalt+Z)">
+        <Button variant="ghost" size="icon-sm" className="size-11 lg:size-9" disabled={!canRedo} onClick={redo} aria-label="Wiederholen" title="Wiederholen (Strg+Umschalt+Z)">
           <Redo2 />
         </Button>
-        <Button data-tour="templates-btn" variant="outline" size="sm" onClick={toggleTemplates} aria-label="Vorlagen anzeigen" title="Vorlagen">
+        <Button data-tour="templates-btn" variant="outline" size="sm" className="h-11 px-3 text-[13px] lg:h-9" onClick={toggleTemplates} aria-label="Vorlagen anzeigen" title="Vorlagen">
           <LayoutTemplate />
           Vorlagen
         </Button>
-        <Button variant="outline" size="sm" onClick={toggleNotes}>
+        <Button variant="outline" size="sm" className="h-11 px-3 text-[13px] lg:h-9" onClick={toggleNotes}>
           <StickyNote />
           Notizen
         </Button>
-        <Button data-tour="add-event-btn" size="sm" onClick={() => openCreate()}>
-          + Termin
+        <Button data-tour="add-event-btn" size="sm" className="h-11 px-3 text-[13px] lg:h-9" onClick={() => openCreate()}>
+          <Plus />
+          Termin anlegen
         </Button>
       </div>
     </div>

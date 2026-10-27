@@ -27,10 +27,11 @@ function WelcomeTab({ id, label, icon, source, onSelect }: TabProps) {
   return (
     <button
       onClick={() => onSelect(id)}
-      className={`flex-1 text-[13px] font-bold py-2 px-2 rounded-[8px] transition ${
+      aria-pressed={source === id}
+      className={`min-h-11 flex-1 rounded-[var(--radius-default)] border px-2 py-2 text-[13px] font-semibold transition lg:min-h-9 ${
         source === id
-          ? 'bg-white text-[var(--color-marine-800)] shadow-[0_2px_8px_rgba(0,52,92,.12)]'
-          : 'text-[var(--color-ink-500)]'
+          ? 'border-[var(--cl-marine-500)] bg-[var(--cl-surface)] text-[var(--cl-marine-800)]'
+          : 'border-transparent text-[var(--cl-ink-500)] hover:text-[var(--cl-ink-900)]'
       }`}
     >
       <span className="flex items-center justify-center gap-1.5">
@@ -162,8 +163,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
   return (
     <div className="min-h-[100dvh] flex items-center justify-center p-6">
       <Card
-        className="max-w-4xl w-full overflow-hidden border-[var(--color-ink-200)] p-0"
-        style={{ boxShadow: 'var(--shadow-modal)' }}
+        className="max-w-4xl w-full overflow-hidden border border-[var(--color-ink-200)] p-0 ring-0"
       >
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr]">
           <BrandPanel
@@ -177,15 +177,15 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
           />
 
           <div className="p-7">
-            <div className="text-[20px] font-extrabold text-[var(--color-ink-900)] tracking-[-0.3px]">
-              Wo ist dein Plan?
-            </div>
+            <h1 className="text-[20px] font-bold leading-[1.3] text-[var(--color-ink-900)]">
+              Jahresplan auswählen
+            </h1>
             <p className="text-[13px] text-[var(--color-ink-500)] mt-1 mb-4">
-              Lokal auf diesem Gerät, auf eurem WordPress oder neu beginnen.
+              Lokal auf diesem Gerät, auf Ihrem WordPress oder neu beginnen.
             </p>
 
             <div
-              className="flex gap-1.5 p-1.5 rounded-[12px] mb-4"
+              className="flex gap-1.5 p-1.5 rounded-[var(--radius-default)] mb-4"
               style={{ background: 'var(--color-paper-bg)' }}
             >
               <WelcomeTab id="local" label="Dieses Gerät" icon={<HardDrive className="w-3.5 h-3.5" />} source={source} onSelect={setSource} />
@@ -206,7 +206,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                     return (
                       <div
                         key={d.id}
-                        className="flex items-center justify-between gap-3 border border-[var(--color-status-red)] bg-red-50 rounded-[12px] p-3.5"
+                        className="flex items-center justify-between gap-3 border border-[var(--color-status-red)] bg-[var(--color-danger-bg)] rounded-[var(--radius-default)] p-3.5"
                       >
                         <span className="text-[13px] font-medium text-[var(--color-status-red)] min-w-0 truncate">
                           „{d.name}" wirklich löschen?
@@ -225,7 +225,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                   return (
                     <div
                       key={d.id}
-                      className="flex items-center justify-between gap-3 border border-[var(--color-ink-200)] rounded-[12px] p-3.5"
+                      className="flex items-center justify-between gap-3 border border-[var(--color-ink-200)] rounded-[var(--radius-default)] p-3.5"
                     >
                       <div className="min-w-0">
                         <div className="text-[14px] font-bold text-[var(--color-ink-900)] truncate">{d.name}</div>
@@ -248,7 +248,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] hover:bg-red-50"
+                          className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] hover:bg-[var(--color-danger-bg)]"
                           onClick={() => setConfirmDeleteLocalId(d.id)}
                           aria-label={`${d.name} löschen`}
                         >
@@ -278,13 +278,13 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                 {authed && wpItems.map((it) => (
                   <div
                     key={it.sj}
-                    className="flex items-center justify-between border border-[var(--color-ink-200)] rounded-[12px] p-3.5"
+                    className="flex items-center justify-between border border-[var(--color-ink-200)] rounded-[var(--radius-default)] p-3.5"
                   >
                     <div>
                       <div className="text-[14px] font-bold text-[var(--color-ink-900)]">
                         {it.name}
                         <span
-                          className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                          className="ml-2 text-[12px] font-bold px-2 py-0.5 rounded-full"
                           style={{ background: 'var(--color-paper-bg)', color: 'var(--color-ink-500)' }}
                         >
                           {STAGE_LABELS[it.stage as WpStage]}
@@ -297,7 +297,7 @@ export function Welcome({ onCreateNew, onOpenDoc, onImportJson, onStartTour, onE
                     <Button onClick={() => handleLoadWp(it)}>Laden</Button>
                   </div>
                 ))}
-                <p className="text-[11px] text-[var(--color-ink-500)] pt-1">Geladene Pläne werden lokal gespeichert.</p>
+                <p className="text-[12px] text-[var(--color-ink-500)] pt-1">Geladene Pläne werden lokal gespeichert.</p>
               </div>
             )}
 

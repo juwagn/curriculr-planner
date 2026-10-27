@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/ui/logo';
 
 interface Props {
   authed: boolean;
@@ -16,55 +17,49 @@ function initials(name: string): string {
 }
 
 export function BrandPanel({ authed, userName, groups, baseUrl, onBaseUrlChange, onLogin, onLogout }: Props) {
-  const logoSrc = `${import.meta.env.BASE_URL}curriculr-logo.svg`;
   return (
-    <div className="flex flex-col p-7 text-white" style={{ background: 'linear-gradient(160deg, var(--color-marine-800) 0%, #012740 100%)' }}>
-      <img src={logoSrc} alt="Curriculr" style={{ width: 180, height: 'auto', display: 'block' }} />
-      <p className="text-[13px] mt-3 leading-[1.55]" style={{ color: 'rgba(255,255,255,0.65)' }}>
-        Jahresterminplan für Ihre Schule
-      </p>
+    <div className="flex flex-col gap-6 border-b border-[var(--cl-line)] bg-[var(--cl-bg)] p-7 md:border-b-0 md:border-r">
+      <div>
+        <Logo className="h-9 w-auto" />
+        <p className="mt-3 text-[13px] leading-[1.55] text-[var(--cl-ink-500)]">
+          Jahresterminplan für Ihre Schule
+        </p>
+      </div>
 
       <div className="flex-1" />
 
-      <div className="pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+      <div className="border-t border-[var(--cl-line)] pt-4">
         {authed && userName ? (
           <div>
             <div className="flex items-center gap-2.5">
               <div
-                className="font-extrabold text-[14px] flex items-center justify-center"
-                style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--color-gelb-500)', color: 'var(--color-marine-800)' }}
+                className="flex size-9 items-center justify-center rounded-full bg-[var(--cl-marine-100)] text-[14px] font-bold text-[var(--cl-marine-800)]"
+                aria-hidden="true"
               >
                 {initials(userName)}
               </div>
               <div>
-                <div className="text-[13px] font-bold">{userName}</div>
-                <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.65)' }}>{groups.join(', ')}</div>
+                <div className="text-[13px] font-semibold text-[var(--cl-ink-900)]">{userName}</div>
+                <div className="text-[12px] text-[var(--cl-ink-500)]">{groups.join(', ')}</div>
               </div>
             </div>
-            <button
-              onClick={onLogout}
-              className="text-[11px] underline mt-3"
-              style={{ color: 'rgba(255,255,255,0.65)' }}
-            >
+            <Button variant="ghost" size="sm" onClick={onLogout} className="mt-3 min-h-[var(--cl-hit-touch)] px-2 text-[13px] text-[var(--cl-ink-500)] underline lg:min-h-9">
               Abmelden
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="text-[11px]" style={{ color: 'rgba(255,255,255,0.65)' }}>Nicht angemeldet</div>
+            <label htmlFor="wp-base-url" className="block text-[13px] font-medium text-[var(--cl-ink-900)]">
+              WordPress-Adresse
+            </label>
             <Input
+              id="wp-base-url"
               value={baseUrl}
-              placeholder="WP-Adresse deiner Schule (https://…)"
+              placeholder="Adresse Ihrer Schule (https://…)"
               onChange={(e) => onBaseUrlChange(e.target.value)}
-              className="text-white placeholder:text-white/50"
-              style={{ background: 'rgba(255,255,255,0.10)', borderColor: 'rgba(255,255,255,0.25)' }}
+              className="h-11 bg-[var(--cl-surface)] lg:h-9"
             />
-            <Button
-              onClick={onLogin}
-              disabled={!baseUrl}
-              className="w-full font-bold"
-              style={{ background: 'var(--color-gelb-500)', color: 'var(--color-marine-800)' }}
-            >
+            <Button onClick={onLogin} disabled={!baseUrl} className="h-11 w-full font-semibold lg:h-9">
               Mit IServ anmelden
             </Button>
           </div>

@@ -5,6 +5,27 @@ Alle nennenswerten Änderungen am **Curriculr Planner** werden hier dokumentiert
 Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
+## [Unveröffentlicht]
+
+### Hinzugefügt
+- **Wochenliste für schmale Bildschirme:** Unter 1024 px Breite ersetzt eine Agenda die Wochentabelle. Je Schulwoche eine lesbare Karte mit Termin, Kategorie und Uhrzeit; die Schulwochen-Spalte (SW 00, 01 …) bleibt links erhalten. Mehrtägige Termine erscheinen einmal je Woche mit Enddatum. Termin und Notiz lassen sich je Woche direkt anlegen. Alle Bedienelemente sind mindestens 44 px hoch; es entsteht kein horizontales Scrollen (geprüft bei 768 und 390 px).
+
+### Geändert
+- **Gestaltung nach Curricu:lr-Designpaket:** Farben, Radien, Schatten und Schrift kommen aus den `--cl-*`-Tokens, Inter wird lokal aus dem Paket geladen. Kopfzeile, Werkzeugleiste und Tabellenkopf stehen auf heller Fläche mit feiner Linie; Marine bleibt für die Hauptaktion („Termin anlegen“), ausgewählte Elemente und Daten. Aktive Reiter (Ansicht, Quartal) sind unterstrichen.
+- **Flache Oberfläche:** Verlauf und Schatten der Startseite entfernt, Schatten nur noch bei Dialogen und Popovern. Keine Großbuchstaben mit Sperrung mehr in Tabellenköpfen und Gruppenüberschriften; keine Schrift unter 12 px.
+- **Anrede vereinheitlicht:** Oberfläche, Hilfe und Tour verwenden „Sie“ oder Aufforderungen ohne Anrede („Wo ist dein Plan?“ heißt jetzt „Jahresplan auswählen“).
+- **Logo und Favicon:** Bildmarke und Wortmarken aus dem Designpaket (`curriculr-icon.svg`, `curriculr-logo-auf-hell.svg`, `curriculr-logo-auf-dunkel.svg`); der Seitentitel lautet „Curricu:lr Planer“.
+- Platzhalter „+ Termin“ und „Notiz hinzufügen“ erscheinen nur noch bei Hover.
+- Die Standardkategorie „Sonderveranstaltung“ und das Demo-Beispiel nutzen kein Violett mehr (Designregel); vorhandene Pläne behalten ihre Farben.
+
+### Behoben
+- Termintexte stehen unter 1024 px nicht mehr Buchstabe für Buchstabe untereinander; ab 1024 px werden lange Wörter in der Tabelle mit Silbentrennung umbrochen.
+- Emojis in der Oberfläche (Notiz, Warnung, Konflikte, Hilfe) durch Lucide-Symbole ersetzt; Symbolschaltflächen tragen eine Beschriftung.
+- Kontrast der Konflikt-Anzeige in der Kopfzeile (zuvor 2,7 : 1).
+- Fehlende Hauptüberschrift (h1) auf Startseite und im Editor ergänzt.
+
+---
+
 ## [1.17.0] – 2026-09-18
 
 ### Hinzugefügt

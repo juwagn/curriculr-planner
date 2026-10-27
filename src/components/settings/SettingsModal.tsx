@@ -86,7 +86,7 @@ export function SettingsModal() {
                   className="
                     hidden sm:block
                     px-4 py-1
-                    text-[10px] font-bold uppercase tracking-[0.08em]
+                    text-[12px] font-bold
                     text-[var(--color-ink-500)]
                     select-none
                   "

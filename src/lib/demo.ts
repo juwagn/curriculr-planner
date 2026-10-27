@@ -9,7 +9,7 @@ const CATEGORIES = [
   { id: 'demo-elternabend', label: 'Elternabend', color: '#0E9F6E', slug: 'elternabend', keywords: ['eltern'] },
   { id: 'demo-wandertag', label: 'Wandertag', color: '#FFC857', slug: 'wandertag', keywords: ['wandertag', 'ausflug'] },
   { id: 'demo-pruefung', label: 'Prüfung', color: '#E02424', slug: 'pruefung', keywords: ['prüfung', 'klausur', 'abitur'] },
-  { id: 'demo-sonder', label: 'Sonderveranstaltung', color: '#7C3AED', slug: 'sonder', keywords: ['fest', 'feier'] },
+  { id: 'demo-sonder', label: 'Sonderveranstaltung', color: '#8C7B4F', slug: 'sonder', keywords: ['fest', 'feier'] },
   { id: 'demo-schliesstag', label: 'Schließtag', color: '#6B7280', slug: 'schliesstag', keywords: ['schließ', 'frei'] },
   { id: 'demo-sondertag', label: 'Sondertag', color: '#FFC857', slug: 'sondertag', keywords: [] }
 ];

@@ -12,6 +12,7 @@ import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import type { PlanEvent } from '@/types';
 import { toast } from 'sonner';
+import { Settings } from 'lucide-react';
 
 function newUuid() {
   return crypto.randomUUID();
@@ -214,7 +215,7 @@ export function EventModal() {
               onClick={() => { close(); openSettings('categories'); }}
               className="mt-1 text-[12px] text-[var(--color-marine-700)] hover:underline"
             >
-              ⚙ Kategorien verwalten
+              <Settings className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />Kategorien verwalten
             </button>
           </div>
 

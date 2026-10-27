@@ -69,7 +69,7 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Quartal-Grenzen
         </h3>
         <div className="grid grid-cols-3 gap-3">
@@ -89,12 +89,12 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Kategorien
         </h3>
         <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-[12px] text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+            <tr className="text-[12px] text-[var(--color-ink-500)]">
               <th className="text-left py-2 font-semibold">Label</th>
               <th className="w-12 font-semibold">Farbe</th>
               <th className="text-left font-semibold">Stichwörter (kommasepariert)</th>
@@ -148,7 +148,7 @@ export function Step2Categories({ initial, onBack, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Gruppen
         </h3>
         <div className="flex flex-wrap gap-2">

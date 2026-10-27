@@ -106,7 +106,7 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
               return (
                 <div
                   key={d.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-[var(--radius-default)] border border-[var(--color-status-red)] bg-red-50"
+                  className="flex items-center justify-between gap-3 p-3 rounded-[var(--radius-default)] border border-[var(--color-status-red)] bg-[var(--color-danger-bg)]"
                 >
                   <span className="text-[13px] font-medium text-[var(--color-status-red)] min-w-0 truncate">
                     „{d.name}" wirklich löschen?
@@ -140,7 +140,7 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
                   <div className="text-[13px] font-semibold text-[var(--color-ink-900)] truncate">
                     {d.name}
                     {isCurrent && (
-                      <span className="ml-2 text-[11px] font-medium text-[var(--color-marine-500)]">
+                      <span className="ml-2 text-[12px] font-medium text-[var(--color-marine-500)]">
                         (aktiv)
                       </span>
                     )}
@@ -159,7 +159,7 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
                   <Button
                     size="icon-sm"
                     variant="ghost"
-                    className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] hover:bg-red-50"
+                    className="text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] hover:bg-[var(--color-danger-bg)]"
                     onClick={() => setConfirmDeleteId(d.id)}
                     aria-label={`${d.name} löschen`}
                   >
@@ -173,7 +173,7 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
 
         {config.enabled && (
           <div className="mt-2 pt-4 border-t border-[var(--color-ink-200)] space-y-2">
-            <p className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+            <p className="text-[12px] font-semibold text-[var(--color-ink-500)]">
               Auf WordPress
             </p>
             {!authed && (
@@ -197,7 +197,7 @@ export function PlanSwitcherDialog({ open, onClose, onCreateNew }: Props) {
                   <div className="text-[13px] font-semibold text-[var(--color-ink-900)] truncate">
                     {it.name}
                     <span
-                      className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      className="ml-2 text-[12px] font-bold px-2 py-0.5 rounded-full"
                       style={{ background: 'var(--color-paper-bg)', color: 'var(--color-ink-500)' }}
                     >
                       {STAGE_LABELS[it.stage as WpStage]}

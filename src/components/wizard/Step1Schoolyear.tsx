@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import type { Step1Data } from './wizard-state';
 import type { Holiday } from '@/types';
 import { HolidayFetchControl } from '@/components/settings/HolidayFetchControl';
+import { X } from 'lucide-react';
 
 const DEFAULT_HOLIDAYS = (): Holiday[] => [
   { id: crypto.randomUUID(), label: 'Herbstferien', start: '', end: '', type: 'ferien' },
@@ -83,7 +84,7 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Eckdaten
         </h3>
         <div className="grid grid-cols-[260px_200px] gap-3 items-center">
@@ -142,7 +143,7 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
       />
 
       <div className="space-y-3">
-        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)] uppercase tracking-[0.05em]">
+        <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Ferien
         </h3>
         {data.holidays.map((h) => (
@@ -154,8 +155,8 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
             />
             <DateInput className="min-w-[170px]" value={h.start} onValueChange={(v) => updateHoliday(h.id, { start: v })} />
             <DateInput className="min-w-[170px]" value={h.end} onValueChange={(v) => updateHoliday(h.id, { end: v })} />
-            <Button variant="ghost" size="icon" onClick={() => removeHoliday(h.id)} title="Entfernen">
-              ✕
+            <Button variant="ghost" size="icon" onClick={() => removeHoliday(h.id)} title="Entfernen" aria-label="Ferien entfernen">
+              <X aria-hidden="true" />
             </Button>
           </div>
         ))}

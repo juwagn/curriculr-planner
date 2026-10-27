@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { usePlannerStore } from '@/stores/planner';
 import { toast } from 'sonner';
+import { X } from 'lucide-react';
 
 const SUGGESTED_GROUPS = [
   'Lehrkräfte',
@@ -48,7 +49,7 @@ export function GroupsTab() {
               style={{ transitionDuration: 'var(--dur-state)' }}
               aria-label={`${g} entfernen`}
             >
-              ✕
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </span>
         ))}

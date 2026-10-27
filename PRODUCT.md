@@ -59,6 +59,10 @@ Erste Begegnung soll vermitteln: *"Endlich ein Tool, das für Schule gemacht ist
 
 5. **Verlässlichkeit demonstrieren.** Schulleitung gibt 100+ Termine ein, davon hängt das Schul-Jahr ab. Tool zeigt aktiv: Auto-Save-Status (Header-Indikator), JSON-Backup als Selbstschutz, explizite Bestätigung vor destruktiven Aktionen (Termin löschen, Plan löschen). Nichts darf unbemerkt verloren gehen, und das Tool macht das sichtbar.
 
+## Dichte
+
+**Planungsansicht** (Text 15 px, Tabellenzeile mindestens 44 px). Unter 1024 px Breite zeigt die Wochentabelle eine Wochenliste (Agenda): je Schulwoche eine Karte, die Schulwochen-Spalte bleibt als Erkennungszeichen erhalten. Touch-Ziele sind dort mindestens 44 px hoch.
+
 ## Accessibility & Inclusion
 
 **Pragmatischer Ansatz** — kein formaler WCAG-Audit, kein BITV-2.0-Zertifikat angestrebt. Fokus auf reale Nutzbarkeit für die Zielgruppe (45–60 Jahre, durchschnittliche IT-Erfahrung, gemischte Sehfähigkeit).

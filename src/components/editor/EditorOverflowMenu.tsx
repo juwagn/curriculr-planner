@@ -69,7 +69,7 @@ export function EditorOverflowMenu() {
           size="icon"
           aria-label="Weitere Optionen"
           title="Weitere Optionen"
-          className="text-[var(--color-paper-card)] hover:bg-white/10 hover:text-[var(--color-paper-card)]"
+          className="size-11 lg:size-9"
         >
           <MoreVertical className="w-4 h-4" />
         </Button>

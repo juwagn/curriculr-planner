@@ -1,7 +1,6 @@
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
+/* Design tokens (--cl-*) and local Inter come from the Curricu:lr design package.
+   curriculr-tokens.css is a verbatim copy; change it only in curriculr-design. */
+@import "./curriculr-tokens.css";
 
 @import "tailwindcss";
 
@@ -9,95 +8,85 @@
 
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is([data-theme="dark"] *));
 
+/* Product-specific colors (rule: --cl-product-*). Light values; dark theme is
+   not enabled for this product yet (index.html pins data-theme="light"). */
+:root {
+  --cl-product-ferien-a: #E2E8F0;
+  --cl-product-ferien-b: #EDF2F8;
+  --cl-product-feiertag-bg: #FFF1D6;
+}
+
+/* Legacy utility names are aliases of the family tokens, so existing
+   `var(--color-*)` usages follow the design package. */
 @theme {
-  /* Marine (Konrektoren-Marine) — Primary */
-  --color-marine-900: #001F35;
-  --color-marine-800: #00345C;
-  --color-marine-700: #00467D;
-  --color-marine-500: #0058A0;
-  --color-marine-100: #E6F4FF;
+  --color-marine-900: var(--cl-marine-900);
+  --color-marine-800: var(--cl-marine-800);
+  --color-marine-700: var(--cl-marine-700);
+  --color-marine-600: var(--cl-marine-700);
+  --color-marine-500: var(--cl-marine-500);
+  --color-marine-300: var(--cl-border);
+  --color-marine-200: var(--cl-line);
+  --color-marine-100: var(--cl-marine-100);
 
-  /* Gelb (Doppelpunkt-Gelb) — Akzent */
-  --color-gelb-500: #FFC857;
-  --color-gelb-200: #FFE9A8;
-  --color-gelb-100: #FFF8E1;
+  /* Gold only for the logo colon and highlight markers / note boxes with border */
+  --color-gelb-500: var(--cl-gold-500);
+  --color-gelb-400: var(--cl-gold-500);
+  --color-gelb-200: var(--cl-gold-500);
+  --color-gelb-100: var(--cl-gold-100);
 
-  /* Status */
-  --color-status-green: #0E9F6E;
-  --color-status-red: #E02424;
-  --color-danger-bg: #FEE2E2;
+  --color-status-green: var(--cl-success);
+  --color-status-red: var(--cl-danger);
+  --color-danger-bg: var(--cl-danger-bg);
+  --color-danger: var(--cl-danger);
+  --color-warning: var(--cl-warning);
 
-  /* Semantic (Konflikt-Hinweise) */
-  --color-danger: #E02424;
-  --color-warning: #B45309;
+  --color-paper-bg: var(--cl-bg);
+  --color-paper-card: var(--cl-surface);
 
-  /* Papier (Hintergründe) */
-  --color-paper-bg: #F3F5F9;
-  --color-paper-card: #FFFFFF;
+  --color-ink-900: var(--cl-ink-900);
+  --color-ink-700: var(--cl-ink-900);
+  --color-ink-500: var(--cl-ink-500);
+  --color-ink-400: var(--cl-ink-500);
+  --color-ink-300: var(--cl-border);
+  --color-ink-200: var(--cl-line);
 
-  /* Tinten-Grau (Text + Linien) */
-  --color-ink-900: #111827;
-  --color-ink-500: #4B5563;
-  --color-ink-200: #E2E8F0;
+  --color-ferien-a: var(--cl-product-ferien-a);
+  --color-ferien-b: var(--cl-product-ferien-b);
+  --color-feiertag-bg: var(--cl-product-feiertag-bg);
 
-  /* Ferien-Schraffur */
-  --color-ferien-a: #E2E8F0;
-  --color-ferien-b: #EDF2F8;
-  --color-feiertag-bg: #FFF1D6;
+  --font-family-sans: var(--cl-font);
 
-  /* Kategorie-Farben (Termin-Blöcke) */
-  --color-cat-konferenz: #0058A0;
-  --color-cat-elternabend: #0E9F6E;
-  --color-cat-pruefung: #E02424;
-  --color-cat-sonder: #7C3AED;
-  --color-cat-schliesstag: #6B7280;
+  --radius-block: var(--cl-radius-sm);
+  --radius-input: var(--cl-radius-sm);
+  --radius-default: var(--cl-radius-md);
+  --radius-card: var(--cl-radius-md);
+  --radius-pill: var(--cl-radius-pill);
+  --radius-btn: var(--cl-radius-md);
 
-  --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', sans-serif;
+  /* Flat at rest: shadows only for dialog and popover */
+  --shadow-card: none;
+  --shadow-modal: var(--cl-shadow-float);
+  --shadow-btn: none;
+  --shadow-focus: var(--cl-focus-ring);
 
-  --radius-block: 3px;
-  --radius-input: 8px;
-  --radius-default: 10px;
-  --radius-card: 14px;
-  --radius-pill: 9999px;
-  --radius-btn: var(--radius-default);
-
-  /* Typo-Scale (DESIGN.md) — letter-spacing nur bei display abweichend (sonst normal) */
-  --fs-display: 20px;
-  --lh-display: 1.2;
-  --ls-display: -0.01em;
-  --fs-headline: 15px;
-  --lh-headline: 1.3;
-  --fs-title: 13px;
-  --lh-title: 1.4;
-  --fs-body: 13px;
-  --lh-body: 1.5;
-
-  /* Schatten — State-Antwort, nicht Identität */
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-modal: 0 18px 40px rgba(15, 23, 42, 0.15);
-  --shadow-btn: 0 2px 8px rgba(0, 70, 125, 0.25);
-  --shadow-focus: 0 0 0 3px rgba(0, 70, 125, 0.25);
-
-  /* Motion */
-  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-state: 150ms;
-  --dur-modal: 100ms;
+  --ease-state: var(--cl-ease);
+  --dur-state: var(--cl-duration);
+  --dur-modal: var(--cl-duration);
 }
 
 html, body {
   height: 100%;
-  background: var(--color-paper-bg);
-  color: var(--color-ink-900);
-  font-family: var(--font-family-sans);
+  background: var(--cl-bg);
+  color: var(--cl-ink-900);
+  font-family: var(--cl-font);
   -webkit-font-smoothing: antialiased;
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: var(--cl-font);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -139,72 +128,38 @@ html, body {
 }
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #111827;
-  --card: #FFFFFF;
-  --card-foreground: #111827;
-  --popover: #FFFFFF;
-  --popover-foreground: #111827;
-  --primary: #00345C;
-  --primary-foreground: #FFFFFF;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: #111827;
-  --muted: #F3F5F9;
-  --muted-foreground: #4B5563;
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: #111827;
-  --destructive: #E02424;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #00345C;
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: var(--cl-surface);
+  --foreground: var(--cl-ink-900);
+  --card: var(--cl-surface);
+  --card-foreground: var(--cl-ink-900);
+  --popover: var(--cl-surface);
+  --popover-foreground: var(--cl-ink-900);
+  --primary: var(--cl-marine-800);
+  --primary-foreground: var(--cl-on-primary);
+  --secondary: var(--cl-bg);
+  --secondary-foreground: var(--cl-ink-900);
+  --muted: var(--cl-bg);
+  --muted-foreground: var(--cl-ink-500);
+  --accent: var(--cl-bg);
+  --accent-foreground: var(--cl-ink-900);
+  --destructive: var(--cl-danger);
+  --border: var(--cl-line);
+  --input: var(--cl-border);
+  --ring: var(--cl-marine-500);
+  --chart-1: var(--cl-marine-500);
+  --chart-2: var(--cl-ink-500);
+  --chart-3: var(--cl-marine-700);
+  --chart-4: var(--cl-ink-900);
+  --chart-5: var(--cl-marine-900);
+  --radius: var(--cl-radius-md);
+  --sidebar: var(--cl-surface);
+  --sidebar-foreground: var(--cl-ink-900);
+  --sidebar-primary: var(--cl-marine-800);
+  --sidebar-primary-foreground: var(--cl-on-primary);
+  --sidebar-accent: var(--cl-bg);
+  --sidebar-accent-foreground: var(--cl-ink-900);
+  --sidebar-border: var(--cl-line);
+  --sidebar-ring: var(--cl-marine-500);
 }
 
 @layer base {

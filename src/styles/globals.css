@@ -274,3 +274,11 @@ html, body {
   outline: 3px solid var(--color-gelb-500) !important;
   outline-offset: 2px !important;
 }
+/* Logo: light wordmark by default, dark wordmark in the dark theme. */
+.cl-logo-dunkel { display: none; }
+:root[data-theme="dark"] .cl-logo-hell { display: none; }
+:root[data-theme="dark"] .cl-logo-dunkel { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cl-logo-hell { display: none; }
+  :root:not([data-theme="light"]) .cl-logo-dunkel { display: block; }
+}

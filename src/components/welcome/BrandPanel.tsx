@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/ui/logo';
 
 interface Props {
   authed: boolean;
@@ -16,10 +17,9 @@ function initials(name: string): string {
 }
 
 export function BrandPanel({ authed, userName, groups, baseUrl, onBaseUrlChange, onLogin, onLogout }: Props) {
-  const logoSrc = `${import.meta.env.BASE_URL}curriculr-logo.svg`;
   return (
     <div className="flex flex-col p-7 text-white" style={{ background: 'linear-gradient(160deg, var(--color-marine-800) 0%, #012740 100%)' }}>
-      <img src={logoSrc} alt="Curriculr" style={{ width: 180, height: 'auto', display: 'block' }} />
+      <Logo className="h-9 w-auto" />
       <p className="text-[13px] mt-3 leading-[1.55]" style={{ color: 'rgba(255,255,255,0.65)' }}>
         Jahresterminplan für Ihre Schule
       </p>

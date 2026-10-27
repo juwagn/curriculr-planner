@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWpSyncStore } from '@/stores/wpSync';
 import { usePresence, relativeTime } from '@/hooks/usePresence';
 import { toast } from 'sonner';
+import { Logo } from '@/components/ui/logo';
 
 interface Props {
   onSwitchPlan(): void;
@@ -93,7 +94,7 @@ export function EditorHeader({ onSwitchPlan }: Props) {
   return (
     <header className="relative bg-[var(--color-marine-800)] text-[var(--color-paper-card)]">
       <div className="px-6 py-3 flex items-center gap-4" style={{ minHeight: 48 }}>
-        <img src={`${import.meta.env.BASE_URL}curriculr-logo.svg`} alt="Curriculr" className="h-6" />
+        <Logo className="h-6 w-auto shrink-0" />
         {renaming ? (
           <input
             ref={nameInputRef}

@@ -86,7 +86,7 @@ export function Editor({ onSwitchPlan }: Props) {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--color-paper-bg)] overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-[var(--color-paper-bg)] overflow-hidden">
       <EditorHeader onSwitchPlan={onSwitchPlan} />
       <EditorToolbar />
       <DndContext
@@ -101,32 +101,32 @@ export function Editor({ onSwitchPlan }: Props) {
       >
         <div className="flex-1 min-h-0 flex overflow-hidden">
           {templatesSidebarOpen && <TemplatesSidebar />}
-          <div className="flex-1 min-h-0 p-6 overflow-auto">
+          <div className="flex-1 min-h-0 overflow-auto p-3 md:p-6">
             {viewMode === 'year' ? <YearGrid /> : <WeekTable />}
           </div>
         </div>
         <DragOverlay dropAnimation={null}>
           {draggedTemplate ? (
-            <div className="flex cursor-grabbing items-center gap-2.5 rounded-lg border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-3 py-2 shadow-[var(--shadow-modal)] ring-2 ring-[var(--color-gelb-400)]">
+            <div className="flex cursor-grabbing items-center gap-2.5 rounded-lg border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-3 py-2 shadow-[var(--shadow-modal)] ring-2 ring-[var(--cl-marine-500)]">
               <span
                 className="inline-block h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-black/10"
                 style={{ backgroundColor: draggedColor }}
               />
               <span className="text-sm font-medium text-[var(--color-ink-900)]">{draggedTemplate.name}</span>
-              <span className="ml-1 rounded bg-[var(--color-paper-bg)] px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-[var(--color-ink-500)]">
+              <span className="ml-1 rounded bg-[var(--color-paper-bg)] px-1.5 py-0.5 text-[12px] font-medium tabular-nums text-[var(--color-ink-500)]">
                 {draggedTemplate.allDay
                   ? 'ganztägig'
                   : `${draggedTemplate.startTime ?? ''}–${draggedTemplate.endTime ?? ''}`}
               </span>
             </div>
           ) : draggedEvent ? (
-            <div className="flex max-w-[16rem] cursor-grabbing items-center gap-2.5 rounded-lg border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-3 py-2 shadow-[var(--shadow-modal)] ring-2 ring-[var(--color-gelb-400)]">
+            <div className="flex max-w-[16rem] cursor-grabbing items-center gap-2.5 rounded-lg border border-[var(--color-ink-200)] bg-[var(--color-paper-card)] px-3 py-2 shadow-[var(--shadow-modal)] ring-2 ring-[var(--cl-marine-500)]">
               <span
                 className="inline-block h-3.5 w-3.5 shrink-0 rounded-full ring-1 ring-black/10"
                 style={{ backgroundColor: draggedEventColor }}
               />
               {!draggedEvent.allDay && draggedEvent.startTime && (
-                <span className="shrink-0 text-[11px] font-bold tabular-nums text-[var(--color-ink-500)]">
+                <span className="shrink-0 text-[12px] font-bold tabular-nums text-[var(--color-ink-500)]">
                   {draggedEvent.startTime}
                 </span>
               )}

@@ -15,7 +15,7 @@ function baseDoc(events: PlanEvent[]): PlannerDocument {
     categories: [
       { id: 'cP', label: 'Prüfung', color: '#E02424', slug: 'pruefung', keywords: [] },
       { id: 'cK', label: 'Konferenz', color: '#0058A0', slug: 'konferenz', keywords: [] },
-      { id: 'cS', label: 'Sonderveranstaltung', color: '#7C3AED', slug: 'sonder', keywords: [] }
+      { id: 'cS', label: 'Sonderveranstaltung', color: '#8C7B4F', slug: 'sonder', keywords: [] }
     ],
     events,
     annotations: [], availableGroups: [], ignoredConflicts: [], templates: [],

@@ -21,7 +21,7 @@ colors:
   kategorie-konferenz: "#0058A0"
   kategorie-elternabend: "#0E9F6E"
   kategorie-pruefung: "#E02424"
-  kategorie-sonder: "#7C3AED"
+  kategorie-sonder: "#8C7B4F"
   kategorie-schliesstag: "#6B7280"
 typography:
   display:
@@ -144,7 +144,7 @@ Schichtung statt Schatten: Tiefe entsteht durch Hintergrund-Töne und Tabellen-L
 
 ## 2. Colors
 
-Die Palette ist absichtlich schmal. Zwei gesättigte Farben tragen Identität (Marine, Gelb), drei Status-Farben warnen oder bestätigen (Grün, Rot, Violett für Sonderkategorien), der Rest ist getöntes Neutral mit leichter Marine-Wärme.
+Die Palette ist absichtlich schmal. Zwei gesättigte Farben tragen Identität (Marine, Gelb), drei Status-Farben warnen oder bestätigen (Grün, Rot, Olivbraun für Sonderkategorien), der Rest ist getöntes Neutral mit leichter Marine-Wärme.
 
 ### Primary
 - **Konrektoren-Marine** (#00345C): Tabellen-Header, Primary-Buttons, Logo, Plan-Name. Trägt Autorität und Vertrauen. Kontrast 12:1 auf Weiß; gut für 50+ Augen ohne Anstrengung.
@@ -160,7 +160,7 @@ Die Palette ist absichtlich schmal. Zwei gesättigte Farben tragen Identität (M
 ### Tertiary (Status & Kategorien)
 - **Meldung-Grün** (#0E9F6E): Kategorie Elternabend; positive Toasts.
 - **Meldung-Rot** (#E02424): Kategorie Prüfung; destruktive Aktionen, Validierungs-Fehler.
-- **Kategorie-Sonder** (#7C3AED): Sonderveranstaltungen.
+- **Kategorie-Sonder** (#8C7B4F): Sonderveranstaltungen. Ein gedecktes Olivbraun; Violett ist in der Curricu:lr-Familie nicht vorgesehen.
 - **Kategorie-Schliesstag** (#6B7280): Schließtag, Service-Termine.
 
 ### Neutral
@@ -173,7 +173,7 @@ Die Palette ist absichtlich schmal. Zwei gesättigte Farben tragen Identität (M
 
 ### Named Rules
 
-**Die Zwei-Stimmen-Regel.** Konrektoren-Marine und Doppelpunkt-Gelb sind die einzigen zwei gesättigten Farben, die das Chrome trägt. Header, Buttons, Auswahl, Status: alles ist Marine oder Gelb. Kategorie-Farben (Grün, Rot, Violett etc.) bleiben in den Termin-Blöcken eingesperrt; sie wandern nie ins UI-Chrome. Wenn etwas im Chrome eine dritte Farbe brauchen will, ist das Symptom für falsche Hierarchie, nicht für fehlende Farbe.
+**Die Zwei-Stimmen-Regel.** Konrektoren-Marine und Doppelpunkt-Gelb sind die einzigen zwei gesättigten Farben, die das Chrome trägt. Header, Buttons, Auswahl, Status: alles ist Marine oder Gelb. Kategorie-Farben (Grün, Rot, Olivbraun etc.) bleiben in den Termin-Blöcken eingesperrt; sie wandern nie ins UI-Chrome. Wenn etwas im Chrome eine dritte Farbe brauchen will, ist das Symptom für falsche Hierarchie, nicht für fehlende Farbe.
 
 **Die Gelb-Sparsamkeitsregel.** Doppelpunkt-Gelb deckt nie mehr als 8% des sichtbaren Bildschirms. Es markiert das Bemerkenswerte: Anmerkungen mit Inhalt, Highlight-Termine, der aktive View-Toggle. Werden mehrere gelbe Flächen gleichzeitig sichtbar, verliert das Akzentsystem seine Funktion. Bei Überschreitung: visuell sortieren, nicht das Limit verschieben.
 
@@ -283,7 +283,7 @@ Die definierende Komponente. `<table>` mit `table-layout: fixed`. Header sticky 
 - **Don't** wie Word oder Excel aussehen. Wenn ein Element keinen sichtbaren Mehrwert gegenüber dem Word-Halbjahresplan-Dokument hat (Auto-SW-Berechnung, Drag-Drop, Farb-Kategorien, Auto-Save), gehört es nicht ins Tool.
 - **Don't** Marketing-Adjektive verwenden: „smart", „intuitive", „powerful", „awesome", „easy". Sachliche Verben.
 - **Don't** Emojis im UI-Chrome als Schmuck. 📝 für Notiz-Icon ist akzeptiert (semantisch, etabliert), sonst keine.
-- **Don't** eine dritte gesättigte Farbe ins Chrome einführen (Header, Buttons, Tabs). Kategorie-Farben (Grün, Rot, Violett) bleiben in den Termin-Blöcken.
+- **Don't** eine dritte gesättigte Farbe ins Chrome einführen (Header, Buttons, Tabs). Kategorie-Farben (Grün, Rot, Olivbraun) bleiben in den Termin-Blöcken.
 - **Don't** Card-Hierarchie über Schatten lösen. Hintergrund-Töne und Linien tragen Struktur.
 - **Don't** Modal als erstes Werkzeug. Inline-Editing, Popover-Anchor, Toolbar-Aktion zuerst prüfen.
 - **Don't** Multi-Schriftfamilien einführen. Inter ist die einzige Schrift; Hierarchie über Gewicht und Größe.

@@ -7,6 +7,9 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unveröffentlicht]
 
+### Geändert
+- **Design-Dokumentation:** Die Kategoriefarbe für Sonderveranstaltungen steht jetzt als Olivbraun (#8C7B4F) im `DESIGN.md`, so wie sie im Programm verwendet wird. Violett ist in der Curricu:lr-Familie nicht vorgesehen.
+
 ### Hinzugefügt
 - **Wochenliste für schmale Bildschirme:** Unter 1024 px Breite ersetzt eine Agenda die Wochentabelle. Je Schulwoche eine lesbare Karte mit Termin, Kategorie und Uhrzeit; die Schulwochen-Spalte (SW 00, 01 …) bleibt links erhalten. Mehrtägige Termine erscheinen einmal je Woche mit Enddatum. Termin und Notiz lassen sich je Woche direkt anlegen. Alle Bedienelemente sind mindestens 44 px hoch; es entsteht kein horizontales Scrollen (geprüft bei 768 und 390 px).
 

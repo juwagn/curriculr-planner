@@ -26,6 +26,9 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Emojis in der Oberfläche (Notiz, Warnung, Konflikte, Hilfe) durch Lucide-Symbole ersetzt; Symbolschaltflächen tragen eine Beschriftung.
 - Kontrast der Konflikt-Anzeige in der Kopfzeile (zuvor 2,7 : 1).
 - Fehlende Hauptüberschrift (h1) auf Startseite und im Editor ergänzt.
+- **Kein stilles Überschreiben beim Start:** Beim Öffnen wird der lokale Plan nur noch durch den WordPress-Stand ersetzt, wenn dort eine neuere Version liegt und lokal nichts Ungesendetes vorhanden ist. Bei gleicher Version bleibt der lokale Stand unverändert. Liegt eine neuere Version vor und gibt es lokale, noch nicht gesendete Änderungen, erscheint der Hinweis „WordPress hat eine neuere Version“ und Sie entscheiden zwischen „Server-Stand laden“ und „Meinen Stand behalten“. Wird während des Ladens weitergearbeitet oder ein anderer Plan geöffnet, wird das Ladeergebnis verworfen.
+- **„Server-Stand laden“:** Der geladene Stand wird jetzt lokal gespeichert, und das nächste Senden führt nicht erneut zur Meldung „WordPress hat eine neuere Version“.
+- **ICS-Import:** Ungültige Termine (z. B. Ende vor Beginn) werden beim Import übersprungen und in der Rückmeldung mit Anzahl und Titel genannt. Ein einzelner fehlerhafter Termin verhindert nicht mehr das Speichern des Plans.
 
 ---
 

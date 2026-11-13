@@ -45,13 +45,14 @@ export function StatusBar() {
   const setDoc       = usePlannerStore((s) => s.setDoc);
   const openSettings = useUiStore((s) => s.openSettings);
 
-  const { config, conflict, pendingPull, clearConflict, confirmPull, cancelPull, keepLocal } =
+  const { config, conflict, pendingPull, clearConflict, acceptServer, confirmPull, cancelPull, keepLocal } =
     useWpSyncStore(
       useShallow((s) => ({
         config:        s.config,
         conflict:      s.conflict,
         pendingPull:   s.pendingPull,
         clearConflict: s.clearConflict,
+        acceptServer:  s.acceptServer,
         confirmPull:   s.confirmPull,
         cancelPull:    s.cancelPull,
         keepLocal:     s.keepLocal,
@@ -193,7 +194,7 @@ export function StatusBar() {
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => cancelPull()}>Abbrechen</Button>
-            <Button onClick={() => { confirmPull(setDoc); toast.success('Stand von WordPress geladen.'); }}>
+            <Button onClick={() => { void confirmPull(setDoc).then(() => toast.success('Stand von WordPress geladen.')); }}>
               Trotzdem laden
             </Button>
           </DialogFooter>
@@ -218,7 +219,7 @@ export function StatusBar() {
             <Button
               variant="outline"
               onClick={() => {
-                if (conflict) { setDoc(conflict.serverDoc); clearConflict(); toast.success('Server-Stand geladen.'); }
+                void acceptServer(setDoc).then(() => toast.success('Server-Stand geladen.'));
               }}
             >
               Server-Stand laden

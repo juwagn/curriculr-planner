@@ -1,5 +1,6 @@
 import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
 import type { Category, PlanEvent, Schoolyear, UUID } from '@/types';
+import { PlanEventSchema } from './schemas';
 
 export interface ParsedEvent {
   uid: string;
@@ -165,4 +166,12 @@ export function shiftToSchoolyear(events: PlanEvent[], target: Schoolyear): Plan
   const weekDelta = Math.ceil(rawDelta / 7) * 7;
   const shift = (iso: string) => format(addDays(parseISO(iso), weekDelta), 'yyyy-MM-dd');
   return events.map((e) => ({ ...e, start: shift(e.start), end: shift(e.end) }));
+}
+
+/** Partition events by PlanEventSchema so one bad import cannot block saving the whole doc. */
+export function splitValidEvents(events: PlanEvent[]): { valid: PlanEvent[]; invalid: PlanEvent[] } {
+  const valid: PlanEvent[] = [];
+  const invalid: PlanEvent[] = [];
+  for (const e of events) (PlanEventSchema.safeParse(e).success ? valid : invalid).push(e);
+  return { valid, invalid };
 }

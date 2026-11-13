@@ -33,6 +33,8 @@ export interface WpPlanLink {
   provisionedCalendars?: WpCalendarGroup[];
   /** ISO 8601 timestamp of the last successful push to WordPress. */
   lastPushedAt?: string;
+  /** meta.lastSaved of the doc at the last successful push/pull; differs → local unsent changes. */
+  syncedLastSaved?: string;
   /**
    * @deprecated Remove after WordpressTab is updated in Task 6.
    */
@@ -114,6 +116,7 @@ function parseLink(v: unknown): WpPlanLink | null {
   const calendarMappings = parseCalendarMappings(l.calendarMappings);
   const wpProfileId = typeof l.wpProfileId === 'string' ? l.wpProfileId : undefined;
   const lastPushedAt = typeof l.lastPushedAt === 'string' ? l.lastPushedAt : undefined;
+  const syncedLastSaved = typeof l.syncedLastSaved === 'string' ? l.syncedLastSaved : undefined;
   return {
     schoolyearKey:   typeof l.schoolyearKey   === 'string' ? l.schoolyearKey   : '',
     schoolyearLabel: typeof l.schoolyearLabel  === 'string' ? l.schoolyearLabel  : '',
@@ -123,6 +126,7 @@ function parseLink(v: unknown): WpPlanLink | null {
     ...(calendarGroups       ? { calendarGroups }       : {}),
     ...(provisionedCalendars ? { provisionedCalendars } : {}),
     ...(lastPushedAt         ? { lastPushedAt }         : {}),
+    ...(syncedLastSaved      ? { syncedLastSaved }      : {}),
     ...(calendarMappings     ? { calendarMappings }     : {}),
     ...(wpProfileId          ? { wpProfileId }          : {}),
   };

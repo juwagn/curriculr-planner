@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GroupChipsInput } from './GroupChipsInput';
+import { addGroup, hasGroup, normalizeGroups, removeGroup, resolveGroupName } from '@/lib/groups';
 import { usePlannerStore } from '@/stores/planner';
 import { useUiStore } from '@/stores/ui';
 import type { PlanEvent } from '@/types';
 import { toast } from 'sonner';
 import { Settings } from 'lucide-react';
+
+const PARENTS_GROUP = 'Eltern';
 
 function newUuid() {
   return crypto.randomUUID();
@@ -43,6 +46,10 @@ export function EventModal() {
 
   const [form, setForm] = useState<PlanEvent | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const startId = useId();
+  const endId = useId();
+  const categoryId = useId();
+  const notesId = useId();
 
   useEffect(() => {
     if (!state.open || !doc) {
@@ -100,10 +107,11 @@ export function EventModal() {
       toast.error('Zeit erforderlich wenn nicht ganztägig');
       return;
     }
+    const saved = { ...form, groups: normalizeGroups(form.groups) };
     if (state.mode === 'edit' && editing) {
-      updateEvent(editing.id, form);
+      updateEvent(editing.id, saved);
     } else {
-      addEvent(form);
+      addEvent(saved);
     }
     close();
   };
@@ -145,12 +153,12 @@ export function EventModal() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Startdatum</Label>
-              <DateInput value={form.start} onValueChange={(v) => update('start', v)} />
+              <Label htmlFor={startId}>Startdatum</Label>
+              <DateInput id={startId} value={form.start} onValueChange={(v) => update('start', v)} />
             </div>
             <div>
-              <Label>Endedatum</Label>
-              <DateInput value={form.end} onValueChange={(v) => update('end', v)} />
+              <Label htmlFor={endId}>Endedatum</Label>
+              <DateInput id={endId} value={form.end} onValueChange={(v) => update('end', v)} />
             </div>
           </div>
 
@@ -196,9 +204,9 @@ export function EventModal() {
           )}
 
           <div>
-            <Label>Kategorie</Label>
+            <Label htmlFor={categoryId}>Kategorie</Label>
             <Select value={form.categoryId} onValueChange={(v) => update('categoryId', v)}>
-              <SelectTrigger>
+              <SelectTrigger id={categoryId}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -229,8 +237,9 @@ export function EventModal() {
           </div>
 
           <div>
-            <Label>Bemerkung</Label>
+            <Label htmlFor={notesId}>Bemerkung</Label>
             <Textarea
+              id={notesId}
               value={form.notes ?? ''}
               onChange={(e) => update('notes', e.target.value)}
               maxLength={500}
@@ -240,6 +249,20 @@ export function EventModal() {
 
           <div>
             <Label>Gruppen</Label>
+            <label className="flex min-h-9 items-center gap-2 text-[13px] text-[var(--color-ink-900)] cursor-pointer">
+              <Checkbox
+                checked={hasGroup(form.groups, PARENTS_GROUP)}
+                onCheckedChange={(v) =>
+                  update(
+                    'groups',
+                    v === true
+                      ? addGroup(form.groups, resolveGroupName(doc.availableGroups, PARENTS_GROUP))
+                      : removeGroup(form.groups, PARENTS_GROUP)
+                  )
+                }
+              />
+              Eltern
+            </label>
             <GroupChipsInput
               available={doc.availableGroups}
               value={form.groups}

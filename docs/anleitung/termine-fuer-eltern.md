@@ -30,6 +30,6 @@ Sie brauchen:
 ## Häufige Probleme
 
 - **Der Termin fehlt auf der Website.** Prüfen Sie, ob Sie nach dem Speichern auch veröffentlicht haben.
-- **Der Termin fehlt trotz Veröffentlichung.** Prüfen Sie, ob die Sichtbarkeit auf **Öffentlich** steht.
+- **Der Termin fehlt trotz Veröffentlichung.** Prüfen Sie, ob der Termin die Gruppe **Eltern** trägt, und leeren Sie den Seiten-Cache der Website.
 - **Die Schaltfläche heißt „Mit IServ anmelden“.** Melden Sie sich zuerst an. Danach erscheint **Veröffentlichen**.
 - **Sie brauchen eine eigene Gruppe.** Tippen Sie bei **Gruppen** in das Feld **Eigene Gruppe (Enter)**.

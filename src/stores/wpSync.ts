@@ -25,9 +25,9 @@ interface WpSyncStore {
   send(doc: PlannerDocument, action?: StageAction): Promise<WpSyncState>;
   keepLocal(doc: PlannerDocument): Promise<WpSyncState>;
   clearConflict(): void;
-  acceptServer(setDocFn: (doc: PlannerDocument) => void): Promise<void>;
+  acceptServer(setDocFn: (doc: PlannerDocument) => void): Promise<boolean>;
   pull(docId: UUID, setDocFn: (doc: PlannerDocument) => void): Promise<'pulled' | 'up-to-date' | 'conflict' | 'discarded' | 'not-found' | 'error' | 'downgrade'>;
-  confirmPull(setDocFn: (doc: PlannerDocument) => void): Promise<void>;
+  confirmPull(setDocFn: (doc: PlannerDocument) => void): Promise<boolean>;
   cancelPull(): void;
   loadFromWp(sj: string, name: string, setDocFn: (doc: PlannerDocument) => void): Promise<'loaded' | 'error'>;
 }
@@ -42,6 +42,17 @@ async function adoptServerDoc(docId: UUID, doc: PlannerDocument, version: number
     setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
   }
   setDocFn(doc);
+}
+
+/** Like adoptServerDoc, but a failing local save leaves the local plan untouched and puts the store into 'error'. */
+async function tryAdoptServerDoc(...args: Parameters<typeof adoptServerDoc>): Promise<boolean> {
+  try {
+    await adoptServerDoc(...args);
+    return true;
+  } catch {
+    useWpSyncStore.setState({ syncState: 'error', message: 'Server-Stand konnte nicht gespeichert werden.' });
+    return false;
+  }
 }
 
 export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
@@ -108,9 +119,10 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
 
   async acceptServer(setDocFn) {
     const { conflict } = get();
-    if (!conflict) return;
-    await adoptServerDoc(conflict.docId, conflict.serverDoc, conflict.serverVersion, undefined, setDocFn);
+    if (!conflict) return false;
+    if (!(await tryAdoptServerDoc(conflict.docId, conflict.serverDoc, conflict.serverVersion, undefined, setDocFn))) return false;
     set({ conflict: null, syncState: 'synced', message: 'Server-Stand geladen' });
+    return true;
   },
 
   async pull(docId, setDocFn) {
@@ -168,16 +180,17 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
         conflict: { docId, serverVersion: wpVer, serverDoc: res.doc } });
       return 'conflict';
     }
-    await adoptServerDoc(docId, res.doc, wpVer, res.stage, setDocFn);
+    if (!(await tryAdoptServerDoc(docId, res.doc, wpVer, res.stage, setDocFn))) return 'error';
     set({ syncState: 'synced', message: 'Stand von WordPress geladen', conflict: null });
     return 'pulled';
   },
 
   async confirmPull(setDocFn) {
     const { pendingPull } = get();
-    if (!pendingPull) return;
-    await adoptServerDoc(pendingPull.docId, pendingPull.doc, pendingPull.version, pendingPull.stage, setDocFn);
+    if (!pendingPull) return false;
+    if (!(await tryAdoptServerDoc(pendingPull.docId, pendingPull.doc, pendingPull.version, pendingPull.stage, setDocFn))) return false;
     set({ pendingPull: null, syncState: 'synced', message: 'Stand von WordPress geladen', conflict: null });
+    return true;
   },
 
   cancelPull() { set({ pendingPull: null, syncState: 'idle', message: '' }); },

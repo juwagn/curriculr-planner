@@ -125,7 +125,7 @@ export function CategoriesTab() {
                   type="button"
                   onClick={() => requestDelete(c)}
                   aria-label={`${c.label || 'Kategorie'} löschen`}
-                  className="relative after:absolute after:left-1/2 after:top-1/2 after:size-9 after:-translate-x-1/2 after:-translate-y-1/2 after:content-[''] pointer-coarse:after:size-11 text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] transition-colors px-1"
+                  className="relative after:absolute after:left-1/2 after:top-1/2 after:size-9 after:-translate-x-1/2 after:-translate-y-1/2 after:content-[''] pointer-coarse:after:size-10 text-[var(--color-ink-500)] hover:text-[var(--color-status-red)] transition-colors px-1"
                   style={{ transitionDuration: 'var(--dur-state)' }}
                 >
                   <X className="h-4 w-4" aria-hidden="true" />

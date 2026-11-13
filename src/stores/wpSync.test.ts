@@ -253,3 +253,60 @@ describe('acceptServer() — "Server-Stand laden" (TS-03)', () => {
     expect(mockPushDoc.mock.calls[0][3]).toBe(5);
   });
 });
+
+describe('Speicherfehler beim Übernehmen des Server-Stands', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mkDoc = (lastSaved: string): any => ({
+    schoolyear: { id: 'sy1' }, events: [], categories: [], annotations: [],
+    availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Muster-Gesamtschule', lastSaved },
+  });
+  const MSG = 'Server-Stand konnte nicht gespeichert werden.';
+
+  beforeEach(() => {
+    vi.mocked(storage.saveDoc).mockReset();
+    vi.mocked(storage.saveDoc).mockRejectedValueOnce(new Error('Quota'));
+  });
+
+  it('pull(): bleibt nicht auf "sending", lokaler Plan unverändert', async () => {
+    const local = mkDoc('2026-11-10T10:00:00Z');
+    usePlannerStore.setState({ doc: local });
+    useWpSyncStore.setState({ config: {
+      ...baseConfig, links: { sy1: { ...baseConfig.links.sy1, syncedLastSaved: '2026-11-10T10:00:00Z' } },
+    } });
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: mkDoc('2026-11-11T08:00:00Z'), version: 4, stage: 'entwurf' });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().pull('sy1', setDoc)).toBe('error');
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('error');
+    expect(s.message).toBe(MSG);
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(usePlannerStore.getState().doc).toBe(local);
+    expect(s.config.links.sy1.knownVersion).toBe(3);
+  });
+
+  it('acceptServer(): meldet Fehler, behält den Konflikt und ändert nichts lokal', async () => {
+    const serverDoc = mkDoc('2026-11-11T08:00:00Z');
+    useWpSyncStore.setState({ syncState: 'conflict', conflict: { docId: 'sy1', serverVersion: 5, serverDoc } });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().acceptServer(setDoc)).toBe(false);
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('error');
+    expect(s.message).toBe(MSG);
+    expect(s.conflict).not.toBeNull();
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(s.config.links.sy1.knownVersion).toBe(3);
+  });
+
+  it('confirmPull(): meldet Fehler, behält pendingPull und ändert nichts lokal', async () => {
+    const doc = mkDoc('2026-11-11T08:00:00Z');
+    useWpSyncStore.setState({ syncState: 'idle', pendingPull: { docId: 'sy1', doc, version: 2, stage: 'entwurf', knownVersion: 3 } });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().confirmPull(setDoc)).toBe(false);
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('error');
+    expect(s.message).toBe(MSG);
+    expect(s.pendingPull).not.toBeNull();
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(s.config.links.sy1.knownVersion).toBe(3);
+  });
+});

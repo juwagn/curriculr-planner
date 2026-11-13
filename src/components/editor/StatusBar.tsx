@@ -194,7 +194,9 @@ export function StatusBar() {
           </p>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => cancelPull()}>Abbrechen</Button>
-            <Button onClick={() => { void confirmPull(setDoc).then(() => toast.success('Stand von WordPress geladen.')); }}>
+            <Button onClick={() => { void confirmPull(setDoc)
+                .then((ok) => (ok ? toast.success('Stand von WordPress geladen.') : toast.error('Server-Stand konnte nicht übernommen werden.')))
+                .catch(() => toast.error('Server-Stand konnte nicht übernommen werden.')); }}>
               Trotzdem laden
             </Button>
           </DialogFooter>
@@ -219,7 +221,9 @@ export function StatusBar() {
             <Button
               variant="outline"
               onClick={() => {
-                void acceptServer(setDoc).then(() => toast.success('Server-Stand geladen.'));
+                void acceptServer(setDoc)
+                  .then((ok) => (ok ? toast.success('Server-Stand geladen.') : toast.error('Server-Stand konnte nicht übernommen werden.')))
+                  .catch(() => toast.error('Server-Stand konnte nicht übernommen werden.'));
               }}
             >
               Server-Stand laden

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useUiStore, type SettingsTab } from '@/stores/ui';
 import { SchoolyearTab } from './SchoolyearTab';
@@ -49,15 +50,27 @@ export function SettingsModal() {
   const tab = useUiStore((s) => s.settingsTab);
   const setTab = useUiStore((s) => s.setSettingsTab);
 
+  // Keep the active tab visible in the horizontally scrolling mobile nav.
+  // Callback ref (not an effect): the dialog content mounts after this component, so a ref object is still null then.
+  const activeRef = useCallback(
+    (el: HTMLButtonElement | null) => el?.scrollIntoView?.({ inline: 'center', block: 'nearest' }),
+    [],
+  );
+
   if (!open) return null;
 
   return (
     <Dialog open onOpenChange={(o) => !o && close()}>
       <DialogContent
-        className="!max-w-[min(1060px,calc(100vw-2rem))] !w-[min(1060px,calc(100vw-2rem))] !p-0 h-[min(680px,90vh)] max-h-[90vh] overflow-hidden flex flex-col"
+        className="!max-w-[min(1060px,calc(100vw-2rem))] !w-[min(1060px,calc(100vw-2rem))] !p-0 h-[min(680px,90vh)] max-h-[90vh] overflow-hidden flex flex-col gap-0"
       >
         {/* Accessible hidden title */}
         <DialogTitle className="sr-only">Einstellungen</DialogTitle>
+
+        {/* Mobile header row: reserves space for the close button so it never covers a tab */}
+        <div className="flex h-12 shrink-0 items-center border-b border-[var(--color-ink-200)] px-4 text-[15px] font-semibold sm:hidden" aria-hidden="true">
+          Einstellungen
+        </div>
 
         {/* Body: sidebar + content */}
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
@@ -98,6 +111,7 @@ export function SettingsModal() {
                 {items.map(({ value, label }) => (
                   <button
                     key={value}
+                    ref={tab === value ? activeRef : undefined}
                     onClick={() => setTab(value)}
                     aria-current={tab === value ? 'page' : undefined}
                     style={{
@@ -117,7 +131,7 @@ export function SettingsModal() {
                       sm:rounded-[var(--radius-default)]
 
                       /* mobile: compact horizontal pill */
-                      px-3 py-2 my-1.5 mx-1
+                      px-3 py-2 my-1.5 mx-1 min-h-9 pointer-coarse:min-h-11
                       rounded-[var(--radius-default)]
                     "
                   >

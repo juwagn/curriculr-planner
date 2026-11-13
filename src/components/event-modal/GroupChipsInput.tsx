@@ -28,7 +28,7 @@ export function GroupChipsInput({ available, value, onChange }: Props) {
             type="button"
             key={g}
             onClick={() => toggle(g)}
-            className={`px-3 py-1 rounded-[var(--radius-pill)] text-[13px] transition-colors ${
+            className={`min-h-9 pointer-coarse:min-h-11 px-3 py-1 rounded-[var(--radius-pill)] text-[13px] transition-colors ${
               hasGroup(value, g)
                 ? 'bg-[var(--color-marine-700)] text-[var(--color-paper-card)]'
                 : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-900)] hover:bg-[var(--color-paper-bg)]/60'

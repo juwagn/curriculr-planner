@@ -46,7 +46,7 @@ export function DayCellContent({ date, weeks, annotations, onNoteClick }: Props)
       <button
         onClick={handleClick}
         onMouseDown={handleMouseDown}
-        className={`inline-flex items-center justify-center w-5 h-5 rounded-[var(--radius-block)] text-[12px] cursor-pointer transition-colors ${
+        className={`relative after:absolute after:left-1/2 after:top-1/2 after:size-9 after:-translate-x-1/2 after:-translate-y-1/2 after:content-[''] pointer-coarse:after:size-11 inline-flex items-center justify-center w-5 h-5 rounded-[var(--radius-block)] text-[12px] cursor-pointer transition-colors ${
           hasNote
             ? 'bg-[var(--color-gelb-500)] text-[var(--color-ink-900)]'
             : 'bg-[var(--color-paper-bg)] text-[var(--color-ink-500)] hover:bg-[var(--color-paper-bg)]/60'

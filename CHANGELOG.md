@@ -10,7 +10,9 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 ### Geändert
 - **Design-Dokumentation:** Die Kategoriefarbe für Sonderveranstaltungen steht jetzt als Olivbraun (#8C7B4F) im `DESIGN.md`, so wie sie im Programm verwendet wird. Violett ist in der Curricu:lr-Familie nicht vorgesehen.
 
-### Hinzugefügt
+### Neu
+- **Termine für Eltern:** Im Termin-Dialog lässt sich ein Termin mit einem Klick für Eltern markieren.
+- Gruppen werden ohne Dubletten und ohne überflüssige Leerzeichen gespeichert.
 - **Wochenliste für schmale Bildschirme:** Unter 1024 px Breite ersetzt eine Agenda die Wochentabelle. Je Schulwoche eine lesbare Karte mit Termin, Kategorie und Uhrzeit; die Schulwochen-Spalte (SW 00, 01 …) bleibt links erhalten. Mehrtägige Termine erscheinen einmal je Woche mit Enddatum. Termin und Notiz lassen sich je Woche direkt anlegen. Alle Bedienelemente sind mindestens 44 px hoch; es entsteht kein horizontales Scrollen (geprüft bei 768 und 390 px).
 
 ### Geändert
@@ -22,10 +24,18 @@ die Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Die Standardkategorie „Sonderveranstaltung“ und das Demo-Beispiel nutzen kein Violett mehr (Designregel); vorhandene Pläne behalten ihre Farben.
 
 ### Behoben
+- Felder im Termin-Dialog sind für Vorlese-Programme beschriftet.
+- Assistent und Einstellungen passen sich schmalen Bildschirmen an.
+- Knöpfe und Felder haben größere Klickflächen.
+- Der Tastatur-Fokus ist besser zu sehen.
+- Nach einem Speicherfehler bleibt das Veröffentlichen bedienbar. Es erscheint die Meldung „Server-Stand konnte nicht gespeichert werden.“
 - Termintexte stehen unter 1024 px nicht mehr Buchstabe für Buchstabe untereinander; ab 1024 px werden lange Wörter in der Tabelle mit Silbentrennung umbrochen.
 - Emojis in der Oberfläche (Notiz, Warnung, Konflikte, Hilfe) durch Lucide-Symbole ersetzt; Symbolschaltflächen tragen eine Beschriftung.
 - Kontrast der Konflikt-Anzeige in der Kopfzeile (zuvor 2,7 : 1).
 - Fehlende Hauptüberschrift (h1) auf Startseite und im Editor ergänzt.
+- **Kein stilles Überschreiben beim Start:** Beim Öffnen wird der lokale Plan nur noch durch den WordPress-Stand ersetzt, wenn dort eine neuere Version liegt und lokal nichts Ungesendetes vorhanden ist. Bei gleicher Version bleibt der lokale Stand unverändert. Liegt eine neuere Version vor und gibt es lokale, noch nicht gesendete Änderungen, erscheint der Hinweis „WordPress hat eine neuere Version“ und Sie entscheiden zwischen „Server-Stand laden“ und „Meinen Stand behalten“. Wird während des Ladens weitergearbeitet oder ein anderer Plan geöffnet, wird das Ladeergebnis verworfen.
+- **„Server-Stand laden“:** Der geladene Stand wird jetzt lokal gespeichert, und das nächste Senden führt nicht erneut zur Meldung „WordPress hat eine neuere Version“.
+- **ICS-Import:** Ungültige Termine (z. B. Ende vor Beginn) werden beim Import übersprungen und in der Rückmeldung mit Anzahl und Titel genannt. Ein einzelner fehlerhafter Termin verhindert nicht mehr das Speichern des Plans.
 
 ---
 

@@ -6,6 +6,7 @@ import { loadWpConfig, saveWpConfig, type WpSyncConfig, type WpPlanLink } from '
 import { pushDoc, fetchDoc, type PushResult } from '@/lib/wp-sync';
 import { useAuthStore } from '@/stores/auth';
 import { storage } from '@/lib/storage';
+import { usePlannerStore } from '@/stores/planner';
 
 export type WpSyncState = 'idle' | 'sending' | 'synced' | 'conflict' | 'error';
 
@@ -24,10 +25,34 @@ interface WpSyncStore {
   send(doc: PlannerDocument, action?: StageAction): Promise<WpSyncState>;
   keepLocal(doc: PlannerDocument): Promise<WpSyncState>;
   clearConflict(): void;
-  pull(docId: UUID, setDocFn: (doc: PlannerDocument) => void): Promise<'pulled' | 'not-found' | 'error' | 'downgrade'>;
-  confirmPull(setDocFn: (doc: PlannerDocument) => void): void;
+  acceptServer(setDocFn: (doc: PlannerDocument) => void): Promise<boolean>;
+  pull(docId: UUID, setDocFn: (doc: PlannerDocument) => void): Promise<'pulled' | 'up-to-date' | 'conflict' | 'discarded' | 'not-found' | 'error' | 'downgrade'>;
+  confirmPull(setDocFn: (doc: PlannerDocument) => void): Promise<boolean>;
   cancelPull(): void;
   loadFromWp(sj: string, name: string, setDocFn: (doc: PlannerDocument) => void): Promise<'loaded' | 'error'>;
+}
+
+/** Adopt a server doc: persist locally, record version + sync baseline, then show it. */
+async function adoptServerDoc(docId: UUID, doc: PlannerDocument, version: number, stage: WpStage | undefined, setDocFn: (doc: PlannerDocument) => void) {
+  await storage.saveDoc(doc);
+  const { config, setConfig } = useWpSyncStore.getState();
+  const link = config.links[docId];
+  if (link) {
+    const newLink: WpPlanLink = { ...link, knownVersion: version, stage: stage ?? link.stage, syncedLastSaved: doc.meta.lastSaved };
+    setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
+  }
+  setDocFn(doc);
+}
+
+/** Like adoptServerDoc, but a failing local save leaves the local plan untouched and puts the store into 'error'. */
+async function tryAdoptServerDoc(...args: Parameters<typeof adoptServerDoc>): Promise<boolean> {
+  try {
+    await adoptServerDoc(...args);
+    return true;
+  } catch {
+    useWpSyncStore.setState({ syncState: 'error', message: 'Server-Stand konnte nicht gespeichert werden.' });
+    return false;
+  }
 }
 
 export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
@@ -64,6 +89,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
         knownVersion: res.version      ?? link.knownVersion,
         feedUrl:      res.feedUrl      ?? link.feedUrl,
         lastPushedAt: new Date().toISOString(),
+        syncedLastSaved: doc.meta.lastSaved,
       };
       get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
       set({ syncState: 'synced', message: 'An WordPress gesendet', conflict: null });
@@ -91,6 +117,14 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
 
   clearConflict() { set({ conflict: null, syncState: 'idle', message: '' }); },
 
+  async acceptServer(setDocFn) {
+    const { conflict } = get();
+    if (!conflict) return false;
+    if (!(await tryAdoptServerDoc(conflict.docId, conflict.serverDoc, conflict.serverVersion, undefined, setDocFn))) return false;
+    set({ conflict: null, syncState: 'synced', message: 'Server-Stand geladen' });
+    return true;
+  },
+
   async pull(docId, setDocFn) {
     const { config } = get();
     const token = useAuthStore.getState().token;
@@ -103,8 +137,14 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       set({ syncState: 'error', message: 'Dieser Plan ist nicht mit WordPress verknüpft.' });
       return 'error';
     }
+    const localBefore = usePlannerStore.getState().doc;
     set({ syncState: 'sending', message: 'Wird von WordPress geladen…' });
     const res = await fetchDoc(config, link.schoolyearKey, token);
+    // Another plan was opened or the user kept editing during the request: drop the result.
+    if (usePlannerStore.getState().doc !== localBefore) {
+      set({ syncState: 'idle', message: '' });
+      return 'discarded';
+    }
     if (!res.exists) {
       if (res.message) {
         set({ syncState: 'error', message: res.message });
@@ -126,23 +166,31 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       });
       return 'downgrade';
     }
-    const newLink: WpPlanLink = { ...link, knownVersion: wpVer, stage: res.stage ?? link.stage };
-    get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
-    setDocFn(res.doc);
+    if (wpVer === link.knownVersion) {
+      const newLink: WpPlanLink = { ...link, stage: res.stage ?? link.stage };
+      get().setConfig({ ...config, links: { ...config.links, [docId]: newLink } });
+      set({ syncState: 'idle', message: '' });
+      return 'up-to-date';
+    }
+    // No baseline (link from before this check existed) counts as unsent: never overwrite silently.
+    const hasUnsent = !localBefore || localBefore.schoolyear.id !== docId
+      || localBefore.meta.lastSaved !== link.syncedLastSaved;
+    if (hasUnsent) {
+      set({ syncState: 'conflict', message: 'WordPress hat eine neuere Version.',
+        conflict: { docId, serverVersion: wpVer, serverDoc: res.doc } });
+      return 'conflict';
+    }
+    if (!(await tryAdoptServerDoc(docId, res.doc, wpVer, res.stage, setDocFn))) return 'error';
     set({ syncState: 'synced', message: 'Stand von WordPress geladen', conflict: null });
     return 'pulled';
   },
 
-  confirmPull(setDocFn) {
-    const { pendingPull, config } = get();
-    if (!pendingPull) return;
-    const link = config.links[pendingPull.docId];
-    if (link) {
-      const newLink: WpPlanLink = { ...link, knownVersion: pendingPull.version, stage: pendingPull.stage };
-      get().setConfig({ ...config, links: { ...config.links, [pendingPull.docId]: newLink } });
-    }
-    setDocFn(pendingPull.doc);
+  async confirmPull(setDocFn) {
+    const { pendingPull } = get();
+    if (!pendingPull) return false;
+    if (!(await tryAdoptServerDoc(pendingPull.docId, pendingPull.doc, pendingPull.version, pendingPull.stage, setDocFn))) return false;
     set({ pendingPull: null, syncState: 'synced', message: 'Stand von WordPress geladen', conflict: null });
+    return true;
   },
 
   cancelPull() { set({ pendingPull: null, syncState: 'idle', message: '' }); },
@@ -171,6 +219,7 @@ export const useWpSyncStore = create<WpSyncStore>((set, get) => ({
       schoolyearLabel: name,
       stage,
       knownVersion: version,
+      syncedLastSaved: doc.meta.lastSaved,
     };
     get().setConfig({ ...config, enabled: true, links: { ...config.links, [docId]: link } });
     setDocFn(doc);

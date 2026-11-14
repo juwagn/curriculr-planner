@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseIcs, mapToEvents, shiftToSchoolyear, type ParsedEvent } from './ics-import';
+import { parseIcs, mapToEvents, shiftToSchoolyear, splitValidEvents, type ParsedEvent } from './ics-import';
+import { usePlannerStore, createEmptyDoc } from '@/stores/planner';
 import { PlanEventSchema } from './schemas';
 import type { Category, Schoolyear } from '@/types';
 
@@ -107,5 +108,26 @@ describe('shiftToSchoolyear', () => {
     const shifted = shiftToSchoolyear(evs, target);
     expect(shifted[0].start >= target.firstSchoolDay).toBe(true);
     expect(new Date(shifted[0].start + 'T00:00:00').getDay()).toBe(3); // still Wednesday
+  });
+});
+
+describe('splitValidEvents (TS-04)', () => {
+  it('rejects an invalid import event, keeps valid ones, and saving still works', async () => {
+    localStorage.clear();
+    const empty = createEmptyDoc('Muster-Gesamtschule', '2026/27', '2026-08-24', '2026-08-31', '2027-07-16');
+    const doc = { ...empty, schoolyear: { ...empty.schoolyear, quarterBoundaries: ['2026-10-31', '2027-01-31', '2027-04-15'] } };
+    usePlannerStore.getState().setDoc(doc);
+    const cat = doc.categories[0].id;
+    const good = { id: 'g1', title: 'Gesamtkonferenz', start: '2026-09-01', end: '2026-09-01', allDay: true, categoryId: cat, groups: [] };
+    const bad = { id: 'b1', title: 'Kaputt', start: '2026-09-02', end: '2026-09-01', allDay: true, categoryId: cat, groups: [] };
+
+    const { valid, invalid } = splitValidEvents([good, bad]);
+    expect(valid).toEqual([good]);
+    expect(invalid).toEqual([bad]);
+
+    usePlannerStore.getState().addEvents(valid);
+    await usePlannerStore.getState().saveDoc();
+    expect(usePlannerStore.getState().savingState).toBe('saved');
+    expect(usePlannerStore.getState().doc?.events.map((e) => e.id)).toEqual(['g1']);
   });
 });

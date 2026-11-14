@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useWpSyncStore } from './wpSync';
 import { useAuthStore } from './auth';
+import { usePlannerStore } from './planner';
 
 vi.mock('@/lib/wp-sync', () => ({
   pushDoc: vi.fn(),
@@ -119,7 +120,7 @@ describe('loadFromWp()', () => {
     expect(storage.setActiveDoc).toHaveBeenCalledWith('sy-load');
     expect(received).toBe(wpDoc);
     const link = useWpSyncStore.getState().config.links['sy-load'];
-    expect(link).toMatchObject({ schoolyearKey: 'sj_2026_27', stage: 'genehmigt', knownVersion: 7 });
+    expect(link).toMatchObject({ schoolyearKey: 'sj_2026_27', stage: 'genehmigt', knownVersion: 7, syncedLastSaved: '2026-01-01T00:00:00Z' });
     expect(useWpSyncStore.getState().syncState).toBe('synced');
   });
 
@@ -134,5 +135,178 @@ describe('loadFromWp()', () => {
     const result = await useWpSyncStore.getState().loadFromWp('sj_2026_27', 'X', () => {});
     expect(result).toBe('error');
     expect(useWpSyncStore.getState().syncState).toBe('error');
+  });
+});
+
+describe('pull() on autostart (TS-01)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mkDoc = (lastSaved: string, title = 'Lokal'): any => ({
+    schoolyear: { id: 'sy1' }, events: [{ id: 'e1', title }], categories: [], annotations: [],
+    availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Muster-Gesamtschule', lastSaved },
+  });
+  const linkWith = (syncedLastSaved?: string) => ({
+    ...baseConfig,
+    links: { sy1: { ...baseConfig.links.sy1, ...(syncedLastSaved ? { syncedLastSaved } : {}) } },
+  });
+
+  beforeEach(() => { vi.mocked(storage.saveDoc).mockClear(); });
+
+  it('keeps the local plan when WP has the same version and local edits were made after the last push', async () => {
+    const local = mkDoc('2026-11-10T10:05:00Z');
+    usePlannerStore.setState({ doc: local });
+    useWpSyncStore.setState({ config: linkWith('2026-11-10T10:00:00Z') });
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: mkDoc('2026-11-10T10:00:00Z', 'Server'), version: 3, stage: 'entwurf' });
+    const setDoc = vi.fn();
+    const result = await useWpSyncStore.getState().pull('sy1', setDoc);
+    expect(result).toBe('up-to-date');
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(usePlannerStore.getState().doc).toBe(local);
+    expect(useWpSyncStore.getState().conflict).toBeNull();
+  });
+
+  it('takes over a newer WP version when there are no local unsent changes', async () => {
+    usePlannerStore.setState({ doc: mkDoc('2026-11-10T10:00:00Z') });
+    useWpSyncStore.setState({ config: linkWith('2026-11-10T10:00:00Z') });
+    const wpDoc = mkDoc('2026-11-11T08:00:00Z', 'Server');
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: wpDoc, version: 4, stage: 'genehmigt' });
+    const setDoc = vi.fn();
+    const result = await useWpSyncStore.getState().pull('sy1', setDoc);
+    expect(result).toBe('pulled');
+    expect(setDoc).toHaveBeenCalledWith(wpDoc);
+    expect(storage.saveDoc).toHaveBeenCalledWith(wpDoc);
+    expect(useWpSyncStore.getState().config.links.sy1).toMatchObject({
+      knownVersion: 4, stage: 'genehmigt', syncedLastSaved: '2026-11-11T08:00:00Z',
+    });
+  });
+
+  it('does not silently replace local unsent changes when WP is newer, raises a conflict instead', async () => {
+    const local = mkDoc('2026-11-10T10:05:00Z');
+    usePlannerStore.setState({ doc: local });
+    useWpSyncStore.setState({ config: linkWith('2026-11-10T10:00:00Z') });
+    const wpDoc = mkDoc('2026-11-11T08:00:00Z', 'Server');
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: wpDoc, version: 4, stage: 'entwurf' });
+    const setDoc = vi.fn();
+    const result = await useWpSyncStore.getState().pull('sy1', setDoc);
+    expect(result).toBe('conflict');
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(storage.saveDoc).not.toHaveBeenCalled();
+    expect(usePlannerStore.getState().doc).toBe(local);
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('conflict');
+    expect(s.conflict).toMatchObject({ docId: 'sy1', serverVersion: 4, serverDoc: wpDoc });
+    expect(s.config.links.sy1.knownVersion).toBe(3);
+  });
+
+  it('treats a link without sync baseline as having unsent changes', async () => {
+    usePlannerStore.setState({ doc: mkDoc('2026-11-10T10:00:00Z') });
+    useWpSyncStore.setState({ config: linkWith() });
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: mkDoc('2026-11-11T08:00:00Z', 'Server'), version: 4, stage: 'entwurf' });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().pull('sy1', setDoc)).toBe('conflict');
+    expect(setDoc).not.toHaveBeenCalled();
+  });
+
+  it('discards the pull result when the local plan changed while the request was running', async () => {
+    usePlannerStore.setState({ doc: mkDoc('2026-11-10T10:00:00Z') });
+    useWpSyncStore.setState({ config: linkWith('2026-11-10T10:00:00Z') });
+    const edited = mkDoc('2026-11-10T10:00:00Z', 'Waehrenddessen bearbeitet');
+    mockFetchDoc.mockImplementationOnce(async () => {
+      usePlannerStore.setState({ doc: edited });
+      return { exists: true, doc: mkDoc('2026-11-11T08:00:00Z', 'Server'), version: 4, stage: 'entwurf' };
+    });
+    const setDoc = vi.fn();
+    const result = await useWpSyncStore.getState().pull('sy1', setDoc);
+    expect(result).toBe('discarded');
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(usePlannerStore.getState().doc).toBe(edited);
+    expect(useWpSyncStore.getState().config.links.sy1.knownVersion).toBe(3);
+  });
+});
+
+describe('send() records the sync baseline', () => {
+  it('stores meta.lastSaved of the pushed doc as syncedLastSaved', async () => {
+    mockPushDoc.mockResolvedValueOnce({ status: 'ok', version: 4 });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await useWpSyncStore.getState().send({ schoolyear: { id: 'sy1' }, meta: { name: 'T', lastSaved: '2026-11-10T10:00:00Z' } } as any);
+    expect(useWpSyncStore.getState().config.links.sy1).toMatchObject({ knownVersion: 4, syncedLastSaved: '2026-11-10T10:00:00Z' });
+  });
+});
+
+describe('acceptServer() — "Server-Stand laden" (TS-03)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const serverDoc = { schoolyear: { id: 'sy1' }, events: [], meta: { name: 'T', lastSaved: '2026-11-11T08:00:00Z' } } as any;
+
+  it('sets knownVersion, saves locally, and the next push uses the server version (no repeated 409)', async () => {
+    vi.mocked(storage.saveDoc).mockClear();
+    useWpSyncStore.setState({ syncState: 'conflict', conflict: { docId: 'sy1', serverVersion: 5, serverDoc } });
+    const setDoc = vi.fn();
+    await useWpSyncStore.getState().acceptServer(setDoc);
+    const s = useWpSyncStore.getState();
+    expect(setDoc).toHaveBeenCalledWith(serverDoc);
+    expect(storage.saveDoc).toHaveBeenCalledWith(serverDoc);
+    expect(s.conflict).toBeNull();
+    expect(s.config.links.sy1).toMatchObject({ knownVersion: 5, syncedLastSaved: '2026-11-11T08:00:00Z' });
+
+    mockPushDoc.mockClear();
+    mockPushDoc.mockResolvedValueOnce({ status: 'ok', version: 6 });
+    expect(await useWpSyncStore.getState().send(serverDoc)).toBe('synced');
+    expect(mockPushDoc.mock.calls[0][3]).toBe(5);
+  });
+});
+
+describe('Speicherfehler beim Übernehmen des Server-Stands', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mkDoc = (lastSaved: string): any => ({
+    schoolyear: { id: 'sy1' }, events: [], categories: [], annotations: [],
+    availableGroups: [], ignoredConflicts: [], templates: [], meta: { name: 'Muster-Gesamtschule', lastSaved },
+  });
+  const MSG = 'Server-Stand konnte nicht gespeichert werden.';
+
+  beforeEach(() => {
+    vi.mocked(storage.saveDoc).mockReset();
+    vi.mocked(storage.saveDoc).mockRejectedValueOnce(new Error('Quota'));
+  });
+
+  it('pull(): bleibt nicht auf "sending", lokaler Plan unverändert', async () => {
+    const local = mkDoc('2026-11-10T10:00:00Z');
+    usePlannerStore.setState({ doc: local });
+    useWpSyncStore.setState({ config: {
+      ...baseConfig, links: { sy1: { ...baseConfig.links.sy1, syncedLastSaved: '2026-11-10T10:00:00Z' } },
+    } });
+    mockFetchDoc.mockResolvedValueOnce({ exists: true, doc: mkDoc('2026-11-11T08:00:00Z'), version: 4, stage: 'entwurf' });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().pull('sy1', setDoc)).toBe('error');
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('error');
+    expect(s.message).toBe(MSG);
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(usePlannerStore.getState().doc).toBe(local);
+    expect(s.config.links.sy1.knownVersion).toBe(3);
+  });
+
+  it('acceptServer(): meldet Fehler, behält den Konflikt und ändert nichts lokal', async () => {
+    const serverDoc = mkDoc('2026-11-11T08:00:00Z');
+    useWpSyncStore.setState({ syncState: 'conflict', conflict: { docId: 'sy1', serverVersion: 5, serverDoc } });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().acceptServer(setDoc)).toBe(false);
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('error');
+    expect(s.message).toBe(MSG);
+    expect(s.conflict).not.toBeNull();
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(s.config.links.sy1.knownVersion).toBe(3);
+  });
+
+  it('confirmPull(): meldet Fehler, behält pendingPull und ändert nichts lokal', async () => {
+    const doc = mkDoc('2026-11-11T08:00:00Z');
+    useWpSyncStore.setState({ syncState: 'idle', pendingPull: { docId: 'sy1', doc, version: 2, stage: 'entwurf', knownVersion: 3 } });
+    const setDoc = vi.fn();
+    expect(await useWpSyncStore.getState().confirmPull(setDoc)).toBe(false);
+    const s = useWpSyncStore.getState();
+    expect(s.syncState).toBe('error');
+    expect(s.message).toBe(MSG);
+    expect(s.pendingPull).not.toBeNull();
+    expect(setDoc).not.toHaveBeenCalled();
+    expect(s.config.links.sy1.knownVersion).toBe(3);
   });
 });

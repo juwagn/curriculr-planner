@@ -87,7 +87,7 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
         <h3 className="text-[12px] font-semibold text-[var(--color-ink-500)]">
           Eckdaten
         </h3>
-        <div className="grid grid-cols-[260px_200px] gap-3 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-[260px_200px] gap-x-3 gap-y-1 sm:gap-y-3 items-center">
           <Label>
             Erster Schultag (SW 00){' '}
             {!data.firstSchoolDay && (
@@ -97,7 +97,6 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
             )}
           </Label>
           <DateInput
-            className="min-w-[180px]"
             aria-required
             data-invalid={!data.firstSchoolDay || undefined}
             style={!data.firstSchoolDay ? { borderColor: 'var(--color-status-red)' } : undefined}
@@ -106,7 +105,6 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
           />
           <Label>Erster Unterrichtstag (SW 01)</Label>
           <DateInput
-            className="min-w-[180px]"
             value={data.firstTeachingDay}
             onValueChange={(v) => update('firstTeachingDay', v)}
           />
@@ -119,7 +117,6 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
             )}
           </Label>
           <DateInput
-            className="min-w-[180px]"
             aria-required
             data-invalid={!data.lastSchoolDay || undefined}
             style={!data.lastSchoolDay ? { borderColor: 'var(--color-status-red)' } : undefined}
@@ -147,15 +144,25 @@ export function Step1Schoolyear({ initial, onCancel, onNext }: Props) {
           Ferien
         </h3>
         {data.holidays.map((h) => (
-          <div key={h.id} className="grid grid-cols-[160px_180px_180px_auto] gap-2 items-center">
-            <Input
-              value={h.label}
-              onChange={(e) => updateHoliday(h.id, { label: e.target.value })}
-              placeholder="Label"
-            />
-            <DateInput className="min-w-[170px]" value={h.start} onValueChange={(v) => updateHoliday(h.id, { start: v })} />
-            <DateInput className="min-w-[170px]" value={h.end} onValueChange={(v) => updateHoliday(h.id, { end: v })} />
-            <Button variant="ghost" size="icon" onClick={() => removeHoliday(h.id)} title="Entfernen" aria-label="Ferien entfernen">
+          <div key={h.id} className="grid grid-cols-1 gap-2 rounded-lg border border-[var(--cl-line)] p-3 sm:grid-cols-[160px_180px_180px_auto] sm:items-center sm:border-0 sm:p-0">
+            <div>
+              <Label htmlFor={`h-label-${h.id}`} className="sm:sr-only">Bezeichnung</Label>
+              <Input
+                id={`h-label-${h.id}`}
+                value={h.label}
+                onChange={(e) => updateHoliday(h.id, { label: e.target.value })}
+                placeholder="Label"
+              />
+            </div>
+            <div>
+              <Label htmlFor={`h-start-${h.id}`} className="sm:sr-only">Von</Label>
+              <DateInput id={`h-start-${h.id}`} value={h.start} onValueChange={(v) => updateHoliday(h.id, { start: v })} />
+            </div>
+            <div>
+              <Label htmlFor={`h-end-${h.id}`} className="sm:sr-only">Bis</Label>
+              <DateInput id={`h-end-${h.id}`} value={h.end} onValueChange={(v) => updateHoliday(h.id, { end: v })} />
+            </div>
+            <Button variant="ghost" size="icon" className="justify-self-end sm:justify-self-auto" onClick={() => removeHoliday(h.id)} title="Entfernen" aria-label="Ferien entfernen">
               <X aria-hidden="true" />
             </Button>
           </div>

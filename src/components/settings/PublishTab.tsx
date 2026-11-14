@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { parseIcs, type ParsedEvent } from '@/lib/ics-import';
+import { parseIcs, splitValidEvents, type ParsedEvent } from '@/lib/ics-import';
 import { IcsImportDialog } from '@/components/import/IcsImportDialog';
 import { toast } from 'sonner';
 import { buildIcs, slugify } from '@/lib/ics-export';
@@ -381,9 +381,17 @@ export function PublishTab() {
               targetSchoolyear={doc.schoolyear}
               onCancel={() => setParsed(null)}
               onConfirm={(events) => {
-                addEvents(events);
+                const { valid, invalid } = splitValidEvents(events);
+                addEvents(valid);
                 setParsed(null);
-                toast.success(`${events.length} Termine importiert`);
+                if (invalid.length === 0) {
+                  toast.success(`${valid.length} Termine importiert`);
+                } else {
+                  toast.warning(
+                    `${valid.length} Termine importiert, ${invalid.length} ungültige übersprungen: ` +
+                    invalid.map((e) => e.title || '(ohne Titel)').join(', ')
+                  );
+                }
               }}
             />
           </>
